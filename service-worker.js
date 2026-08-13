@@ -6,7 +6,7 @@
 // least once while online (e.g. right after "Add to Home Screen"). Only
 // runs over https (or localhost) -- browsers refuse to register service
 // workers on file:// pages.
-var CACHE_NAME = 'offline-cache-v2';
+var CACHE_NAME = 'offline-cache-v3';
 var PRECACHE_URLS = ['./', './index.html', './icon.png', './manifest.json'];
 
 self.addEventListener('install', function (event) {
