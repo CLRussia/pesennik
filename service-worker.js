@@ -28,18 +28,54 @@ self.addEventListener('activate', function (event) {
   );
 });
 
+// Плохое подключение ("есть значок сети, данных нет") -- не то же самое,
+// что честный обрыв: настоящий fetch() может просто зависать в ожидании
+// ответа десятки секунд вместо быстрого провала в catch, и до тех пор
+// приложение выглядит как будто не грузится вовсе, хотя рабочая копия уже
+// лежит в кэше -- ровно то, что случилось у пользователя вживую, пока не
+// включила авиарежим (это заставляет ОС сразу сказать браузеру "сети нет",
+// без ожидания). Гонка с таймаутом ниже даёт тот же эффект без авиарежима:
+// если сеть не ответила за NETWORK_TIMEOUT_MS, сразу отдаём кэш, а настоящий
+// fetch() всё равно доучивается в фоне и обновляет кэш к следующему разу,
+// если/когда всё-таки дозвонится.
+var NETWORK_TIMEOUT_MS = 3000;
+
 self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET') { return; }
+
+  var networkPromise = fetch(req).then(function (resp) {
+    if (resp && resp.status === 200) {
+      var copy = resp.clone();
+      caches.open(CACHE_NAME).then(function (cache) { cache.put(req, copy); });
+    }
+    return resp;
+  });
+
   event.respondWith(
-    fetch(req).then(function (resp) {
-      if (resp && resp.status === 200) {
-        var copy = resp.clone();
-        caches.open(CACHE_NAME).then(function (cache) { cache.put(req, copy); });
-      }
-      return resp;
-    }).catch(function () {
-      return caches.match(req).then(function (cached) { return cached || Promise.reject('offline and not cached'); });
+    new Promise(function (resolve, reject) {
+      var settled = false;
+      var timer = setTimeout(function () {
+        // сеть не ответила вовремя -- сразу пробуем кэш, но settled
+        // остаётся false, если кэша тоже нет: тогда единственный шанс --
+        // всё-таки дождаться networkPromise ниже, ждать больше нечего.
+        caches.match(req).then(function (cached) {
+          if (cached && !settled) { settled = true; resolve(cached); }
+        });
+      }, NETWORK_TIMEOUT_MS);
+
+      networkPromise.then(function (resp) {
+        clearTimeout(timer);
+        if (!settled) { settled = true; resolve(resp); }
+      }).catch(function () {
+        clearTimeout(timer);
+        if (!settled) {
+          caches.match(req).then(function (cached) {
+            settled = true;
+            if (cached) { resolve(cached); } else { reject('offline and not cached'); }
+          });
+        }
+      });
     })
   );
 });
