@@ -1607,6 +1607,28 @@ input{font-family:inherit;color:inherit;}
   </div></div>
 </div>
 
+<div class="modal-overlay" id="install-notice-modal">
+  <div class="modal-sheet"><div class="modal-sheet-scroll">
+    <h2 class="ui-caps">Важная информация!</h2>
+    <p>Чтобы&nbsp;песенник работал как&nbsp;настоящее приложение, сохраните его через&nbsp;системное меню:</p>
+    <p class="info-steps-label">На&nbsp;iPhone или&nbsp;iPad:</p>
+    <ol class="info-steps">
+      <li>Откройте ссылку в&nbsp;Safari (именно в&nbsp;Safari, не&nbsp;в&nbsp;другом браузере).</li>
+      <li>Нажмите на&nbsp;иконку «Поделиться» внизу экрана&nbsp;— квадрат со&nbsp;стрелкой вверх.</li>
+      <li>Прокрутите список вниз и&nbsp;выберите «На&nbsp;экран „Домой“».</li>
+      <li>Нажмите «Добавить» в&nbsp;правом верхнем углу.</li>
+    </ol>
+    <p class="info-steps-label">На&nbsp;Android:</p>
+    <ol class="info-steps">
+      <li>Откройте ссылку в&nbsp;браузере (лучше всего использовать Chrome).</li>
+      <li>Нажмите на&nbsp;три точки в&nbsp;правом верхнем углу.</li>
+      <li>Выберите «Установить и&nbsp;создать ярлык»&nbsp;— «Установить» (или&nbsp;«Добавить на&nbsp;главный экран» в&nbsp;других браузерах).</li>
+      <li>Подтвердите действие.</li>
+    </ol>
+    <button class="modal-close ui-caps" id="install-notice-close" type="button">Понятно</button>
+  </div></div>
+</div>
+
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
     <h2 class="ui-caps">Подтвердите</h2>
@@ -3166,7 +3188,22 @@ function closeTour(){
      песни (см. maybeShowChromeHint выше) после этого не нужна, иначе
      один и тот же урок повторится дважды подряд разными способами. */
   store.set('sb_song_chrome_hint_shown', '1');
+  /* Сразу вслед за туром (закрыт ли он кнопкой "Готово" или
+     "Пропустить" -- оба пути идут через closeTour) -- один раз
+     показываем "Важная информация!" с инструкцией сохранения на
+     главный экран, чтобы это не зависело от того, догадается ли
+     человек сам открыть справку. */
+  if(!store.get('sb_install_notice_seen', null)){
+    store.set('sb_install_notice_seen', '1');
+    document.getElementById('install-notice-modal').classList.add('open');
+  }
 }
+document.getElementById('install-notice-close').addEventListener('click', function(){
+  document.getElementById('install-notice-modal').classList.remove('open');
+});
+document.getElementById('install-notice-modal').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('open');
+});
 tourPrevBtn.addEventListener('click', function(){ goToTourSlide(tourIndex-1); });
 tourNextBtn.addEventListener('click', function(){
   if(tourIndex === TOUR_SLIDE_COUNT-1){ closeTour(); return; }
