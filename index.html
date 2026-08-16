@@ -1303,6 +1303,17 @@ input{font-family:inherit;color:inherit;}
 
 @media (min-width:720px){
   .home-title{font-size:26px;}
+  /* На широких экранах (планшет/десктоп) те же кнопки в пикселях
+     физически меньше относительно размера экрана и пальца, чем на
+     телефоне -- особенно заметно на "Оформлении" (тонкие линии+точки
+     эквалайзера), которую на iPad было не разобрать. Увеличиваем
+     только маленькие круглые кнопки (.icon-btn-sm) и звёздочку
+     (.nav-fav-btn) -- .icon-btn на главной (42px) и так была нормально
+     читаема, её не трогаем. */
+  .icon-btn-sm{width:46px;height:46px;}
+  .icon-btn-sm svg{width:21px;height:21px;}
+  .nav-fav-btn{width:44px;height:44px;}
+  .nav-fav-btn svg{width:22px;height:22px;}
 }
 </style>
 </head>
