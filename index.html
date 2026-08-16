@@ -1002,6 +1002,23 @@ input{font-family:inherit;color:inherit;}
    по всей справке, а не плавало от места к месту. */
 #info-modal .modal-sheet-scroll > p{margin:0 0 12px;}
 #info-modal .modal-sheet-scroll > p:last-of-type{margin-bottom:0;}
+/* Шаги "как сохранить" -- бирюзовые буллеты вместо системных цифр
+   (её явная просьба), список всё равно семантически ol/ul -- порядок
+   шагов важен -- просто своя точка вместо ::marker/counter. */
+.info-steps-label{
+  font-weight:700;font-size:16px;margin:0 0 8px;
+}
+.info-steps{list-style:none;margin:0 0 16px;padding:0;}
+.info-steps li{
+  position:relative;padding-left:20px;margin-bottom:8px;
+  font-size:16px;line-height:1.5;color:var(--text);
+}
+.info-steps li:last-child{margin-bottom:0;}
+.info-steps li::before{
+  content:'';position:absolute;left:0;top:9px;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+}
 
 /* ============================================================
    МОДАЛКА "ОФОРМЛЕНИЕ" (тема / размер / начертание)
@@ -1569,7 +1586,21 @@ input{font-family:inherit;color:inherit;}
         <p>Поделиться ссылкой на песню.</p>
       </div>
     </div>
-    <p>Если&nbsp;вы открыли ссылку с&nbsp;песенником в&nbsp;браузере вашего устройства, сохраните ее через&nbsp;системное меню: («Поделиться» на&nbsp;iPhone и&nbsp;iPad, три точки на&nbsp;Android; далее: на&nbsp;экран «Домой» или&nbsp;«Добавить на&nbsp;главный экран»). Песенник будет открываться, подобно&nbsp;любому приложению, работать без&nbsp;интернета и&nbsp;запоминать все ваши настройки.</p>
+    <p>Чтобы&nbsp;песенник работал как&nbsp;настоящее приложение, сохраните его через&nbsp;системное меню:</p>
+    <p class="info-steps-label">На&nbsp;iPhone или&nbsp;iPad:</p>
+    <ol class="info-steps">
+      <li>Откройте ссылку в&nbsp;Safari (именно в&nbsp;Safari, не&nbsp;в&nbsp;другом браузере).</li>
+      <li>Нажмите на&nbsp;иконку «Поделиться» внизу экрана&nbsp;— квадрат со&nbsp;стрелкой вверх.</li>
+      <li>Прокрутите список вниз и&nbsp;выберите «На&nbsp;экран „Домой“».</li>
+      <li>Нажмите «Добавить» в&nbsp;правом верхнем углу.</li>
+    </ol>
+    <p class="info-steps-label">На&nbsp;Android:</p>
+    <ol class="info-steps">
+      <li>Откройте ссылку в&nbsp;браузере (лучше всего использовать Chrome).</li>
+      <li>Нажмите на&nbsp;три точки в&nbsp;правом верхнем углу.</li>
+      <li>Выберите «Установить и&nbsp;создать ярлык»&nbsp;— «Установить» (или&nbsp;«Добавить на&nbsp;главный экран» в&nbsp;других браузерах).</li>
+      <li>Подтвердите действие.</li>
+    </ol>
     <p>Если&nbsp;при&nbsp;отсутствии доступа в&nbsp;интернет песенник долго не&nbsp;загружается, переведите устройство в&nbsp;авиарежим&nbsp;— это решит проблему.</p>
     <button class="modal-close ui-caps secondary" id="tour-replay" type="button">Тур по приложению</button>
     <button class="modal-close ui-caps" id="info-close">Понятно</button>
