@@ -149,7 +149,7 @@ input{font-family:inherit;color:inherit;}
   border:1.5px solid var(--border);
   border-radius:999px;
   background:var(--bg-elevated);
-  padding:13px 20px 13px 44px;
+  padding:13px 44px 13px 44px;
   font-size:15.5px;
   color:var(--text);
   outline:none;
@@ -172,6 +172,42 @@ input{font-family:inherit;color:inherit;}
   stroke-width:1.6;
   pointer-events:none;
 }
+/* Кнопка-крестик для быстрой очистки поля поиска. Нативный крестик
+   у <input type="search"> рисуют только десктопные браузеры, на
+   телефоне его нет вовсе -- добавляем свой во все пять полей
+   (главная, список, избранное, все песни, песня). Кнопка создаётся
+   из JS (wireSearchClear) и всегда идёт последним элементом обёртки,
+   поэтому её видимость можно повесить прямо на CSS: поле с текстом
+   не показывает placeholder -> :not(:placeholder-shown). Никакой
+   JS-синхронизации класса не нужно, крестик не "залипает", даже
+   если поле очистит посторонний код (openSong/openList и т.п.). */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration{
+  -webkit-appearance:none;appearance:none;
+}
+.search-clear{
+  position:absolute;
+  right:7px;top:50%;
+  transform:translateY(-50%);
+  display:none;
+  align-items:center;justify-content:center;
+  width:30px;height:30px;
+  padding:0;margin:0;
+  border:none;background:transparent;
+  border-radius:999px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.search-wrap input:not(:placeholder-shown) ~ .search-clear,
+.quick-search-wrap input:not(:placeholder-shown) ~ .search-clear{display:flex;}
+.search-clear svg{
+  width:15px;height:15px;
+  stroke:var(--text-faint);
+  fill:none;
+  stroke-width:1.9;
+  stroke-linecap:round;
+}
+.search-clear:active svg{stroke:var(--text);}
 
 .section-block{
   border-bottom:1px solid var(--border);
@@ -577,7 +613,7 @@ input{font-family:inherit;color:inherit;}
   border:1.5px solid var(--border);
   border-radius:999px;
   background:var(--bg-elevated);
-  padding:10px 16px 10px 40px;
+  padding:10px 38px 10px 40px;
   font-size:14px;
   color:var(--text);
   outline:none;
@@ -2362,6 +2398,7 @@ function openFavorites(pushHash){
     setTimeout(function(){ listView.classList.remove('open'); }, 200);
   }
   currentListKey = null;
+  clearSearchField('favorites-search');
   renderFavorites();
   favoritesView.classList.add('open');
   requestAnimationFrame(function(){ favoritesView.classList.add('visible'); });
@@ -2604,6 +2641,7 @@ function openAllSongs(pushHash){
     setTimeout(function(){ favoritesView.classList.remove('open'); }, 200);
   }
   currentListKey = null;
+  clearSearchField('allsongs-search');
   renderAllSongs();
   allsongsView.classList.add('open');
   requestAnimationFrame(function(){
@@ -2895,6 +2933,7 @@ function goHome(){
     document.getElementById('az-jump').classList.remove('open');
   }
   currentListKey = null;
+  clearSearchField('search');
   collapseSections();
   if(location.hash){ history.pushState({}, '', location.pathname); }
 }
@@ -2915,7 +2954,8 @@ window.addEventListener('popstate', function(){
   /* ни песня, ни список, ни избранное, ни "все песни" не совпали с
      хэшем -- значит, родной жест/кнопка "назад" довели до главной;
      сворачиваем ранее открытый раздел (п.8) так же, как при нажатии
-     "НА ГЛАВНУЮ" */
+     "НА ГЛАВНУЮ" и чистим поле поиска (тоже как в goHome) */
+  clearSearchField('search');
   collapseSections();
 });
 
@@ -3050,6 +3090,44 @@ function wireQuickSearch(inputId, resultsId){
 wireQuickSearch('list-search', 'list-search-results');
 wireQuickSearch('song-search', 'song-search-results');
 wireQuickSearch('favorites-search', 'favorites-search-results');
+
+/* ------------------------------------------------------------
+   КРЕСТИК ОЧИСТКИ ПОЛЯ ПОИСКА
+   Свой аналог нативного крестика (мобильные браузеры его не рисуют):
+   одна кнопка на каждое из пяти полей, добавляется из JS, видна
+   только когда в поле есть текст. Тап -- чистит поле и заново
+   запускает его обычный обработчик 'input' (прячет результаты,
+   на главной возвращает меню разделов), фокус остаётся в поле.
+   ------------------------------------------------------------ */
+function wireSearchClear(inputId){
+  var input = document.getElementById(inputId);
+  if(!input) return;
+  var wrap = input.closest('.search-wrap, .quick-search-wrap');
+  if(!wrap) return;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'search-clear';
+  btn.setAttribute('aria-label', 'Очистить поиск');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+  wrap.appendChild(btn); // всегда последний -> селектор "input ~ .search-clear" работает
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+    input.value = '';
+    input.dispatchEvent(new Event('input', {bubbles:true})); // прячет результаты, на главной возвращает меню разделов
+    input.focus();
+  });
+}
+['search','list-search','favorites-search','allsongs-search','song-search'].forEach(wireSearchClear);
+
+/* Сброс поля поиска при уходе с экрана -- чтобы, вернувшись, найти
+   его чистым и готовым к новому поиску. dispatch 'input' заодно
+   синхронизирует крестик и обычные обработчики поля. */
+function clearSearchField(id){
+  var el = document.getElementById(id);
+  if(!el || !el.value) return;
+  el.value = '';
+  el.dispatchEvent(new Event('input', {bubbles:true}));
+}
 /* Поле в шапке песни -- часть "хром"-панели, которая сама прячется
    через 3с (см. showChrome/hideChrome выше). Пока в нём набирают
    текст, скрывать её нельзя -- иначе поле пропадёт прямо во время
