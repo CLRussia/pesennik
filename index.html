@@ -768,25 +768,36 @@ input[type="search"]::-webkit-search-decoration{
 }
 .song-original .stanza:last-child{margin-bottom:0;}
 
-/* Кнопка "ПЕРЕВОД" -- только на узких экранах (см. медиа-запрос ниже,
-   на широких она скрывается, а плашка перевода открыта сразу). */
-.translation-toggle{
-  display:flex;align-items:center;gap:6px;
-  margin-top:6px;
-  padding:10px 2px;
-  background:none;border:none;
-  color:var(--accent);
-  font-size:12px;
-}
-.translation-toggle .chev{
-  width:7px;height:7px;
-  border-right:1.6px solid var(--accent);
-  border-bottom:1.6px solid var(--accent);
-  transform:rotate(45deg);
-  transition:transform .22s ease;
+/* Пилюля "ПЕРЕВОД" -- одна справа в шапке песни (слева "назад" + закладка
+   = уйти с песни; справа перевод = действие с тем, что читаешь). Шапка на
+   экране песни не прячется, поэтому доступ к переводу не теряется даже
+   глубоко в длинной песне (раньше кнопка жила внизу под оригиналом -- в
+   длинной песне до неё надо было мотать). margin-left:auto отжимает
+   пилюлю к правому краю ряда. Намеренно легче двух 34px нав-кнопок (24px,
+   без заливки), но рамка акцентная -- "живой элемент, нажми", не серая
+   деталь. Активное состояние -- заливка акцентом. Видна только у песен с
+   переводом (pill.hidden из JS); на широких экранах (см. медиа-запрос
+   ниже) перевод и так открыт колонкой -- пилюля скрыта. */
+.translation-pill{
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
   flex:0 0 auto;
+  height:24px;
+  padding:0 11px;
+  border:1px solid var(--accent);
+  border-radius:999px;
+  background:transparent;
+  color:var(--accent);
+  font-size:9.5px;
+  letter-spacing:.06em;
+  cursor:pointer;
 }
-.translation-wrap.open .translation-toggle .chev{transform:rotate(-135deg);}
+.translation-pill.is-on{
+  background:var(--accent);
+  color:#fff;
+}
+.translation-pill[hidden]{display:none;}
 /* Раскрытие плашки перевода через grid-template-rows 0fr→1fr -- в
    отличие от max-height, точно повторяет реальную высоту содержимого
    на любой длине перевода, без "магических" чисел. .translation-clip
@@ -828,7 +839,7 @@ input[type="search"]::-webkit-search-decoration{
     align-items:start;
     gap:0 44px;
   }
-  .translation-toggle{display:none;}
+  .translation-pill{display:none;}
   .translation-wrap{
     border-left:1px solid var(--border);
     padding-left:44px;
@@ -1503,6 +1514,7 @@ input[type="search"]::-webkit-search-decoration{
       <button class="icon-btn-sm" id="btn-favorites-song" title="Избранное" aria-label="Избранное">
         <svg viewBox="0 0 24 24"><path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/></svg>
       </button>
+      <button class="translation-pill ui-caps" id="btn-translation-pill" type="button" hidden>Перевод</button>
     </div>
     <div class="quick-search-wrap song-quicksearch">
       <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.5" y2="15.5"/></svg>
@@ -1523,10 +1535,6 @@ input[type="search"]::-webkit-search-decoration{
     <div class="song-body">
       <div class="song-original" id="song-original"></div>
       <div class="translation-wrap" id="translation-wrap">
-        <button class="translation-toggle ui-caps" id="btn-translation-toggle" type="button">
-          <span>Перевод</span>
-          <span class="chev"></span>
-        </button>
         <div class="translation-collapse">
           <div class="translation-clip">
             <div class="song-translation" id="song-translation"></div>
@@ -2833,6 +2841,8 @@ if('IntersectionObserver' in window){
 }
 function setTranslationOpen(isOpen){
   translationWrap.classList.toggle('open', isOpen);
+  var pill = document.getElementById('btn-translation-pill');
+  if(pill) pill.classList.toggle('is-on', isOpen);
   if(!translationObserver) return;
   var target = document.getElementById('song-translation');
   if(isOpen){
@@ -2847,14 +2857,17 @@ function renderTranslation(song){
   var el = document.getElementById('song-translation');
   var wrap = document.getElementById('translation-wrap');
   var body = document.querySelector('.song-body');
+  var pill = document.getElementById('btn-translation-pill');
   if(song.translation){
     el.textContent = translitOn ? translitText(song.translation) : song.translation;
     wrap.style.display = '';
     body.classList.remove('no-translation');
+    if(pill) pill.hidden = false;
   } else {
     el.textContent = '';
     wrap.style.display = 'none';
     body.classList.add('no-translation');
+    if(pill) pill.hidden = true;
   }
 }
 var translitOn = false;
@@ -2966,8 +2979,8 @@ document.getElementById('btn-translit').addEventListener('click', function(){
   renderOriginal(song);
   renderTranslation(song);
 });
-document.getElementById('btn-translation-toggle').addEventListener('click', function(e){
-  e.stopPropagation(); // не даём клику всплыть до общего обработчика songView, который иначе тоже дёргает нижнюю панель
+function toggleTranslation(e){
+  if(e) e.stopPropagation(); // не даём клику всплыть до общего обработчика songView, который иначе тоже дёргает нижнюю панель
   var willOpen = !translationWrap.classList.contains('open');
   setTranslationOpen(willOpen);
   /* при раскрытии -- подтягиваем плашку перевода к верху видимой области.
@@ -2993,7 +3006,8 @@ document.getElementById('btn-translation-toggle').addEventListener('click', func
     collapseEl.addEventListener('transitionend', doScroll, {once:true});
     setTimeout(doScroll, 380);
   }
-});
+}
+document.getElementById('btn-translation-pill').addEventListener('click', toggleTranslation);
 document.getElementById('btn-song-fav').addEventListener('click', function(){
   toggleFav(currentId);
   this.classList.toggle('is-on', isFav(currentId));
