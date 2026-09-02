@@ -2982,38 +2982,47 @@ document.getElementById('btn-translit').addEventListener('click', function(){
 function toggleTranslation(e){
   if(e) e.stopPropagation(); // не даём клику всплыть до общего обработчика songView, который иначе тоже дёргает нижнюю панель
   var willOpen = !translationWrap.classList.contains('open');
-  setTranslationOpen(willOpen);
-  /* при раскрытии -- подтягиваем плашку перевода к верху видимой области.
-     Важно: scrollIntoView нельзя звать сразу же в этот же тик -- высота
-     .translation-collapse ещё не выросла физически (растёт по transition,
-     см. .translation-collapse{transition:grid-template-rows .32s ease}
-     в CSS выше), так что общая прокручиваемая высота .song-scroll в этот
-     момент ещё "старая", схлопнутая -- браузер упирается в тогдашний предел
-     прокрутки и не докручивает до конца (перевод виден только с самого
-     верха плашки, дальше уже некуда). Ждём конца transition (событие
-     transitionend на самой анимируемой .translation-collapse) и только
-     тогда скроллим -- на случай если событие не придёт (например, транзишн
-     переопределён CSS-медиа-запросом на широких экранах, где кнопка и так
-     скрыта) есть подстраховка таймером чуть дольше длительности transition. */
-  if(willOpen){
-    var collapseEl = translationWrap.querySelector('.translation-collapse');
-    var scrolled = false;
-    var doScroll = function(){
-      if(scrolled) return;
-      scrolled = true;
-      translationWrap.scrollIntoView({behavior:'smooth', block:'start'});
-    };
-    collapseEl.addEventListener('transitionend', doScroll, {once:true});
-    setTimeout(doScroll, 380);
-  } else {
-    /* закрыли кнопкой -- возвращаемся к началу песни (к названию), а не
-       остаёмся где-то посреди оригинала: панель схлопнулась под нами и
-       позиция иначе "проваливается". Только для явного тапа по кнопке --
-       автосворачивание при прокрутке (IntersectionObserver) сюда не
-       заходит, там пользователь листает сам и позицию трогать нельзя. */
+  var collapseEl = translationWrap.querySelector('.translation-collapse');
+
+  if(!willOpen){
+    /* Закрытие кнопкой -- возвращаемся к началу песни (к названию), а не
+       остаёмся где-то посреди оригинала. Только для явного тапа по кнопке;
+       автосворачивание при прокрутке (IntersectionObserver -> setTranslationOpen)
+       сюда не заходит и позицию не трогает.
+
+       Схлопываем плашку МГНОВЕННО (transition:none на время), затем один
+       плавный scrollTo к верху. Иначе выходило два этапа: анимация
+       grid-template-rows за .32s укорачивала прокручиваемую высоту и браузер
+       НЕплавным рывком (по ease-кривой grid) поджимал позицию вверх, и только
+       потом smooth-scrollTo доводил до самого верха -- с заметным швом и
+       паузой между рывком и доводкой. Плашку в этот момент всё равно не видно
+       (уезжаем от неё вверх), так что мгновенное схлопывание незаметно, зато
+       прокрутка идёт одним движением по уже финальной раскладке. */
+    var prev = collapseEl.style.transition;
+    collapseEl.style.transition = 'none';
+    setTranslationOpen(false);
+    void collapseEl.offsetHeight;        // reflow -- схлопывание применяется сейчас, до scrollTo
+    collapseEl.style.transition = prev;  // вернуть transition для будущих открытий
     var sc = document.querySelector('.song-scroll');
     if(sc.scrollTo) sc.scrollTo({top:0, behavior:'smooth'}); else sc.scrollTop = 0;
+    return;
   }
+
+  /* Открытие -- подтягиваем плашку к верху видимой области. scrollIntoView
+     нельзя звать в тот же тик: высота .translation-collapse ещё растёт по
+     transition (.32s), прокручиваемая высота .song-scroll ещё "старая",
+     браузер упрётся в тогдашний предел и не докрутит. Ждём transitionend
+     (или таймер-подстраховку -- на широких экранах transition переопределён
+     и событие может не прийти) и только тогда скроллим. */
+  setTranslationOpen(true);
+  var scrolled = false;
+  var doScroll = function(){
+    if(scrolled) return;
+    scrolled = true;
+    translationWrap.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+  collapseEl.addEventListener('transitionend', doScroll, {once:true});
+  setTimeout(doScroll, 380);
 }
 document.getElementById('btn-translation-pill').addEventListener('click', toggleTranslation);
 document.getElementById('btn-song-fav').addEventListener('click', function(){
