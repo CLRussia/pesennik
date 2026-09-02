@@ -783,14 +783,14 @@ input[type="search"]::-webkit-search-decoration{
   display:inline-flex;
   align-items:center;
   flex:0 0 auto;
-  height:24px;
-  padding:0 11px;
-  border:1px solid var(--accent);
+  height:28px;
+  padding:0 14px;
+  border:1.5px solid var(--accent);
   border-radius:999px;
   background:transparent;
   color:var(--accent);
-  font-size:9.5px;
-  letter-spacing:.06em;
+  font-size:11px;
+  letter-spacing:.05em;
   cursor:pointer;
 }
 .translation-pill.is-on{
@@ -3005,6 +3005,14 @@ function toggleTranslation(e){
     };
     collapseEl.addEventListener('transitionend', doScroll, {once:true});
     setTimeout(doScroll, 380);
+  } else {
+    /* закрыли кнопкой -- возвращаемся к началу песни (к названию), а не
+       остаёмся где-то посреди оригинала: панель схлопнулась под нами и
+       позиция иначе "проваливается". Только для явного тапа по кнопке --
+       автосворачивание при прокрутке (IntersectionObserver) сюда не
+       заходит, там пользователь листает сам и позицию трогать нельзя. */
+    var sc = document.querySelector('.song-scroll');
+    if(sc.scrollTo) sc.scrollTo({top:0, behavior:'smooth'}); else sc.scrollTop = 0;
   }
 }
 document.getElementById('btn-translation-pill').addEventListener('click', toggleTranslation);
