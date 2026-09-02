@@ -6,6 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f4f8f8" id="theme-color-meta">
+<!-- Цвет системной строки телефона выставляем СРАЗУ, до первой отрисовки:
+     сохранённая тема, иначе -- тема ОС. Иначе установленное приложение
+     мигало бы светлой строкой в тёмном режиме, пока не выполнится
+     основной скрипт (applyTheme там же держит этот тег в синхроне).
+     В manifest.json theme_color НЕ задаём намеренно -- иначе он бы
+     жёстко перекрывал этот динамический тег для установленного PWA. -->
+<script>try{var _t=localStorage.getItem('sb_theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
 <title>ПЕСЕННИК</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
@@ -796,6 +803,14 @@ input[type="search"]::-webkit-search-decoration{
 .translation-pill.is-on{
   background:var(--accent);
   color:#fff;
+}
+/* В тёмной теме сплошная заливка --accent (#5fc3d1, яркий циан) слишком
+   резкая на тёмном фоне. Мягкое активное состояние: приглушённая заливка
+   --accent-soft + акцентный текст, рамка остаётся акцентной -- читается
+   как "включено" без глянца. Светлая тема без изменений. */
+:root[data-theme="dark"] .translation-pill.is-on{
+  background:var(--accent-soft);
+  color:var(--accent);
 }
 .translation-pill[hidden]{display:none;}
 /* Раскрытие плашки перевода через grid-template-rows 0fr→1fr -- в
