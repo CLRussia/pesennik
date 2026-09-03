@@ -12,18 +12,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- Цвет системной строки телефона.
-     В браузере/вкладке: media-версии ниже -- браузер сам выбирает по теме
-       ОС, без JS.
-     В установленном Android-приложении: media-теги не всегда учитываются,
-       запасной вариант -- theme_color из manifest.json. Он ОДИН статичный
-       (media-зависимым его сделать нельзя) и задан ТЁМНЫМ (#0d2126), потому
-       что тёмная тема здесь основная; в светлой теме у установленного
-       приложения строка тогда может быть тёмной -- считаем допустимым.
+     У приложения СВОЯ тема (data-theme + сохранённый выбор), которая может
+     не совпадать с темой ОС -- поэтому НЕ используем media (prefers-color-
+     scheme): он следит за телефоном, а не за выбором в приложении, и давал
+     тёмную строку над светлым приложением. Ниже -- один тег, его content
+     выставляет applyTheme() под текущую тему ПРИЛОЖЕНИЯ; инлайн-скрипт
+     задаёт стартовое значение до первой отрисовки.
+     Для установленного Android-приложения решает статичный theme_color из
+     manifest.json (наш Chrome media-теги для WebAPK игнорирует). Он ОДИН,
+     задан светлым (#f4f8f8) под основную -- светлую -- тему приложения; у
+     тех, кто включит тёмную, строка тогда будет светловатой сверху.
      theme_color в манифесте ОБЯЗАН присутствовать: без него Android рисует
-       свою непрозрачную системную строку ВНЕ окна приложения и оно
-       перестаёт быть полноэкранным (проверено на живом устройстве). -->
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f8f8">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d2126">
+     свою непрозрачную строку ВНЕ окна и ломает полноэкранность. -->
 <meta name="theme-color" content="#f4f8f8" id="theme-color-meta">
 <script>try{var _t=localStorage.getItem('sb_theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
 <title>ПЕСЕННИК</title>
