@@ -1,0 +1,13 @@
+{
+  "name": "Песенник (тест: полный экран)",
+  "short_name": "Тест ПЭ",
+  "start_url": "./test-fs.html",
+  "scope": "./test-fs.html",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "background_color": "#f4f8f8",
+  "theme_color": "#f4f8f8",
+  "icons": [
+    { "src": "icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
