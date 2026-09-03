@@ -1,0 +1,12 @@
+{
+  "name": "Песенник (тест: тема)",
+  "short_name": "Тест тема",
+  "start_url": "./test-theme.html",
+  "scope": "./test-theme.html",
+  "display": "standalone",
+  "background_color": "#f4f8f8",
+  "theme_color": "#f4f8f8",
+  "icons": [
+    { "src": "icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
