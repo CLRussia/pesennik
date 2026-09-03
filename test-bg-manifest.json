@@ -1,0 +1,12 @@
+{
+  "name": "Песенник (тест: фон как раньше)",
+  "short_name": "Тест фон",
+  "start_url": "./test-bg.html",
+  "scope": "./test-bg.html",
+  "display": "standalone",
+  "background_color": "#f4f8f8",
+  "theme_color": "#f4f8f8",
+  "icons": [
+    { "src": "icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
