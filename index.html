@@ -16,20 +16,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- Системная строка. Установленное приложение (manifest.json) -- display:
-     "standalone": системная строка есть, с часами. Её цвет -- статичный
-     theme_color из манифеста, задан ТЁМНЫМ (#0d2126): в тёмной теме
-     приложения сливается с фоном, в светлой -- тёмная полоса сверху
-     (по явному решению пользователя: "убирай белую полосу, оставляй чёрную
-     полосу с часами"). Полноэкран (display:"fullscreen") на её Samsung не
-     заработал -- сверху оставалась чёрная полоса даже после жеста шторкой.
-     Один цвет строки не может совпасть сразу с обеими темами приложения, а
-     media(prefers-color-scheme) для установленного WebAPK этот Chrome
-     игнорирует. НЕ возвращать светлый theme_color -- светлая полоса на
-     тёмном фоне -- категорически нет.
-     Тег ниже -- только для вкладки браузера; content ведёт applyTheme() по
-     теме ПРИЛОЖЕНИЯ, инлайн-скрипт -- стартовое значение (дефолт светлый). -->
-<meta name="theme-color" content="#f4f8f8" id="theme-color-meta">
-<script>try{var _t=localStorage.getItem('sb_theme')||'light';document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
+     "standalone": строка есть, с часами. Цвет строки -- ОДИН, тёмный
+     (#0d2126), и в манифесте (theme_color), и в теге ниже. Обязательно
+     одинаковый: Chrome заливает строку по theme_color из манифеста, а цвет
+     системных значков (часы/батарея) считает по ЭТОМУ тегу -- если тег
+     светлый, значки делаются тёмными и на тёмной строке пропадают. Оба
+     тёмные -> строка тёмная, значки светлые, видно.
+     В тёмной теме приложения строка сливается с фоном; в светлой -- тёмная
+     полоса сверху с часами (явное решение пользователя: "убирай белую
+     полосу, оставляй чёрную полосу с часами"). Полноэкран на её Samsung не
+     заработал. НЕ делать тег/theme_color светлым и НЕ разводить их по теме
+     -- значки пропадут. -->
+<meta name="theme-color" content="#0d2126" id="theme-color-meta">
 <title>ПЕСЕННИК</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
@@ -1941,11 +1939,13 @@ updateFavoritesBookmark();
    ТЕМА
    ------------------------------------------------------------ */
 var root = document.documentElement;
-var themeMetaTag = document.getElementById('theme-color-meta');
+/* Цвет системной строки (<meta name="theme-color">) больше НЕ трогаем из
+   JS: он статичный тёмный (#0d2126), одинаковый с manifest theme_color,
+   иначе Chrome красит системные значки в тёмный и они пропадают на тёмной
+   строке. Тема приложения переключается только через data-theme/CSS. */
 function applyTheme(t){
   root.setAttribute('data-theme', t);
   store.set('sb_theme', t);
-  themeMetaTag.setAttribute('content', t==='dark' ? '#0d2126' : '#f4f8f8');
   renderThemeSwitch();
 }
 var savedTheme = store.get('sb_theme', null);
