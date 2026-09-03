@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- Цвет системной строки телефона.
+     В браузере/вкладке: media-версии ниже -- браузер сам выбирает по теме
+       ОС, без JS.
+     В установленном Android-приложении: media-теги не всегда учитываются,
+       запасной вариант -- theme_color из manifest.json. Он ОДИН статичный
+       (media-зависимым его сделать нельзя) и задан ТЁМНЫМ (#0d2126), потому
+       что тёмная тема здесь основная; в светлой теме у установленного
+       приложения строка тогда может быть тёмной -- считаем допустимым.
+     theme_color в манифесте ОБЯЗАН присутствовать: без него Android рисует
+       свою непрозрачную системную строку ВНЕ окна приложения и оно
+       перестаёт быть полноэкранным (проверено на живом устройстве). -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f8f8">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d2126">
 <meta name="theme-color" content="#f4f8f8" id="theme-color-meta">
-<!-- Цвет системной строки телефона выставляем СРАЗУ, до первой отрисовки:
-     сохранённая тема, иначе -- тема ОС. Иначе установленное приложение
-     мигало бы светлой строкой в тёмном режиме, пока не выполнится
-     основной скрипт (applyTheme там же держит этот тег в синхроне).
-     В manifest.json theme_color НЕ задаём намеренно -- иначе он бы
-     жёстко перекрывал этот динамический тег для установленного PWA. -->
 <script>try{var _t=localStorage.getItem('sb_theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
 <title>ПЕСЕННИК</title>
 <link rel="manifest" href="manifest.json">
@@ -83,6 +90,11 @@ body{
   transition:background .25s ease,color .25s ease;
   overflow-x:hidden;
 }
+/* -webkit-tap-highlight-color: у мобильного WebKit подсветка нажатия --
+   всегда прямоугольник, игнорирует border-radius, поэтому у круглых
+   кнопок с заливкой при тапе мелькал цветной квадрат, торчащий за края.
+   Убираем везде -- обратная связь на нажатие и так есть через :active. */
+button,a,input,label,select,textarea,[role="button"]{-webkit-tap-highlight-color:transparent;}
 button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit;}
 input{font-family:inherit;color:inherit;}
 ::selection{background:var(--accent);color:#fff;}
