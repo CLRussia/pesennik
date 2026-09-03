@@ -11,21 +11,17 @@
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- Цвет системной строки телефона.
-     У приложения СВОЯ тема (data-theme + сохранённый выбор), которая может
-     не совпадать с темой ОС -- поэтому НЕ используем media (prefers-color-
-     scheme): он следит за телефоном, а не за выбором в приложении, и давал
-     тёмную строку над светлым приложением. Ниже -- один тег, его content
-     выставляет applyTheme() под текущую тему ПРИЛОЖЕНИЯ; инлайн-скрипт
-     задаёт стартовое значение до первой отрисовки.
-     Для установленного Android-приложения решает статичный theme_color из
-     manifest.json (наш Chrome media-теги для WebAPK игнорирует). Он ОДИН,
-     задан светлым (#f4f8f8) под основную -- светлую -- тему приложения; у
-     тех, кто включит тёмную, строка тогда будет светловатой сверху.
-     theme_color в манифесте ОБЯЗАН присутствовать: без него Android рисует
-     свою непрозрачную строку ВНЕ окна и ломает полноэкранность. -->
+<!-- Цвет системной строки (для вкладки браузера). Установленное приложение
+     идёт в manifest.json как display:"fullscreen" -- системной строки там
+     нет вовсе, ни в светлой, ни в тёмной теме (её цвет никак не мог
+     совпасть сразу с обеими темами приложения -- см. историю). theme_color
+     в манифесте всё равно ОБЯЗАН присутствовать (без него Android ломает
+     полноэкранность), задан под тему по умолчанию -- светлую.
+     Тег ниже -- для обычной вкладки браузера; content выставляет
+     applyTheme() под тему ПРИЛОЖЕНИЯ, инлайн-скрипт -- стартовое значение
+     (тема по умолчанию тоже светлая, тему ОС не подхватываем). -->
 <meta name="theme-color" content="#f4f8f8" id="theme-color-meta">
-<script>try{var _t=localStorage.getItem('sb_theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
+<script>try{var _t=localStorage.getItem('sb_theme')||'light';document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
 <title>ПЕСЕННИК</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
@@ -1943,7 +1939,11 @@ function applyTheme(t){
 }
 var savedTheme = store.get('sb_theme', null);
 if(!savedTheme){
-  savedTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  /* По умолчанию -- светлая тема, НЕ подхватываем тему телефона: светлый
+     "бумажный" фон естественнее для песенника, а тёмную тему на iPhone/
+     Android с тёмной системной темой давало бы несовпадение (см. историю
+     со строкой статуса). Тёмную выбирают сами в "Оформлении". */
+  savedTheme = 'light';
 }
 applyTheme(savedTheme);
 
