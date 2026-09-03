@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Приложение само управляет светлой/тёмной темой (data-theme + свои
+     переменные). Без этого объявления Chrome может включить свой
+     "принудительный тёмный режим для сайтов" и затемнить уже светлый
+     текст поверх нашей тёмной темы -- получается блёклый нечитаемый
+     текст. color-scheme говорит браузеру не вмешиваться. -->
+<meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- Цвет системной строки телефона.
@@ -32,6 +38,9 @@
    ПЕРЕМЕННЫЕ ТЕМ
    ============================================================ */
 :root{
+  /* см. <meta name="color-scheme"> в <head>: приложение само рисует обе
+     темы, браузеру принудительно затемнять/осветлять страницу не нужно. */
+  color-scheme:light dark;
   --bg:#f4f8f8;
   --bg-elevated:#ffffff;
   --bg-header:rgba(244,248,248,0.92);
