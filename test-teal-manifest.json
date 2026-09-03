@@ -1,0 +1,12 @@
+{
+  "name": "Песенник (тест: бирюзовая строка)",
+  "short_name": "Тест бирюза",
+  "start_url": "./test-teal.html",
+  "scope": "./test-teal.html",
+  "display": "standalone",
+  "background_color": "#3A8E9E",
+  "theme_color": "#3A8E9E",
+  "icons": [
+    { "src": "icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
