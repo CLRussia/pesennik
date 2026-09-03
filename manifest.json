@@ -3,8 +3,9 @@
   "short_name": "Песенник",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
-  "background_color": "#f4f8f8",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "background_color": "#0d2126",
   "theme_color": "#0d2126",
   "icons": [
     { "src": "icon.png", "sizes": "180x180", "type": "image/png" }
