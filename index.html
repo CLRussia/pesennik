@@ -11,15 +11,16 @@
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<!-- Цвет системной строки (для вкладки браузера). Установленное приложение
-     идёт в manifest.json как display:"fullscreen" -- системной строки там
-     нет вовсе, ни в светлой, ни в тёмной теме (её цвет никак не мог
-     совпасть сразу с обеими темами приложения -- см. историю). theme_color
-     в манифесте всё равно ОБЯЗАН присутствовать (без него Android ломает
-     полноэкранность), задан под тему по умолчанию -- светлую.
-     Тег ниже -- для обычной вкладки браузера; content выставляет
-     applyTheme() под тему ПРИЛОЖЕНИЯ, инлайн-скрипт -- стартовое значение
-     (тема по умолчанию тоже светлая, тему ОС не подхватываем). -->
+<!-- Системная строка (установленное приложение, manifest.json):
+     display:"standalone" -- строка есть, с часами/батареей. Её цвет --
+     статичный theme_color из манифеста, задан ТЁМНЫМ (#0d2126): в тёмной
+     теме приложения сливается с фоном, в светлой -- тёмная полоса сверху
+     (нормально, как у многих приложений). display:"fullscreen" на реальном
+     Android дал пустую чёрную полосу без иконок -- хуже, поэтому standalone.
+     Один цвет не может совпасть сразу с обеими темами приложения, а
+     media(prefers-color-scheme) для WebAPK этот Chrome игнорирует -- см. историю.
+     Тег ниже -- только для вкладки браузера; content ведёт applyTheme() по
+     теме ПРИЛОЖЕНИЯ, инлайн-скрипт -- стартовое значение (дефолт светлый). -->
 <meta name="theme-color" content="#f4f8f8" id="theme-color-meta">
 <script>try{var _t=localStorage.getItem('sb_theme')||'light';document.getElementById('theme-color-meta').setAttribute('content',_t==='dark'?'#0d2126':'#f4f8f8');}catch(e){}</script>
 <title>ПЕСЕННИК</title>
