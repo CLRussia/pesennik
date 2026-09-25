@@ -152,16 +152,17 @@ input{font-family:inherit;color:inherit;}
 #giussani-view .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
 
 /* Редкий медленный блик по цитате -- подсказка, что на нее можно нажать.
-   Цикл 13s: два медленных прохода по 3s подряд слева направо, потом ~7s
-   тишины; стартует почти сразу и перезапускается при каждом возврате на
-   главную (restartGiussaniShine). В светлой теме
+   При появлении главной -- два медленных прохода подряд (2x3s), дальше
+   одинарные: 7s тишины + 3s проход; стартует почти сразу и перезапускается
+   при каждом возврате на главную (restartGiussaniShine). В светлой теме
    --accent слишком близок к цвету текста -- блик светлее; в темной -- accent. */
 :root{--shine:#5ab7c7;}
 :root[data-theme="dark"]{--shine:var(--accent);}
 #giussani .q{background:linear-gradient(100deg,var(--text) 0%,var(--text) 38%,var(--shine) 50%,var(--text) 62%,var(--text) 100%);
   background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;
-  color:transparent;-webkit-text-fill-color:transparent;animation:giussani-shine 13s linear .3s infinite;}
-@keyframes giussani-shine{0%{background-position:100% 0;}23%{background-position:0% 0;}23.01%{background-position:100% 0;}46%{background-position:0% 0;}46.01%,100%{background-position:100% 0;}}
+  color:transparent;-webkit-text-fill-color:transparent;animation:giussani-shine-double 6s linear .3s 1, giussani-shine 10s linear 6.3s infinite;}
+@keyframes giussani-shine-double{0%{background-position:100% 0;}50%{background-position:0% 0;}50.01%{background-position:100% 0;}100%{background-position:0% 0;}}
+@keyframes giussani-shine{0%,70%{background-position:100% 0;}100%{background-position:0% 0;}}
 @media (prefers-reduced-motion:reduce){#giussani .q{animation:none;color:var(--text);-webkit-text-fill-color:currentColor;background:none;}}
 </style>
 <style>
