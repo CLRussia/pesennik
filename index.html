@@ -118,6 +118,33 @@ input{font-family:inherit;color:inherit;}
   letter-spacing:.09em;
   font-weight:700;
 }
+
+/* Главная: блок «Недавно открытые» (последние 5 открытых песен, sb_recent) */
+#recent-block{margin-top:26px;}
+#recent-block .recent-title{font-size:calc(12.5px * var(--scale-menu));letter-spacing:.08em;color:var(--text-faint);
+  font-family:var(--font-ui);font-weight:600;text-transform:uppercase;padding:0 4px 6px;}
+#recent-block:empty{display:none;}
+
+/* Главная: цитата Джуссани -- вся кликабельна, открывает окно «Высшее выражение человека» */
+#giussani{display:block;width:100%;margin:34px 0 20px;padding:14px 12px;border-radius:var(--radius-m);text-align:center;
+  background:transparent;-webkit-tap-highlight-color:transparent;cursor:pointer;}
+#giussani:active{background:var(--accent-soft);}
+#giussani .q{font-family:var(--font-lyrics);font-style:italic;font-size:calc(23px * var(--scale-menu));line-height:1.35;color:var(--text);}
+#giussani .who{margin-top:10px;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-weight:600;
+  font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+#giussani-modal .g-text p{font-family:var(--font-lyrics);font-size:calc(16px * var(--scale-menu));line-height:1.55;color:var(--text);margin:0 0 1.55em;text-align:left;}
+#giussani-modal .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
+
+/* Редкий медленный блик по цитате -- подсказка, что на нее можно нажать.
+   Цикл 9s: ~6s тишины, ~3s медленный проход слева направо. В светлой теме
+   --accent слишком близок к цвету текста -- блик светлее; в темной -- accent. */
+:root{--shine:#5ab7c7;}
+:root[data-theme="dark"]{--shine:var(--accent);}
+#giussani .q{background:linear-gradient(100deg,var(--text) 0%,var(--text) 38%,var(--shine) 50%,var(--text) 62%,var(--text) 100%);
+  background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;animation:giussani-shine 9s linear 1.5s infinite;}
+@keyframes giussani-shine{0%,66%{background-position:100% 0;}100%{background-position:0% 0;}}
+@media (prefers-reduced-motion:reduce){#giussani .q{animation:none;color:var(--text);-webkit-text-fill-color:currentColor;background:none;}}
 </style>
 <style>
 /* ============================================================
@@ -1462,6 +1489,11 @@ input[type="search"]::-webkit-search-decoration{
       <button class="section-head ui-caps"><span>Песни для детей</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
+    <div id="recent-block"></div>
+    <button id="giussani" type="button" aria-label="Высшее выражение человека — Луиджи Джуссани">
+      <div class="q">Пение — это чистая любовь.</div>
+      <div class="who">Луиджи Джуссани</div>
+    </button>
   </nav>
   <div id="results-view"></div>
   <p id="no-results">Ничего не найдено</p>
@@ -1634,6 +1666,15 @@ input[type="search"]::-webkit-search-decoration{
       </div>
     </div>
     <button class="modal-close ui-caps" id="appearance-close">Готово</button>
+  </div></div>
+</div>
+
+<div class="modal-overlay" id="giussani-modal">
+  <div class="modal-sheet"><div class="modal-sheet-scroll">
+    <h2 class="ui-caps">Высшее выражение человека</h2>
+    <div class="g-text"><p>Никакое выражение человеческих чувств не может превзойти музыку. Кого не трогает скрипичный концерт и как можно остаться равнодушным, слушая сонату для фортепиано? Кажется, это высшая точка. Однако когда я слышу человеческий голос… Не знаю, происходит ли то же самое и с вами, но это то, выше чего ничего не может быть. На самом деле не существует для общины служения, сравнимого по своему значению с пением. Пение — это чистая любовь.</p><p>Я хотел бы дать вам совет. Не беспокойтесь за себя самих, за вашу способность выразиться. Предметом беспокойства и заботы должно быть не выражение самого себя, а лишь выражение сознания народа. Поэтому хор, пение — самое полезное и бескорыстное служение общине. Если в общине нет хора, это значит, что в ней нет любви, что что-то разрушено.</p><p>Песня исходит из сердца и из груди сознательно, только если человек принадлежит чему-то. Вы когда-либо были в доме молодой ласковой матери? Не может быть, чтобы ее малыш не напевал чего-то. Он поет, напевает. К нему приходят созвучия, неизвестно откуда взявшиеся, а ему только четыре года! Это выражение радости и покоя, которые происходят от того, что он чувствует себя любимым, происходят от принадлежности.</p></div>
+    <div class="g-sign">Луиджи Джуссани</div>
+    <button class="modal-close ui-caps" id="giussani-close" type="button">Закрыть</button>
   </div></div>
 </div>
 
@@ -2267,6 +2308,7 @@ function buildAllLists(){
   if(sec2.length) addList('2', 2, 'Песни для детей', [{label:null, songs:sec2}], 'ДЛЯ\xa0ДЕТЕЙ');
 }
 buildAllLists();
+setTimeout(renderRecent, 0);
 
 function renderSectionMenus(){
   [0,1,2].forEach(function(sectionIdx){
@@ -2927,9 +2969,20 @@ function updateTranslitVisibility(){
   var isRussian = !!song && /[А-Яа-яЁё]/.test(song.title);
   document.getElementById('btn-translit').style.display = isRussian ? '' : 'none';
 }
+var recent = store.getJSON('sb_recent', []);
+function renderRecent(){
+  var box = document.getElementById('recent-block'); if(!box) return;
+  box.innerHTML = '';
+  var ids = recent.filter(function(id){ return byId[id]; }).slice(0, 5);
+  if(!ids.length) return;
+  var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
+  ids.forEach(function(id){ var it = makeNavItem(byId[id], numberById[id]); it.style.setProperty('--indent','0px'); box.appendChild(it); });
+}
 function openSong(id, pushHash){
   var song = byId[id];
   if(!song) return;
+  recent = [id].concat(recent.filter(function(x){ return x!==id; })).slice(0, 20);
+  store.setJSON('sb_recent', recent); renderRecent();
   currentId = id;
   translitOn = false;
   var num = numberById[id];
@@ -3254,6 +3307,12 @@ document.getElementById('btn-info').addEventListener('click', function(){
      в прошлый раз. */
   modal.querySelector('.modal-sheet-scroll').scrollTop = 0;
 });
+
+document.getElementById('giussani').addEventListener('click', function(){
+  var m = document.getElementById('giussani-modal'); m.classList.add('open'); m.querySelector('.modal-sheet-scroll').scrollTop = 0;
+});
+document.getElementById('giussani-close').addEventListener('click', function(){ document.getElementById('giussani-modal').classList.remove('open'); });
+document.getElementById('giussani-modal').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 document.getElementById('info-close').addEventListener('click', function(){ document.getElementById('info-modal').classList.remove('open'); });
 document.getElementById('info-modal').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 
