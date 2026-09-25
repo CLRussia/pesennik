@@ -44,7 +44,17 @@ self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET') { return; }
 
-  var networkPromise = fetch(req).then(function (resp) {
+  // Свои файлы (index.html, иконки, manifest) -- всегда с проверкой у
+  // сервера (cache:'no-cache' -> быстрый ответ 304, если не менялось):
+  // иначе браузер по заголовку GitHub Pages "max-age=600" мог до 10 минут
+  // отдавать старую копию, и свежие правки были видны не сразу. Запрос
+  // строим заново по URL: исходный request навигации нельзя пересобрать с
+  // новыми опциями. Чужие файлы (шрифты Google) -- как раньше.
+  var sameOrigin = new URL(req.url).origin === self.location.origin;
+  var networkPromise = (sameOrigin
+    ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+    : fetch(req)
+  ).then(function (resp) {
     if (resp && resp.status === 200) {
       var copy = resp.clone();
       caches.open(CACHE_NAME).then(function (cache) { cache.put(req, copy); });
