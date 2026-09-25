@@ -120,30 +120,39 @@ input{font-family:inherit;color:inherit;}
 }
 
 /* Главная: блок «Недавно открытые» (последние 5 открытых песен, sb_recent) */
+/* Главная -- колонка во всю высоту экрана, цитата прижата к низу
+   (margin-top:auto): стоит на месте, есть недавние песни или нет; если
+   разделы раскрыты и не помещаются -- просто уезжает ниже, как обычно. */
+#home{min-height:100vh;min-height:100svh;box-sizing:border-box;display:flex;flex-direction:column;}
+#sections-menu{flex:1 0 auto;display:flex;flex-direction:column;}
 #recent-block{margin-top:26px;}
 #recent-block .recent-title{font-size:calc(12.5px * var(--scale-menu));letter-spacing:.08em;color:var(--text-faint);
   font-family:var(--font-ui);font-weight:600;text-transform:uppercase;padding:0 4px 6px;}
 #recent-block:empty{display:none;}
 
 /* Главная: цитата Джуссани -- вся кликабельна, открывает окно «Высшее выражение человека» */
-#giussani{display:block;width:100%;margin:34px 0 20px;padding:14px 12px;border-radius:var(--radius-m);text-align:center;
+#giussani{display:block;width:100%;margin:auto 0 4px;padding:14px 12px;border-radius:var(--radius-m);text-align:center;
   background:transparent;-webkit-tap-highlight-color:transparent;cursor:pointer;}
 #giussani:active{background:var(--accent-soft);}
 #giussani .q{font-family:var(--font-lyrics);font-style:italic;font-size:calc(23px * var(--scale-menu));line-height:1.35;color:var(--text);}
+/* минимальный зазор над цитатой, даже когда она прижата вниз вплотную к списку */
+#giussani{border-top:30px solid transparent;background-clip:padding-box;}
 #giussani .who{margin-top:10px;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-weight:600;
   font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
 #giussani-modal .g-text p{font-family:var(--font-lyrics);font-size:calc(16px * var(--scale-menu));line-height:1.55;color:var(--text);margin:0 0 1.55em;text-align:left;}
 #giussani-modal .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
 
 /* Редкий медленный блик по цитате -- подсказка, что на нее можно нажать.
-   Цикл 9s: ~6s тишины, ~3s медленный проход слева направо. В светлой теме
+   Цикл 13s: два медленных прохода по 3s подряд слева направо, потом ~7s
+   тишины; стартует почти сразу и перезапускается при каждом возврате на
+   главную (restartGiussaniShine). В светлой теме
    --accent слишком близок к цвету текста -- блик светлее; в темной -- accent. */
 :root{--shine:#5ab7c7;}
 :root[data-theme="dark"]{--shine:var(--accent);}
 #giussani .q{background:linear-gradient(100deg,var(--text) 0%,var(--text) 38%,var(--shine) 50%,var(--text) 62%,var(--text) 100%);
   background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;
-  color:transparent;-webkit-text-fill-color:transparent;animation:giussani-shine 9s linear 1.5s infinite;}
-@keyframes giussani-shine{0%,66%{background-position:100% 0;}100%{background-position:0% 0;}}
+  color:transparent;-webkit-text-fill-color:transparent;animation:giussani-shine 13s linear .3s infinite;}
+@keyframes giussani-shine{0%{background-position:100% 0;}23%{background-position:0% 0;}23.01%{background-position:100% 0;}46%{background-position:0% 0;}46.01%,100%{background-position:100% 0;}}
 @media (prefers-reduced-motion:reduce){#giussani .q{animation:none;color:var(--text);-webkit-text-fill-color:currentColor;background:none;}}
 </style>
 <style>
@@ -1658,6 +1667,13 @@ input[type="search"]::-webkit-search-decoration{
         <span class="size-slider-edge size-slider-edge-max">A</span>
       </div>
     </div>
+    <div class="appearance-row" id="appearance-recent-row">
+      <div class="appearance-label">Недавно открытые</div>
+      <div class="theme-switch">
+        <button class="theme-switch-btn" data-recent-choice="1" type="button"><span>Показывать</span></button>
+        <button class="theme-switch-btn" data-recent-choice="0" type="button"><span>Скрыть</span></button>
+      </div>
+    </div>
     <div class="appearance-row" id="appearance-font-row">
       <div class="appearance-label">Шрифт</div>
       <div class="font-choice">
@@ -2064,7 +2080,7 @@ applyScale('song');
 var appearanceContext = 'basic';
 function renderThemeSwitch(){
   var current = root.getAttribute('data-theme');
-  document.querySelectorAll('.theme-switch-btn').forEach(function(btn){
+  document.querySelectorAll('.theme-switch-btn[data-theme-choice]').forEach(function(btn){
     btn.classList.toggle('is-active', btn.dataset.themeChoice===current);
   });
 }
@@ -2083,6 +2099,8 @@ function renderFontCards(){
 function openAppearanceModal(context){
   appearanceContext = context;
   document.getElementById('appearance-font-row').style.display = (context==='song') ? '' : 'none';
+  document.getElementById('appearance-recent-row').style.display = (context==='song') ? 'none' : '';
+  renderRecentSwitch();
   renderThemeSwitch();
   renderSizeSlider();
   renderFontCards();
@@ -2090,8 +2108,17 @@ function openAppearanceModal(context){
   modal.classList.add('open');
   modal.querySelector('.modal-sheet-scroll').scrollTop = 0;
 }
-document.querySelectorAll('.theme-switch-btn').forEach(function(btn){
+document.querySelectorAll('.theme-switch-btn[data-theme-choice]').forEach(function(btn){
   btn.addEventListener('click', function(){ applyTheme(btn.dataset.themeChoice); });
+});
+function renderRecentSwitch(){
+  var on = store.get('sb_show_recent', '1');
+  document.querySelectorAll('.theme-switch-btn[data-recent-choice]').forEach(function(btn){
+    btn.classList.toggle('is-active', btn.dataset.recentChoice===on);
+  });
+}
+document.querySelectorAll('.theme-switch-btn[data-recent-choice]').forEach(function(btn){
+  btn.addEventListener('click', function(){ store.set('sb_show_recent', btn.dataset.recentChoice); renderRecentSwitch(); renderRecent(); });
 });
 document.querySelectorAll('.size-slider-dot').forEach(function(dot){
   dot.addEventListener('click', function(){
@@ -2308,7 +2335,7 @@ function buildAllLists(){
   if(sec2.length) addList('2', 2, 'Песни для детей', [{label:null, songs:sec2}], 'ДЛЯ\xa0ДЕТЕЙ');
 }
 buildAllLists();
-setTimeout(renderRecent, 0);
+renderRecent();
 
 function renderSectionMenus(){
   [0,1,2].forEach(function(sectionIdx){
@@ -2969,10 +2996,12 @@ function updateTranslitVisibility(){
   var isRussian = !!song && /[А-Яа-яЁё]/.test(song.title);
   document.getElementById('btn-translit').style.display = isRussian ? '' : 'none';
 }
-var recent = store.getJSON('sb_recent', []);
+var recent = recent || store.getJSON('sb_recent', []);
 function renderRecent(){
   var box = document.getElementById('recent-block'); if(!box) return;
+  if(!recent) recent = store.getJSON('sb_recent', []);
   box.innerHTML = '';
+  if(store.get('sb_show_recent', '1') === '0') return;
   var ids = recent.filter(function(id){ return byId[id]; }).slice(0, 5);
   if(!ids.length) return;
   var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
@@ -3053,6 +3082,7 @@ function goHome(){
   clearSearchField('search');
   collapseSections();
   if(location.hash){ history.pushState({}, '', location.pathname); }
+  restartGiussaniShine();
 }
 document.getElementById('btn-back').addEventListener('click', goHome);
 document.getElementById('btn-list-back').addEventListener('click', goHome);
@@ -3074,6 +3104,7 @@ window.addEventListener('popstate', function(){
      "НА ГЛАВНУЮ" и чистим поле поиска (тоже как в goHome) */
   clearSearchField('search');
   collapseSections();
+  restartGiussaniShine();
 });
 
 document.getElementById('btn-translit').addEventListener('click', function(){
@@ -3308,6 +3339,11 @@ document.getElementById('btn-info').addEventListener('click', function(){
   modal.querySelector('.modal-sheet-scroll').scrollTop = 0;
 });
 
+function restartGiussaniShine(){
+  var q = document.querySelector('#giussani .q'); if(!q) return;
+  q.style.animation = 'none'; void q.offsetWidth; q.style.animation = '';
+}
+document.addEventListener('visibilitychange', function(){ if(!document.hidden && !location.hash) restartGiussaniShine(); });
 document.getElementById('giussani').addEventListener('click', function(){
   var m = document.getElementById('giussani-modal'); m.classList.add('open'); m.querySelector('.modal-sheet-scroll').scrollTop = 0;
 });
