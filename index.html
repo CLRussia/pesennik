@@ -120,6 +120,15 @@ input{font-family:inherit;color:inherit;}
 }
 
 /* Главная: блок «Недавно открытые» (последние 5 открытых песен, sb_recent) */
+#giussani-view{
+  position:fixed;inset:0;background:var(--bg);z-index:35;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;
+  opacity:0;transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;
+}
+#giussani-view.open{display:block;}
+#giussani-view.open.visible{opacity:1;transform:translateY(0);}
+.giussani-scroll{padding:24px 20px calc(var(--safe-b) + 40px);max-width:640px;margin:0 auto;}
+
 /* Главная -- колонка во всю высоту экрана, цитата прижата к низу
    (margin-top:auto): стоит на месте, есть недавние песни или нет; если
    разделы раскрыты и не помещаются -- просто уезжает ниже, как обычно. */
@@ -139,8 +148,8 @@ input{font-family:inherit;color:inherit;}
 #giussani{border-top:30px solid transparent;background-clip:padding-box;}
 #giussani .who{margin-top:10px;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-weight:600;
   font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
-#giussani-modal .g-text p{font-family:var(--font-lyrics);font-size:calc(16px * var(--scale-menu));line-height:1.55;color:var(--text);margin:0 0 1.55em;text-align:left;}
-#giussani-modal .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
+#giussani-view .g-text p{font-family:var(--font-lyrics);font-size:calc(16px * var(--scale-menu));line-height:1.55;color:var(--text);margin:0 0 1.55em;text-align:left;}
+#giussani-view .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
 
 /* Редкий медленный блик по цитате -- подсказка, что на нее можно нажать.
    Цикл 13s: два медленных прохода по 3s подряд слева направо, потом ~7s
@@ -1685,13 +1694,20 @@ input[type="search"]::-webkit-search-decoration{
   </div></div>
 </div>
 
-<div class="modal-overlay" id="giussani-modal">
-  <div class="modal-sheet"><div class="modal-sheet-scroll">
-    <h2 class="ui-caps">Высшее выражение человека</h2>
+<div id="giussani-view">
+  <div class="list-topbar">
+    <div class="list-topbar-row">
+      <button class="back-btn" id="btn-giussani-back" aria-label="На главную">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+        <span>На главную</span>
+      </button>
+      <div class="list-title">ВЫСШЕЕ ВЫРАЖЕНИЕ ЧЕЛОВЕКА</div>
+    </div>
+  </div>
+  <div class="list-scroll giussani-scroll">
     <div class="g-text"><p>Никакое выражение человеческих чувств не может превзойти музыку. Кого не трогает скрипичный концерт и как можно остаться равнодушным, слушая сонату для фортепиано? Кажется, это высшая точка. Однако когда я слышу человеческий голос… Не знаю, происходит ли то же самое и с вами, но это то, выше чего ничего не может быть. На самом деле не существует для общины служения, сравнимого по своему значению с пением. Пение — это чистая любовь.</p><p>Я хотел бы дать вам совет. Не беспокойтесь за себя самих, за вашу способность выразиться. Предметом беспокойства и заботы должно быть не выражение самого себя, а лишь выражение сознания народа. Поэтому хор, пение — самое полезное и бескорыстное служение общине. Если в общине нет хора, это значит, что в ней нет любви, что что-то разрушено.</p><p>Песня исходит из сердца и из груди сознательно, только если человек принадлежит чему-то. Вы когда-либо были в доме молодой ласковой матери? Не может быть, чтобы ее малыш не напевал чего-то. Он поет, напевает. К нему приходят созвучия, неизвестно откуда взявшиеся, а ему только четыре года! Это выражение радости и покоя, которые происходят от того, что он чувствует себя любимым, происходят от принадлежности.</p></div>
     <div class="g-sign">Луиджи Джуссани</div>
-    <button class="modal-close ui-caps" id="giussani-close" type="button">Закрыть</button>
-  </div></div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="info-modal">
@@ -3078,6 +3094,10 @@ function goHome(){
     setTimeout(function(){ allsongsView.classList.remove('open'); }, 200);
     document.getElementById('az-jump').classList.remove('open');
   }
+  if(giussaniView.classList.contains('open')){
+    giussaniView.classList.remove('visible');
+    setTimeout(function(){ giussaniView.classList.remove('open'); }, 200);
+  }
   currentListKey = null;
   clearSearchField('search');
   collapseSections();
@@ -3098,6 +3118,8 @@ window.addEventListener('popstate', function(){
   if(favoritesView.classList.contains('open')){ instantHideFavorites(); }
   if(h === '#allsongs'){ openAllSongs(false); return; }
   if(allsongsView.classList.contains('open')){ instantHideAllSongs(); }
+  if(h === '#giussani'){ openGiussani(false); return; }
+  if(giussaniView.classList.contains('open')){ instantHideGiussani(); }
   /* ни песня, ни список, ни избранное, ни "все песни" не совпали с
      хэшем -- значит, родной жест/кнопка "назад" довели до главной;
      сворачиваем ранее открытый раздел (п.8) так же, как при нажатии
@@ -3344,11 +3366,16 @@ function restartGiussaniShine(){
   q.style.animation = 'none'; void q.offsetWidth; q.style.animation = '';
 }
 document.addEventListener('visibilitychange', function(){ if(!document.hidden && !location.hash) restartGiussaniShine(); });
-document.getElementById('giussani').addEventListener('click', function(){
-  var m = document.getElementById('giussani-modal'); m.classList.add('open'); m.querySelector('.modal-sheet-scroll').scrollTop = 0;
-});
-document.getElementById('giussani-close').addEventListener('click', function(){ document.getElementById('giussani-modal').classList.remove('open'); });
-document.getElementById('giussani-modal').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+var giussaniView = document.getElementById('giussani-view');
+function openGiussani(pushHash){
+  giussaniView.classList.add('open');
+  requestAnimationFrame(function(){ giussaniView.classList.add('visible'); });
+  giussaniView.scrollTop = 0;
+  if(pushHash !== false){ history.pushState({giussani:true}, '', '#giussani'); }
+}
+function instantHideGiussani(){ giussaniView.classList.remove('open','visible'); }
+document.getElementById('giussani').addEventListener('click', function(){ openGiussani(); });
+document.getElementById('btn-giussani-back').addEventListener('click', goHome);
 document.getElementById('info-close').addEventListener('click', function(){ document.getElementById('info-modal').classList.remove('open'); });
 document.getElementById('info-modal').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
 
