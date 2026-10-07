@@ -1875,6 +1875,9 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
+      <button class="icon-btn-sm" id="btn-pv-share" title="Поделиться" aria-label="Поделиться">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg>
+      </button>
       <div class="list-title">СПИСОК</div>
     </div>
   </div>
@@ -3413,15 +3416,12 @@ document.getElementById('btn-add-header').addEventListener('click', function(){
 });
 document.getElementById('pb-done').addEventListener('click', function(){ var id = curListId; endPicker(); instantHideList(); instantHideAllSongs(); openEdit(id); });
 /* ---------- отправка ---------- */
-function shareProgram(){
-  var l = getList(curListId); if(!l) return;
-  var items = existingItems(l.ids);
+function shareItems(items, title){
+  items = existingItems(items);
   if(!songCount(items)) return;
-  var title = listTitle(l);
-  var url = location.origin + location.pathname + progHash(items, title);
   var out = [], first = true;
   items.forEach(function(x){
-    if(isHdr(x)){ if(!first) out.push(''); out.push('— ' + (x.trim() || 'Раздел') + ' —'); }
+    if(isHdr(x)){ if(!first) out.push(''); out.push('\u2014 ' + (x.trim() || 'Раздел') + ' \u2014'); }
     else { out.push(SEARCH_ENTRY_BY_ID[x].number + '. ' + byId[x].title); }
     first = false;
   });
@@ -3432,6 +3432,14 @@ function shareProgram(){
   if(window.__progShareHook){ window.__progShareHook(text, link); return; }
   if(navigator.share){ navigator.share({title: title, text: text}).catch(function(){}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('Текст скопирован'); }); }
+}
+function shareProgram(){
+  var l = getList(curListId); if(!l) return;
+  shareItems(l.ids, listTitle(l));
+}
+function shareReceived(){
+  var p = parseAnyHash(currentProgHash || ''); if(!p) return;
+  shareItems(p.ids, p.t || 'Список');
 }
 document.getElementById('btn-prog-share').addEventListener('click', shareProgram);
 /* ---------- присланные ---------- */
@@ -3467,6 +3475,7 @@ function openProgramFromHash(h, pushHash){
   openExtra(programView, h, pushHash);
 }
 document.getElementById('btn-program-back').addEventListener('click', goHome);
+document.getElementById('btn-pv-share').addEventListener('click', shareReceived);
 document.getElementById('btn-pv-copy').addEventListener('click', function(){
   var link = location.href;
   function done(){ showToast('Ссылка скопирована'); }
