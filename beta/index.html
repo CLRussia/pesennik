@@ -1829,7 +1829,7 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
     </div>
   </div>
   <div class="list-scroll">
-    <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Добавить из чата</span></button></div>
+    <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Вставить ссылку</span></button></div>
     <div class="screen-head" id="lists-own-head">Мои списки</div>
     <div id="lists-own"></div>
     <div class="screen-head" id="lists-recv-head">Общие списки</div>
@@ -1889,9 +1889,9 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 
 <div class="modal-overlay" id="import-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
-    <h2 class="ui-caps">Список из чата</h2>
-    <p>Скопируйте сообщение со списком (можно только ссылку) и вставьте сюда.</p>
-    <textarea id="import-text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте сообщение или ссылку"></textarea>
+    <h2 class="ui-caps">Вставить ссылку</h2>
+    <p>Скопируйте ссылку из сообщения или письма и вставьте сюда.</p>
+    <textarea id="import-text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте ссылку"></textarea>
     <p class="import-err" id="import-err"></p>
     <div class="modal-actions">
       <button class="modal-btn ui-caps" id="import-cancel" type="button">Отмена</button>
@@ -3118,6 +3118,39 @@ function parseProgHash(h){
   var t = ''; try{ t = decodeURIComponent(m[2] || ''); }catch(e){}
   return {ids: items, t: t.slice(0, 60)};
 }
+
+/* компактная ссылка: #l=<base64url>; внутри «название» и элементы через запятую (id в base36, подзаголовок с «~») */
+function b64uEncode(str){
+  var bytes = new TextEncoder().encode(str), bin = '';
+  for(var i = 0; i < bytes.length; i++){ bin += String.fromCharCode(bytes[i]); }
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function b64uDecode(b64){
+  var bin = atob(b64.replace(/-/g, '+').replace(/_/g, '/')), bytes = new Uint8Array(bin.length);
+  for(var i = 0; i < bin.length; i++){ bytes[i] = bin.charCodeAt(i); }
+  return new TextDecoder().decode(bytes);
+}
+function linkHash(items, title){
+  var body = items.map(function(x){ return isHdr(x) ? '~' + x.replace(/[,\n]/g, ' ') : x.toString(36); }).join(',');
+  return '#l=' + b64uEncode(title.replace(/\n/g, ' ') + '\n' + body);
+}
+function parseLinkHash(h){
+  var m = h.match(/^#l=([A-Za-z0-9_-]+)$/);
+  if(!m) return null;
+  try{
+    var str = b64uDecode(m[1]), nl = str.indexOf('\n');
+    if(nl < 0) return null;
+    var items = [];
+    str.slice(nl + 1).split(',').forEach(function(tok){
+      if(!tok) return;
+      if(tok.charAt(0) === '~'){ items.push(tok.slice(1)); }
+      else { var n = parseInt(tok, 36); if(n > 0) items.push(n); }
+    });
+    return {ids: items, t: str.slice(0, nl).slice(0, 60)};
+  }catch(e){ return null; }
+}
+function parseAnyHash(h){ return parseProgHash(h) || parseLinkHash(h); }
+
 /* значок в шапке: «списки» вместо закладки */
 function updateFavoritesBookmark(){}
 function makeFavButton(){ return document.createDocumentFragment(); }
@@ -3348,13 +3381,11 @@ function shareProgram(){
     else { out.push(SEARCH_ENTRY_BY_ID[x].number + '. ' + byId[x].title); }
     first = false;
   });
+  var link = location.origin + location.pathname + linkHash(items, title);
   var text = title + '\n\n' + out.join('\n') + '\n\n' +
-    'Чтобы открыть этот список в приложении «Песенник»:\n' +
-    '1. Скопируйте это сообщение целиком.\n' +
-    '2. Откройте приложение и нажмите значок «Списки» (вверху главной).\n' +
-    '3. Нажмите «Добавить из чата» и вставьте сообщение.\n\n' +
-    'Код списка: ' + encodeListCode(items);
-  if(window.__progShareHook){ window.__progShareHook(text, url); return; }
+    'Открыть список в приложении «Песенник»:\n' + link + '\n\n' +
+    'Если ссылка открылась в браузере: скопируйте её, откройте приложение, нажмите значок «Списки» → «Вставить ссылку» и вставьте.';
+  if(window.__progShareHook){ window.__progShareHook(text, link); return; }
   if(navigator.share){ navigator.share({title: title, text: text}).catch(function(){}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('Текст скопирован'); }); }
 }
@@ -3363,7 +3394,7 @@ document.getElementById('btn-prog-share').addEventListener('click', shareProgram
 var programView = document.getElementById('program-view');
 var currentProgHash = null;
 function openProgramFromHash(h, pushHash){
-  var p = parseProgHash(h);
+  var p = parseAnyHash(h);
   if(!p || !songCount(p.ids)){ showToast('Не удалось открыть список'); history.replaceState({}, '', location.pathname); return; }
   currentProgHash = h;
   var items = existingItems(p.ids), missing = p.ids.filter(function(x){ return !isHdr(x); }).length - songCount(items);
@@ -3391,7 +3422,7 @@ function openProgramFromHash(h, pushHash){
 }
 document.getElementById('btn-program-back').addEventListener('click', goHome);
 document.getElementById('btn-pv-remove').addEventListener('click', function(){
-  var p = parseProgHash(currentProgHash || ''); if(!p) return;
+  var p = parseAnyHash(currentProgHash || ''); if(!p) return;
   var key = listKey(p.ids, p.t || 'Список');
   programs = programs.filter(function(x){ return x.k !== key; });
   store.setJSON('sb_programs', programs);
@@ -3430,6 +3461,8 @@ function guessImportTitle(body){
 function parseImport(text){
   var body = importBody(text), title = guessImportTitle(body) || 'Список из чата';
   var names = body.filter(function(ln){ return HDR_LINE.test(ln); }).map(function(ln){ return ln.match(HDR_LINE)[1]; });
+  var lm = text.match(/#l=[A-Za-z0-9_-]+/);
+  if(lm && parseLinkHash(lm[0])) return lm[0];
   var code = decodeListCode(text);
   if(code){
     var k = 0, items = code.map(function(x){ if(x === null){ var nm = names[k] || ('Раздел ' + (k + 1)); k++; return nm; } return x; });
@@ -3451,7 +3484,7 @@ document.getElementById('import-cancel').addEventListener('click', closeImport);
 importModal.addEventListener('click', function(e){ if(e.target === importModal) closeImport(); });
 document.getElementById('import-ok').addEventListener('click', function(){
   var h = parseImport(document.getElementById('import-text').value || '');
-  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл в тексте список песен. Скопируйте сообщение целиком.'; return; }
+  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл ссылку на список. Скопируйте ссылку из сообщения целиком.'; return; }
   closeImport();
   openProgramFromHash(h);
 });
@@ -3689,7 +3722,7 @@ window.addEventListener('popstate', function(){
   if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
   if(listView.classList.contains('open')){ instantHideList(); }
   var em = h.match(/^#edit=(\w+)$/);
-  if(h.indexOf('#prog=') === 0){ endPicker(); openProgramFromHash(h, false); return; }
+  if(h.indexOf('#prog=') === 0 || h.indexOf('#l=') === 0){ endPicker(); openProgramFromHash(h, false); return; }
   if(h === '#lists'){ endPicker(); openListsScreen(false); return; }
   if(em){ endPicker(); openEdit(em[1], false); return; }
   closeExtraViews();
@@ -4102,7 +4135,7 @@ document.addEventListener('visibilitychange', function(){
   var lm = h.match(/^#list(.+)$/);
   if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
   var em0 = h.match(/^#edit=(\w+)$/);
-  if(h.indexOf('#prog=') === 0){ openProgramFromHash(h, false); return; }
+  if(h.indexOf('#prog=') === 0 || h.indexOf('#l=') === 0){ openProgramFromHash(h, false); return; }
   if(h === '#lists'){ openListsScreen(false); return; }
   if(em0){ openEdit(em0[1], false); return; }
 })();
@@ -4110,7 +4143,7 @@ document.addEventListener('visibilitychange', function(){
 /* Тур при первом входе -- после initFromHash, чтобы он лёг поверх
    уже открытого экрана (в т.ч. если открыли по присланной ссылке на
    конкретную песню), а не блокировал переход по ней. */
-if(!store.get('sb_tour_seen', null) && location.hash.indexOf('#prog=') !== 0){ showTour(); }
+if(!store.get('sb_tour_seen', null) && location.hash.indexOf('#prog=') !== 0 && location.hash.indexOf('#l=') !== 0){ showTour(); }
 
 /* ------------------------------------------------------------
    SERVICE WORKER
