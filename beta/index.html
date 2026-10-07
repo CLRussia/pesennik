@@ -278,6 +278,15 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
   transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
 #lists-view.open{display:block;}
 #lists-view.open.visible{opacity:1;transform:translateY(0);}
+
+.hdr-row{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 0 4px;border-top:1px solid var(--border);}
+.hdr-input{flex:1;min-width:0;padding:8px 10px;border:1.5px solid transparent;border-radius:var(--radius-s);background:transparent;color:var(--accent);
+  font-family:var(--font-ui);font-size:calc(14px * var(--scale-menu));font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.hdr-input:focus{outline:none;border-color:var(--accent);background:var(--bg-elevated);}
+.hdr-input::placeholder{text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-faint);}
+.hdr-add{flex:0 0 auto;padding:6px 12px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-family:var(--font-ui);
+  font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.hdr-add:active{background:var(--accent-soft);}
 </style>
 <style>
 /* ============================================================
@@ -1842,6 +1851,7 @@ input[type="search"]::-webkit-search-decoration{
     <p class="empty-note" id="program-empty">Пока нет песен. Нажмите «Добавить песни».</p>
     <div class="prog-actions">
       <button class="prog-btn" id="btn-prog-add" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Добавить песни</span></button>
+      <button class="prog-btn" id="btn-add-header" type="button"><svg viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="13" x2="14" y2="13"/><line x1="5" y1="19" x2="19" y2="19"/></svg><span>Добавить подзаголовок</span></button>
       <button class="prog-btn primary" id="btn-prog-share" type="button"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg><span>Поделиться списком</span></button>
       <button class="link-btn ui-caps prog-sublink" id="btn-prog-clear" type="button" style="color:var(--danger)">Удалить список</button>
     </div>
@@ -3079,13 +3089,27 @@ var MONTHS = ['января','февраля','марта','апреля','ма�
 function dayMonth(ts){ var d = new Date(ts); return d.getDate()+' '+MONTHS[d.getMonth()]; }
 function listTitle(l){ var t = (l.t||'').trim(); return t || ('Список от ' + dayMonth(l.c)); }
 function existingIds(ids){ return ids.filter(function(id){ return SEARCH_ENTRY_BY_ID[id]; }); }
-function progHash(ids, title){ return '#prog=' + ids.join('.') + '&t=' + encodeURIComponent(title); }
+/* элементы списка: число = id песни, строка = подзаголовок («Вторник», «Причастие») */
+function isHdr(x){ return typeof x === 'string'; }
+function existingItems(arr){ return arr.filter(function(x){ return isHdr(x) || SEARCH_ENTRY_BY_ID[x]; }); }
+function songCount(arr){ return arr.filter(function(x){ return !isHdr(x) && SEARCH_ENTRY_BY_ID[x]; }).length; }
+function listKey(items, title){ return items.map(function(x){ return isHdr(x) ? '#' + x : x; }).join('.') + '|' + title; }
+function progHash(items, title){
+  var hs = items.filter(isHdr);
+  return '#prog=' + items.map(function(x){ return isHdr(x) ? 'h' : x; }).join('.') + '&t=' + encodeURIComponent(title) +
+    (hs.length ? '&h=' + hs.map(encodeURIComponent).join('~') : '');
+}
 function parseProgHash(h){
-  var m = h.match(/^#prog=([\d.]*)(?:&t=(.*))?$/);
+  var m = h.match(/^#prog=([\dh.]*)(?:&t=([^&]*))?(?:&h=(.*))?$/);
   if(!m) return null;
-  var ids = m[1] ? m[1].split('.').map(Number).filter(function(n){ return n > 0; }) : [];
-  var t = ''; try{ t = decodeURIComponent(m[2]||''); }catch(e){}
-  return {ids: ids, t: t.slice(0,60)};
+  var names = []; try{ names = m[3] ? m[3].split('~').map(decodeURIComponent) : []; }catch(e){}
+  var k = 0, items = [];
+  (m[1] ? m[1].split('.') : []).forEach(function(tok){
+    if(tok === 'h'){ items.push(names[k] !== undefined ? names[k] : 'Раздел'); k++; }
+    else { var n = parseInt(tok, 10); if(n > 0) items.push(n); }
+  });
+  var t = ''; try{ t = decodeURIComponent(m[2] || ''); }catch(e){}
+  return {ids: items, t: t.slice(0, 60)};
 }
 /* значок в шапке: «списки» вместо закладки */
 function updateFavoritesBookmark(){}
@@ -3128,11 +3152,11 @@ function homeItem(style, o){
   return b;
 }
 function ownItem(l){
-  var n = existingIds(l.ids).length;
+  var n = songCount(l.ids);
   return {title: listTitle(l), meta: n ? songsWord(n) : 'пусто', onClick: function(){ openEdit(l.id); }};
 }
 function recvItem(p, withTag){
-  return {title: p.t, meta: songsWord(existingIds(p.ids).length), tag: withTag ? 'Прислали' : '', onClick: function(){ openProgramFromHash(progHash(p.ids, p.t)); }};
+  return {title: p.t, meta: songsWord(songCount(p.ids)), tag: withTag ? 'Прислали' : '', onClick: function(){ openProgramFromHash(progHash(p.ids, p.t)); }};
 }
 function renderHomeLists(){
   var box = document.getElementById('home-lists');
@@ -3191,37 +3215,53 @@ function renderEdit(){
   var l = getList(curListId); if(!l) return;
   var list = document.getElementById('program-list');
   list.innerHTML = '';
-  var ids = existingIds(l.ids);
-  if(ids.length !== l.ids.length){ l.ids = ids; saveLists(); }
-  var many = ids.length > 1;
-  ids.forEach(function(id){
-    var item = makeNavItem(byId[id], SEARCH_ENTRY_BY_ID[id].number);
-    item.style.setProperty('--indent', '0px');
-    item.setAttribute('data-fav-id', id);
+  var items = existingItems(l.ids);
+  if(items.length !== l.ids.length){ l.ids = items; saveLists(); }
+  var many = items.length > 1;
+  items.forEach(function(x, idx){
+    var item;
+    if(isHdr(x)){
+      item = document.createElement('div');
+      item.className = 'nav-item hdr-row';
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'hdr-input'; inp.value = x; inp.maxLength = 40; inp.placeholder = 'Подзаголовок (например, «Вторник»)';
+      inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done');
+      inp.addEventListener('input', function(){ l.ids[idx] = inp.value; l.u = Date.now(); saveLists(); });
+      inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ inp.blur(); } });
+      item.appendChild(inp);
+      var add = document.createElement('button');
+      add.type = 'button'; add.className = 'hdr-add'; add.textContent = '+ песни';
+      add.addEventListener('click', function(){ startPicker(idx); });
+      item.appendChild(add);
+    } else {
+      item = makeNavItem(byId[x], SEARCH_ENTRY_BY_ID[x].number);
+      item.style.setProperty('--indent', '0px');
+    }
+    item.setAttribute('data-fav-id', idx);
     if(many) item.appendChild(makeDragHandle());
     var rm = document.createElement('button');
     rm.className = 'prog-remove'; rm.type = 'button'; rm.setAttribute('aria-label', 'Убрать из списка');
     rm.innerHTML = ICON_X;
     rm.addEventListener('click', function(){
-      l.ids = l.ids.filter(function(x){ return x !== id; }); l.u = Date.now(); saveLists(); renderEdit();
+      l.ids.splice(idx, 1); l.u = Date.now(); saveLists(); renderEdit();
     });
     item.appendChild(rm);
     list.appendChild(item);
   });
-  var n = ids.length;
+  var n = songCount(items);
   document.getElementById('prog-count').textContent = n ? songsWord(n) : '';
-  document.getElementById('program-empty').classList.toggle('show', n === 0);
+  document.getElementById('program-empty').classList.toggle('show', items.length === 0);
   document.getElementById('btn-prog-share').disabled = n === 0;
-  var inp = document.getElementById('program-title');
-  if(document.activeElement !== inp) inp.value = l.t || '';
-  inp.placeholder = 'Список от ' + dayMonth(l.c);
+  var inp2 = document.getElementById('program-title');
+  if(document.activeElement !== inp2) inp2.value = l.t || '';
+  inp2.placeholder = 'Список от ' + dayMonth(l.c);
 }
 function openEdit(id, pushHash){
   if(!getList(id)){ openListsScreen(false); return; }
   curListId = id; renderEdit();
   openExtra(editView, '#edit=' + id, pushHash);
 }
-function onProgramReorder(order){ var l = getList(curListId); if(l){ l.ids = order; l.u = Date.now(); saveLists(); } }
+function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
 document.getElementById('btn-edit-back').addEventListener('click', function(){ openListsScreen(); });
 document.getElementById('program-title').addEventListener('input', function(){ var l = getList(curListId); if(l){ l.t = this.value; l.u = Date.now(); saveLists(); } });
 document.getElementById('program-title').addEventListener('keydown', function(e){ if(e.key==='Enter'){ this.blur(); } });
@@ -3233,23 +3273,40 @@ document.getElementById('btn-prog-clear').addEventListener('click', function(){
   });
 });
 /* ---------- подбор песен через обычное оглавление ---------- */
-function updatePickerBar(){
-  var l = getList(curListId), n = l ? l.ids.length : 0;
-  document.getElementById('pb-text').innerHTML = '<span class="pb-name"></span>' + (n ? 'В списке: <b>' + songsWord(n) + '</b>' : 'Откройте раздел и нажимайте на песни');
-  document.querySelector('#pb-text .pb-name').textContent = l ? listTitle(l) : '';
+var pickHdr = -1; /* индекс подзаголовка, под который добавляем песни; -1 = в начало списка (до первого подзаголовка) */
+function sectionRange(items, hdr){
+  var start = hdr + 1, end = items.length;
+  for(var i = start; i < items.length; i++){ if(isHdr(items[i])){ end = i; break; } }
+  return [start, end];
 }
-function draftHas(id){ var l = getList(curListId); return !!l && l.ids.indexOf(id) !== -1; }
+function updatePickerBar(){
+  var l = getList(curListId); if(!l) return;
+  var items = l.ids, r = sectionRange(items, pickHdr);
+  var inSec = items.slice(r[0], r[1]).filter(function(x){ return !isHdr(x); }).length;
+  var name = listTitle(l) + (pickHdr >= 0 ? ' → ' + (items[pickHdr] || 'без названия') : '');
+  document.getElementById('pb-text').innerHTML = '<span class="pb-name"></span>' + (inSec ? (pickHdr >= 0 ? 'В разделе: ' : 'В списке: ') + '<b>' + songsWord(inSec) + '</b>' : 'Откройте раздел и нажимайте на песни');
+  document.querySelector('#pb-text .pb-name').textContent = name;
+}
+function draftHas(id){
+  var l = getList(curListId); if(!l) return false;
+  var r = sectionRange(l.ids, pickHdr);
+  return l.ids.slice(r[0], r[1]).indexOf(id) !== -1;
+}
 function togglePick(id){
   var l = getList(curListId); if(!l) return;
-  var i = l.ids.indexOf(id);
-  if(i === -1) l.ids.push(id); else l.ids.splice(i, 1);
+  var r = sectionRange(l.ids, pickHdr), i = -1, k;
+  for(k = r[1] - 1; k >= r[0]; k--){ if(l.ids[k] === id){ i = k; break; } }
+  if(i === -1) l.ids.splice(r[1], 0, id); else l.ids.splice(i, 1);
   l.u = Date.now(); saveLists();
   Array.prototype.forEach.call(document.querySelectorAll('.nav-item-main[data-id="'+id+'"]'), function(el){
     el.parentNode.classList.toggle('pick-on', i === -1);
   });
   updatePickerBar();
 }
-function startPicker(){
+function startPicker(hdr){
+  var l0 = getList(curListId);
+  if(typeof hdr !== 'number'){ hdr = -1; if(l0){ for(var q = l0.ids.length - 1; q >= 0; q--){ if(isHdr(l0.ids[q])){ hdr = q; break; } } } }
+  pickHdr = hdr;
   pickerMode = true;
   document.body.classList.add('picking');
   updatePickerBar();
@@ -3264,25 +3321,35 @@ function endPicker(){
   document.body.classList.remove('picking');
   renderHomeLists();
 }
-document.getElementById('btn-prog-add').addEventListener('click', startPicker);
+document.getElementById('btn-prog-add').addEventListener('click', function(){ startPicker(); });
+document.getElementById('btn-add-header').addEventListener('click', function(){
+  var l = getList(curListId); if(!l) return;
+  l.ids.push(''); l.u = Date.now(); saveLists(); renderEdit();
+  var rows = document.querySelectorAll('#program-list .hdr-input'); var last = rows[rows.length - 1]; if(last){ last.focus(); last.scrollIntoView({block:'center'}); }
+});
 document.getElementById('pb-done').addEventListener('click', function(){ var id = curListId; endPicker(); instantHideList(); instantHideAllSongs(); openEdit(id); });
 /* ---------- отправка ---------- */
 function shareProgram(){
   var l = getList(curListId); if(!l) return;
-  var ids = existingIds(l.ids);
-  if(!ids.length) return;
+  var items = existingItems(l.ids);
+  if(!songCount(items)) return;
   var title = listTitle(l);
-  var url = location.origin + location.pathname + progHash(ids, title);
-  var lines = ids.map(function(id){ return SEARCH_ENTRY_BY_ID[id].number + '. ' + byId[id].title; });
-  var text = title + '\n\n' + lines.join('\n') + '\n\n' +
+  var url = location.origin + location.pathname + progHash(items, title);
+  var out = [], first = true;
+  items.forEach(function(x){
+    if(isHdr(x)){ if(!first) out.push(''); out.push('— ' + (x.trim() || 'Раздел') + ' —'); }
+    else { out.push(SEARCH_ENTRY_BY_ID[x].number + '. ' + byId[x].title); }
+    first = false;
+  });
+  var text = title + '\n\n' + out.join('\n') + '\n\n' +
     'Чтобы открыть этот список в приложении «Песенник»:\n' +
     '1. Скопируйте это сообщение целиком.\n' +
     '2. Откройте приложение и нажмите значок «Списки» (вверху главной).\n' +
     '3. Нажмите «Добавить из чата» и вставьте сообщение.\n\n' +
-    'Код списка: ' + encodeListCode(ids);
+    'Код списка: ' + encodeListCode(items);
   if(window.__progShareHook){ window.__progShareHook(text, url); return; }
   if(navigator.share){ navigator.share({title: title, text: text}).catch(function(){}); }
-  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('Текст со ссылкой скопирован'); }); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('Текст скопирован'); }); }
 }
 document.getElementById('btn-prog-share').addEventListener('click', shareProgram);
 /* ---------- присланные ---------- */
@@ -3290,11 +3357,11 @@ var programView = document.getElementById('program-view');
 var currentProgHash = null;
 function openProgramFromHash(h, pushHash){
   var p = parseProgHash(h);
-  if(!p || !existingIds(p.ids).length){ showToast('Не удалось открыть список'); history.replaceState({}, '', location.pathname); return; }
+  if(!p || !songCount(p.ids)){ showToast('Не удалось открыть список'); history.replaceState({}, '', location.pathname); return; }
   currentProgHash = h;
-  var ids = existingIds(p.ids), missing = p.ids.length - ids.length;
+  var items = existingItems(p.ids), missing = p.ids.filter(function(x){ return !isHdr(x); }).length - songCount(items);
   var title = p.t || 'Список';
-  var key = p.ids.join('.') + '|' + title;
+  var key = listKey(p.ids, title);
   var known = programs.filter(function(x){ return x.k === key; })[0];
   if(!known){
     programs.unshift({k:key, t:title, ids:p.ids, at:Date.now()});
@@ -3304,10 +3371,11 @@ function openProgramFromHash(h, pushHash){
     renderHomeLists();
   }
   document.getElementById('pv-title').textContent = title;
-  document.getElementById('pv-meta').textContent = songsWord(ids.length) + ' · получен ' + dayMonth((known||programs[0]).at);
+  document.getElementById('pv-meta').textContent = songsWord(songCount(items)) + ' · получен ' + dayMonth((known||programs[0]).at);
   var list = document.getElementById('pv-list'); list.innerHTML = '';
-  ids.forEach(function(id){
-    var item = makeNavItem(byId[id], SEARCH_ENTRY_BY_ID[id].number);
+  items.forEach(function(x){
+    if(isHdr(x)){ list.appendChild(makeLabel('nav-sub', x.trim() || 'Раздел', 0)); return; }
+    var item = makeNavItem(byId[x], SEARCH_ENTRY_BY_ID[x].number);
     item.style.setProperty('--indent', '0px');
     list.appendChild(item);
   });
@@ -3317,7 +3385,7 @@ function openProgramFromHash(h, pushHash){
 document.getElementById('btn-program-back').addEventListener('click', goHome);
 document.getElementById('btn-pv-remove').addEventListener('click', function(){
   var p = parseProgHash(currentProgHash || ''); if(!p) return;
-  var key = p.ids.join('.') + '|' + (p.t || 'Список');
+  var key = listKey(p.ids, p.t || 'Список');
   programs = programs.filter(function(x){ return x.k !== key; });
   store.setJSON('sb_programs', programs);
   openListsScreen();
@@ -3325,41 +3393,51 @@ document.getElementById('btn-pv-remove').addEventListener('click', function(){
 
 
 /* код списка: постоянные id в base36 («1V · 1Y · 24») -- не ссылка, чат её не подсвечивает */
-function encodeListCode(ids){ return ids.map(function(n){ return n.toString(36).toUpperCase(); }).join(' \u00b7 '); }
+function encodeListCode(items){ return items.map(function(x){ return isHdr(x) ? '|' : x.toString(36).toUpperCase(); }).join(' · '); }
 function decodeListCode(text){
   var m = text.match(/Код списка[^:\n]*:([^\n]+)/i);
   if(!m) return null;
-  var toks = m[1].split(/[\s\u00b7.,;:\-\u2013\u2014]+/).filter(Boolean);
-  if(!toks.length || toks.some(function(t){ return !/^[0-9A-Za-z]{1,3}$/.test(t); })) return null;
-  var ids = toks.map(function(x){ return parseInt(x, 36); }).filter(function(n){ return n > 0; });
-  return ids.length ? ids : null;
+  var toks = m[1].split(/[\s·.,;:–—]+/).filter(Boolean);
+  if(!toks.length || toks.some(function(t){ return t !== '|' && !/^[0-9A-Za-z]{1,3}$/.test(t); })) return null;
+  var out = toks.map(function(x){ return x === '|' ? null : parseInt(x, 36); }).filter(function(n){ return n === null || n > 0; });
+  return out.some(function(n){ return n !== null; }) ? out : null;
 }
 /* ---------- «Добавить из чата»: вставить текст сообщения или ссылку ---------- */
 var importModal = document.getElementById('import-modal');
 function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; importModal.classList.add('open'); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
 function closeImport(){ importModal.classList.remove('open'); }
-function guessImportTitle(text){
-  /* название -- ближайшая непустая строка над первой строкой «N. Название песни»
-     (так «Мария:» или «Переслано из...» над сообщением названием не станет) */
-  var lines = text.split(/\r?\n/), firstNum = -1, i;
-  for(i = 0; i < lines.length; i++){ if(/^\s*\d+[.)]\s+\S/.test(lines[i])){ firstNum = i; break; } }
-  var from = firstNum === -1 ? lines.length : firstNum;
-  for(i = from - 1; i >= 0; i--){ if(lines[i].trim()) return lines[i].trim().slice(0, 60); }
+var HDR_LINE = /^\s*[—–-]\s*(.+?)\s*[—–-]\s*$/;
+function importBody(text){
+  var lines = text.split(/\r?\n/), cut = -1, i;
+  for(i = 0; i < lines.length; i++){ if(/^\s*(Чтобы открыть|Код списка)/i.test(lines[i])){ cut = i; break; } }
+  return cut === -1 ? lines : lines.slice(0, cut);
+}
+function guessImportTitle(body){
+  /* название -- ближайшая непустая строка над первой строкой песни/подзаголовка
+     (так «Мария:» над сообщением названием не станет) */
+  var first = body.length, i;
+  for(i = 0; i < body.length; i++){ if(/^\s*\d+[.)]\s+\S/.test(body[i]) || HDR_LINE.test(body[i])){ first = i; break; } }
+  for(i = first - 1; i >= 0; i--){ if(body[i].trim()) return body[i].trim().slice(0, 60); }
   return '';
 }
 function parseImport(text){
+  var body = importBody(text), title = guessImportTitle(body) || 'Список из чата';
+  var names = body.filter(function(ln){ return HDR_LINE.test(ln); }).map(function(ln){ return ln.match(HDR_LINE)[1]; });
   var code = decodeListCode(text);
-  if(code){ return progHash(code, guessImportTitle(text) || 'Список из чата'); }
-  var m = text.match(/#prog=[\d.]*(?:&t=[^\s]*)?/);
+  if(code){
+    var k = 0, items = code.map(function(x){ if(x === null){ var nm = names[k] || ('Раздел ' + (k + 1)); k++; return nm; } return x; });
+    return progHash(items, title);
+  }
+  var m = text.match(/#prog=[\dh.]*(?:&t=[^\s&]*)?(?:&h=[^\s]*)?/);
   if(m) return m[0];
-  /* запасной вариант: сообщение без ссылки -- «название» и строки «12. Название песни» */
-  var lines = text.split(/\r?\n/), title = '', ids = [];
-  lines.forEach(function(ln){
-    var n = ln.match(/^\s*(\d+)[.)]\s+\S/);
-    if(n){ var id = idByNumber[parseInt(n[1], 10)]; if(id && ids.indexOf(id) === -1) ids.push(id); }
-    else if(!title && ln.trim() && !ids.length){ title = ln.trim().slice(0, 60); }
+  /* запасной вариант: сообщение без кода -- строки «12. Название песни» и «— Подзаголовок —» */
+  var items2 = [];
+  body.forEach(function(ln){
+    var n = ln.match(/^\s*(\d+)[.)]\s+\S/), hd = ln.match(HDR_LINE);
+    if(n){ var id = idByNumber[parseInt(n[1], 10)]; if(id) items2.push(id); }
+    else if(hd){ items2.push(hd[1]); }
   });
-  return ids.length ? progHash(ids, title || 'Список из чата') : null;
+  return songCount(items2) ? progHash(items2, title) : null;
 }
 document.getElementById('btn-import').addEventListener('click', openImport);
 document.getElementById('import-cancel').addEventListener('click', closeImport);
