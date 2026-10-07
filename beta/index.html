@@ -3149,7 +3149,42 @@ function parseLinkHash(h){
     return {ids: items, t: str.slice(0, nl).slice(0, 60)};
   }catch(e){ return null; }
 }
-function parseAnyHash(h){ return parseProgHash(h) || parseLinkHash(h); }
+function parseAnyHash(h){ return parseProgHash(h) || parseLinkHash(h) || parseReadableHash(h); }
+/* читаемая ссылка: .../pesennik/#список/Каникулы_день_1/Вторник=1V.1Y/Среда=24
+   (слова -- по-русски, id песен -- короткие коды; пробелы в названиях заменены на «_») */
+var LINK_WORD = 'список';
+function safeDecode(x){ try{ return decodeURIComponent(x); }catch(e){ return x; } }
+function cleanName(x){ return String(x).replace(/[\/=#?&%\s]+/g, '_').replace(/^_+|_+$/g, ''); }
+function readableHash(items, title){
+  var groups = [{name: null, ids: []}];
+  items.forEach(function(x){
+    if(isHdr(x)) groups.push({name: cleanName(x) || 'Раздел', ids: []});
+    else groups[groups.length - 1].ids.push(x.toString(36).toUpperCase());
+  });
+  var parts = [];
+  groups.forEach(function(g){
+    if(g.name === null){ if(g.ids.length) parts.push(g.ids.join('.')); }
+    else parts.push(g.name + '=' + g.ids.join('.'));
+  });
+  return '#' + LINK_WORD + '/' + (cleanName(title) || 'Список') + '/' + parts.join('/');
+}
+function isReadableHash(h){ return safeDecode(h).toLowerCase().indexOf('#' + LINK_WORD + '/') === 0; }
+function parseReadableHash(h){
+  var d = safeDecode(h);
+  if(d.toLowerCase().indexOf('#' + LINK_WORD + '/') !== 0) return null;
+  var segs = d.slice(LINK_WORD.length + 2).split('/');
+  var title = (segs.shift() || '').replace(/_/g, ' ').trim().slice(0, 60);
+  var items = [];
+  segs.forEach(function(seg){
+    if(!seg) return;
+    var eq = seg.indexOf('='), ids;
+    if(eq >= 0){ items.push(seg.slice(0, eq).replace(/_/g, ' ')); ids = seg.slice(eq + 1); } else { ids = seg; }
+    ids.split('.').filter(Boolean).forEach(function(t){ var n = parseInt(t, 36); if(n > 0) items.push(n); });
+  });
+  return items.length ? {ids: items, t: title} : null;
+}
+function isListHash(h){ return h.indexOf('#prog=') === 0 || h.indexOf('#l=') === 0 || isReadableHash(h); }
+
 
 /* значок в шапке: «списки» вместо закладки */
 function updateFavoritesBookmark(){}
@@ -3381,7 +3416,7 @@ function shareProgram(){
     else { out.push(SEARCH_ENTRY_BY_ID[x].number + '. ' + byId[x].title); }
     first = false;
   });
-  var link = location.origin + location.pathname + linkHash(items, title);
+  var link = location.origin + location.pathname + readableHash(items, title);
   var text = title + '\n\n' + out.join('\n') + '\n\n' +
     'Открыть список в приложении «Песенник»:\n' + link + '\n\n' +
     'Если ссылка открылась в браузере: скопируйте её, откройте приложение, нажмите значок «Списки» → «Вставить ссылку» и вставьте.';
@@ -3461,6 +3496,11 @@ function guessImportTitle(body){
 function parseImport(text){
   var body = importBody(text), title = guessImportTitle(body) || 'Список из чата';
   var names = body.filter(function(ln){ return HDR_LINE.test(ln); }).map(function(ln){ return ln.match(HDR_LINE)[1]; });
+  var variants = [text, safeDecode(text)];
+  for(var vi = 0; vi < variants.length; vi++){
+    var rm = variants[vi].match(/#[Сс]писок\/[^\s<>"«»]+/);
+    if(rm){ var cand = rm[0].replace(/[.,;:!?)\]]+$/, ''); if(parseReadableHash(cand)) return cand; }
+  }
   var lm = text.match(/#l=[A-Za-z0-9_-]+/);
   if(lm && parseLinkHash(lm[0])) return lm[0];
   var code = decodeListCode(text);
@@ -3722,7 +3762,7 @@ window.addEventListener('popstate', function(){
   if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
   if(listView.classList.contains('open')){ instantHideList(); }
   var em = h.match(/^#edit=(\w+)$/);
-  if(h.indexOf('#prog=') === 0 || h.indexOf('#l=') === 0){ endPicker(); openProgramFromHash(h, false); return; }
+  if(isListHash(h)){ endPicker(); openProgramFromHash(h, false); return; }
   if(h === '#lists'){ endPicker(); openListsScreen(false); return; }
   if(em){ endPicker(); openEdit(em[1], false); return; }
   closeExtraViews();
@@ -4135,7 +4175,7 @@ document.addEventListener('visibilitychange', function(){
   var lm = h.match(/^#list(.+)$/);
   if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
   var em0 = h.match(/^#edit=(\w+)$/);
-  if(h.indexOf('#prog=') === 0 || h.indexOf('#l=') === 0){ openProgramFromHash(h, false); return; }
+  if(isListHash(h)){ openProgramFromHash(h, false); return; }
   if(h === '#lists'){ openListsScreen(false); return; }
   if(em0){ openEdit(em0[1], false); return; }
 })();
@@ -4143,7 +4183,7 @@ document.addEventListener('visibilitychange', function(){
 /* Тур при первом входе -- после initFromHash, чтобы он лёг поверх
    уже открытого экрана (в т.ч. если открыли по присланной ссылке на
    конкретную песню), а не блокировал переход по ней. */
-if(!store.get('sb_tour_seen', null) && location.hash.indexOf('#prog=') !== 0 && location.hash.indexOf('#l=') !== 0){ showTour(); }
+if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ showTour(); }
 
 /* ------------------------------------------------------------
    SERVICE WORKER
