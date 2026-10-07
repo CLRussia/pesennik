@@ -3274,7 +3274,12 @@ function shareProgram(){
   var title = listTitle(l);
   var url = location.origin + location.pathname + progHash(ids, title);
   var lines = ids.map(function(id){ return SEARCH_ENTRY_BY_ID[id].number + '. ' + byId[id].title; });
-  var text = title + '\n\n' + lines.join('\n') + '\n\nВ приложении «Песенник»: значок «Списки» вверху главной → «Добавить из чата» → вставьте это сообщение.\n\nИли откройте по ссылке:\n' + url;
+  var text = title + '\n\n' + lines.join('\n') + '\n\n' +
+    'Чтобы открыть этот список в приложении «Песенник»:\n' +
+    '1. Скопируйте это сообщение целиком.\n' +
+    '2. Откройте приложение и нажмите значок «Списки» (вверху главной).\n' +
+    '3. Нажмите «Добавить из чата» и вставьте сообщение.\n\n' +
+    'Код списка: ' + encodeListCode(ids);
   if(window.__progShareHook){ window.__progShareHook(text, url); return; }
   if(navigator.share){ navigator.share({title: title, text: text}).catch(function(){}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('Текст со ссылкой скопирован'); }); }
@@ -3318,11 +3323,33 @@ document.getElementById('btn-pv-remove').addEventListener('click', function(){
   openListsScreen();
 });
 
+
+/* код списка: постоянные id в base36 («1V · 1Y · 24») -- не ссылка, чат её не подсвечивает */
+function encodeListCode(ids){ return ids.map(function(n){ return n.toString(36).toUpperCase(); }).join(' \u00b7 '); }
+function decodeListCode(text){
+  var m = text.match(/Код списка[^:\n]*:([^\n]+)/i);
+  if(!m) return null;
+  var toks = m[1].split(/[\s\u00b7.,;:\-\u2013\u2014]+/).filter(Boolean);
+  if(!toks.length || toks.some(function(t){ return !/^[0-9A-Za-z]{1,3}$/.test(t); })) return null;
+  var ids = toks.map(function(x){ return parseInt(x, 36); }).filter(function(n){ return n > 0; });
+  return ids.length ? ids : null;
+}
 /* ---------- «Добавить из чата»: вставить текст сообщения или ссылку ---------- */
 var importModal = document.getElementById('import-modal');
 function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; importModal.classList.add('open'); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
 function closeImport(){ importModal.classList.remove('open'); }
+function guessImportTitle(text){
+  /* название -- ближайшая непустая строка над первой строкой «N. Название песни»
+     (так «Мария:» или «Переслано из...» над сообщением названием не станет) */
+  var lines = text.split(/\r?\n/), firstNum = -1, i;
+  for(i = 0; i < lines.length; i++){ if(/^\s*\d+[.)]\s+\S/.test(lines[i])){ firstNum = i; break; } }
+  var from = firstNum === -1 ? lines.length : firstNum;
+  for(i = from - 1; i >= 0; i--){ if(lines[i].trim()) return lines[i].trim().slice(0, 60); }
+  return '';
+}
 function parseImport(text){
+  var code = decodeListCode(text);
+  if(code){ return progHash(code, guessImportTitle(text) || 'Список из чата'); }
   var m = text.match(/#prog=[\d.]*(?:&t=[^\s]*)?/);
   if(m) return m[0];
   /* запасной вариант: сообщение без ссылки -- «название» и строки «12. Название песни» */
