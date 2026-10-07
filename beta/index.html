@@ -260,7 +260,7 @@ body[data-ls="cards"] .hl-items{gap:10px;}
 .hl-row .hl-count{flex:0 0 auto;color:var(--text-faint);font-family:var(--font-ui);font-size:calc(12.5px * var(--scale-menu));}
 .hl-more{padding:8px 4px;color:var(--accent);font-family:var(--font-ui);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
 .btn-lists-icon svg{width:21px;height:21px;}
-body.ic-1 .ic2{display:none;} body.ic-2 .ic1{display:none;}
+body.ic-1 .ic2,body.ic-1 .ic3{display:none;} body.ic-2 .ic1,body.ic-2 .ic3{display:none;} body.ic-3 .ic1,body.ic-3 .ic2{display:none;}
 .screen-head{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);font-weight:600;padding:22px 4px 8px;}
 #lists-own,#lists-recv{display:flex;flex-direction:column;gap:10px;}
 body.picking #home-lists{display:none;}
@@ -1596,9 +1596,9 @@ input[type="search"]::-webkit-search-decoration{
     <div class="home-title ui-caps">Песенник</div>
     <div class="icon-row-right">
       <button class="icon-btn" id="btn-all-songs" title="Все песни" aria-label="Все песни">
-        <svg viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg>
+        <svg viewBox="0 0 24 24"><text x="11.6" y="9.7" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="11.6" y="19.6" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg>
       </button>
-      <button class="icon-btn" id="btn-favorites" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="13" y2="6.5"/><line x1="4" y1="12" x2="13" y2="12"/><line x1="4" y1="17.5" x2="10" y2="17.5"/><path d="M15 16.8l2.3 2.3 4-4.6"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg></button>
+      <button class="icon-btn" id="btn-favorites" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
     </div>
   </div>
 
@@ -1638,7 +1638,7 @@ input[type="search"]::-webkit-search-decoration{
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="icon-btn-sm" id="btn-favorites-list" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="13" y2="6.5"/><line x1="4" y1="12" x2="13" y2="12"/><line x1="4" y1="17.5" x2="10" y2="17.5"/><path d="M15 16.8l2.3 2.3 4-4.6"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg></button>
+      <button class="icon-btn-sm" id="btn-favorites-list" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
       <button class="icon-btn-sm" id="btn-appearance-list" title="Оформление" aria-label="Оформление">
         <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg>
       </button>
@@ -1687,7 +1687,7 @@ input[type="search"]::-webkit-search-decoration{
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="icon-btn-sm" id="btn-favorites-allsongs" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="13" y2="6.5"/><line x1="4" y1="12" x2="13" y2="12"/><line x1="4" y1="17.5" x2="10" y2="17.5"/><path d="M15 16.8l2.3 2.3 4-4.6"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg></button>
+      <button class="icon-btn-sm" id="btn-favorites-allsongs" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
       <button class="icon-btn-sm" id="btn-appearance-allsongs" title="Оформление" aria-label="Оформление">
         <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg>
       </button>
@@ -1711,7 +1711,7 @@ input[type="search"]::-webkit-search-decoration{
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="icon-btn-sm" id="btn-favorites-song" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="13" y2="6.5"/><line x1="4" y1="12" x2="13" y2="12"/><line x1="4" y1="17.5" x2="10" y2="17.5"/><path d="M15 16.8l2.3 2.3 4-4.6"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg></button>
+      <button class="icon-btn-sm" id="btn-favorites-song" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
       <button class="translation-pill ui-caps" id="btn-translation-pill" type="button" hidden>Перевод</button>
     </div>
     <div class="quick-search-wrap song-quicksearch">
@@ -1913,7 +1913,7 @@ input[type="search"]::-webkit-search-decoration{
         <p>Настроить тему, размер текста и&nbsp;шрифт куплетов.</p>
       </div>
       <div class="info-item">
-        <span class="info-icon"><svg viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg></span>
+        <span class="info-icon"><svg viewBox="0 0 24 24"><text x="11.6" y="9.7" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="11.6" y="19.6" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg></span>
         <p>Открыть список всех песен в&nbsp;алфавитном порядке.</p>
       </div>
       <div class="info-item">
@@ -1921,7 +1921,7 @@ input[type="search"]::-webkit-search-decoration{
         <p>Переписать текст русской песни латиницей.</p>
       </div>
       <div class="info-item info-item-group-end">
-        <span class="info-icon"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="13" y2="6.5"/><line x1="4" y1="12" x2="13" y2="12"/><line x1="4" y1="17.5" x2="10" y2="17.5"/><path d="M15 16.8l2.3 2.3 4-4.6"/></svg></span>
+        <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></span>
         <p>Списки песен: составьте список для&nbsp;встречи и&nbsp;отправьте его ссылкой.</p>
       </div>
     </div>
@@ -3376,7 +3376,7 @@ document.getElementById('import-ok').addEventListener('click', function(){
   var q = new URLSearchParams(location.search);
   document.body.setAttribute('data-lv', q.get('lv') === 'two' ? 'two' : 'one');
   document.body.setAttribute('data-ls', q.get('ls') === 'cards' ? 'cards' : 'rows');
-  document.body.classList.add(q.get('ic') === '2' ? 'ic-2' : 'ic-1');
+  document.body.classList.add(q.get('ic') === '2' ? 'ic-2' : (q.get('ic') === '1' ? 'ic-1' : 'ic-3'));
 })();
 renderHomeLists();
 
