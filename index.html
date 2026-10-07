@@ -3057,7 +3057,7 @@ function openSong(id, pushHash){
   maybeShowChromeHint();
   window.scrollTo(0,0);
   document.querySelector('.song-scroll').scrollTop = 0;
-  if(pushHash !== false){ history.pushState({song:id}, '', '#song'+id); }
+  if(pushHash !== false){ history.pushState({song:id}, '', '#song'+numberById[id]); }
   requestWakeLock();
 }
 function instantHideSong(){ songView.classList.remove('open','visible'); currentId = null; releaseWakeLock(); setTranslationOpen(false); }
@@ -3110,7 +3110,7 @@ document.getElementById('btn-list-back').addEventListener('click', goHome);
 window.addEventListener('popstate', function(){
   var h = location.hash;
   var sm = h.match(/^#song(\d+)$/);
-  if(sm && byId[+sm[1]]){ openSong(+sm[1], false); return; }
+  if(sm && idByNumber[+sm[1]]){ openSong(idByNumber[+sm[1]], false); return; }
   if(songView.classList.contains('open')){ instantHideSong(); }
   var lm = h.match(/^#list(.+)$/);
   if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
@@ -3332,7 +3332,7 @@ songSearchInput.addEventListener('blur', function(){ chromeTimer = setTimeout(hi
 document.getElementById('btn-share').addEventListener('click', function(){
   var song = byId[currentId];
   if(!song) return;
-  var url = location.origin + location.pathname + '#song' + currentId;
+  var url = location.origin + location.pathname + '#song' + numberById[currentId];
   var shareData = { title: song.title, text: 'Песня «'+song.title+'» — Песенник', url: url };
   if(navigator.share){
     navigator.share(shareData).catch(function(){});
@@ -3520,7 +3520,7 @@ document.addEventListener('visibilitychange', function(){
 (function initFromHash(){
   var h = location.hash;
   var m = h.match(/^#song(\d+)$/);
-  if(m && byId[+m[1]]){ openSong(+m[1], false); return; }
+  if(m && idByNumber[+m[1]]){ openSong(idByNumber[+m[1]], false); return; }
   var lm = h.match(/^#list(.+)$/);
   if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
   if(h === '#favorites'){ openFavorites(false); }
