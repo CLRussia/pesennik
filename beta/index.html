@@ -1595,6 +1595,9 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 @media (min-width:720px){ .icon-btn-sm svg{width:24px;height:24px;} }
 #btn-appearance-song,#btn-share{width:44px;min-width:44px;padding:0;}
 .icon-btn svg,.icon-btn-sm svg,.panel-btn svg{stroke-width:1.4;}
+.pv-browser{margin:14px 4px 4px;padding:12px 14px;border:1.5px dashed var(--accent);border-radius:var(--radius-s);}
+.pv-browser p{margin:0 0 10px;font-size:13.5px;color:var(--text-muted);line-height:1.4;}
+.pv-browser .prog-btn{width:100%;}
 </style>
 </head>
 <body>
@@ -1881,6 +1884,10 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
       <div class="pv-title" id="pv-title"></div>
       <div class="pv-meta" id="pv-meta"></div>
     </div>
+    <div class="pv-browser" id="pv-browser" style="display:none">
+      <p>Вы открыли список в браузере. Чтобы он появился в приложении «Песенник»: скопируйте ссылку, откройте приложение, нажмите значок «Списки» → «Вставить ссылку».</p>
+      <button class="prog-btn" id="btn-pv-copy" type="button"><span>Скопировать ссылку</span></button>
+    </div>
     <div id="pv-list"></div>
     <p class="pv-note" id="pv-note"></p>
     <div class="prog-actions"><button class="link-btn ui-caps prog-sublink" id="btn-pv-remove" type="button">Убрать из «Общих списков»</button></div>
@@ -1891,6 +1898,8 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
   <div class="modal-sheet"><div class="modal-sheet-scroll">
     <h2 class="ui-caps">Вставить ссылку</h2>
     <p>Скопируйте ссылку из сообщения или письма и вставьте сюда.</p>
+    <button class="prog-btn primary" id="import-clip" type="button" style="width:100%;margin-bottom:12px"><span>Вставить из буфера</span></button>
+    <p style="margin:0 0 8px;font-size:13px;color:var(--text-faint)">или вставьте вручную:</p>
     <textarea id="import-text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте ссылку"></textarea>
     <p class="import-err" id="import-err"></p>
     <div class="modal-actions">
@@ -3452,10 +3461,18 @@ function openProgramFromHash(h, pushHash){
     item.style.setProperty('--indent', '0px');
     list.appendChild(item);
   });
+  var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  document.getElementById('pv-browser').style.display = (!isStandalone && pushHash === false) ? '' : 'none';
   document.getElementById('pv-note').textContent = missing > 0 ? ('Часть песен (' + missing + ') больше не входит в песенник.') : '';
   openExtra(programView, h, pushHash);
 }
 document.getElementById('btn-program-back').addEventListener('click', goHome);
+document.getElementById('btn-pv-copy').addEventListener('click', function(){
+  var link = location.href;
+  function done(){ showToast('Ссылка скопирована'); }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(done, function(){ showToast('Не удалось скопировать'); }); }
+  else { showToast('Скопируйте адрес из адресной строки'); }
+});
 document.getElementById('btn-pv-remove').addEventListener('click', function(){
   var p = parseAnyHash(currentProgHash || ''); if(!p) return;
   var key = listKey(p.ids, p.t || 'Список');
@@ -3520,14 +3537,22 @@ function parseImport(text){
   return songCount(items2) ? progHash(items2, title) : null;
 }
 document.getElementById('btn-import').addEventListener('click', openImport);
+function importFromText(txt){
+  var h = parseImport(txt || '');
+  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл ссылку на список. Скопируйте ссылку из сообщения целиком.'; return false; }
+  closeImport(); openProgramFromHash(h); return true;
+}
+document.getElementById('import-clip').addEventListener('click', function(){
+  var err = document.getElementById('import-err'); err.textContent = '';
+  if(!navigator.clipboard || !navigator.clipboard.readText){ err.textContent = 'Здесь нельзя вставить автоматически: нажмите и удерживайте в поле ниже и выберите «Вставить».'; return; }
+  navigator.clipboard.readText().then(function(t){
+    document.getElementById('import-text').value = t || '';
+    importFromText(t);
+  }).catch(function(){ err.textContent = 'Нет доступа к буферу: нажмите и удерживайте в поле ниже и выберите «Вставить».'; });
+});
 document.getElementById('import-cancel').addEventListener('click', closeImport);
 importModal.addEventListener('click', function(e){ if(e.target === importModal) closeImport(); });
-document.getElementById('import-ok').addEventListener('click', function(){
-  var h = parseImport(document.getElementById('import-text').value || '');
-  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл ссылку на список. Скопируйте ссылку из сообщения целиком.'; return; }
-  closeImport();
-  openProgramFromHash(h);
-});
+document.getElementById('import-ok').addEventListener('click', function(){ importFromText(document.getElementById('import-text').value || ''); });
 
 /* варианты оформления для сравнения (?lv=one|two&ls=rows|cards&ic=1|2) */
 (function(){
