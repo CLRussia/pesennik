@@ -165,128 +165,6 @@ input{font-family:inherit;color:inherit;}
 @keyframes giussani-shine-double{0%{background-position:100% 0;}50%{background-position:0% 0;}50.01%{background-position:100% 0;}100%{background-position:0% 0;}}
 @keyframes giussani-shine{0%,70%{background-position:100% 0;}100%{background-position:0% 0;}}
 @media (prefers-reduced-motion:reduce){#giussani .q{animation:none;color:var(--text);-webkit-text-fill-color:currentColor;background:none;}}
-
-/* ===== ПРОГРАММА (прототип) ===== */
-.fav-tabs{display:flex;gap:6px;margin-top:12px;padding:3px;background:var(--accent-soft);border-radius:999px;}
-.fav-tab{flex:1;padding:9px 8px;border-radius:999px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:7px;}
-.fav-tab.is-active{background:var(--bg-elevated);color:var(--accent);box-shadow:0 1px 4px rgba(45,74,80,.14);}
-.fav-tab .badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px;letter-spacing:0;display:none;}
-.fav-tab .badge.show{display:inline-block;}
-#program-pane{display:none;}
-#program-pane.show{display:block;}
-.prog-title-wrap{padding:14px 4px 4px;}
-.prog-title-label{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);font-weight:600;padding-bottom:6px;}
-#program-title{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:var(--radius-s);border:1.5px solid var(--border);
-  background:var(--bg-elevated);color:var(--text);font-family:var(--font-lyrics);font-size:calc(17px * var(--scale-menu));}
-#program-title:focus{outline:none;border-color:var(--accent);}
-.prog-count{padding:12px 4px 4px;color:var(--text-faint);font-size:13px;font-family:var(--font-ui);}
-.prog-actions{display:flex;flex-direction:column;gap:10px;padding:14px 4px 6px;}
-.prog-btn{padding:13px 14px;border-radius:999px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.06em;border:1.5px solid var(--accent);color:var(--accent);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;gap:8px;}
-.prog-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;}
-.prog-btn.primary{background:var(--accent);color:#fff;}
-.prog-btn:active{opacity:.85;}
-.prog-btn[disabled]{opacity:.4;pointer-events:none;}
-.prog-sublink{align-self:center;}
-.prog-remove{flex:0 0 auto;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text-faint);border-radius:50%;}
-.prog-remove:active{background:var(--accent-soft);}
-.prog-remove svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
-#recent-block,#appearance-recent-row{display:none !important;}
-/* карточки на главной */
-#program-block{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
-#program-block:empty{display:none;}
-.prog-card{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:var(--radius-m);
-  background:var(--bg-elevated);border:1px solid var(--border);text-align:left;}
-.prog-card:active{background:var(--accent-soft);}
-.prog-card .pc-main{flex:1;min-width:0;}
-.prog-card .pc-label{font-family:var(--font-ui);font-size:calc(11px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;}
-.prog-card .pc-title{font-family:var(--font-lyrics);font-size:calc(17px * var(--scale-menu));color:var(--text);line-height:1.25;padding-top:2px;overflow:hidden;text-overflow:ellipsis;}
-.prog-card .pc-meta{font-size:calc(12.5px * var(--scale-menu));color:var(--text-faint);padding-top:2px;font-family:var(--font-ui);}
-.prog-card svg{width:16px;height:16px;stroke:var(--text-faint);fill:none;stroke-width:2;flex:0 0 auto;}
-/* экран полученной программы */
-#program-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
-  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
-#program-view.open{display:block;}
-#program-view.open.visible{opacity:1;transform:translateY(0);}
-.pv-head{padding:16px 4px 6px;}
-.pv-label{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;}
-.pv-title{font-family:var(--font-lyrics);font-size:calc(22px * var(--scale-menu));line-height:1.25;color:var(--text);padding-top:4px;}
-.pv-meta{color:var(--text-faint);font-size:13px;font-family:var(--font-ui);padding-top:6px;}
-.pv-note{color:var(--text-faint);font-size:13px;font-style:italic;padding:10px 4px 0;}
-/* режим подбора песен */
-#picker-bar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;align-items:center;gap:12px;
-  padding:12px calc(var(--safe-r) + 16px) calc(var(--safe-b) + 12px) calc(var(--safe-l) + 16px);
-  background:var(--bg-header);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);}
-body.picking #picker-bar{display:flex;}
-#picker-bar .pb-text{flex:1;font-family:var(--font-ui);font-size:14px;color:var(--text);}
-#picker-bar .pb-text b{color:var(--accent);}
-#picker-bar .prog-btn{padding:11px 22px;}
-body.picking .nav-fav-btn{display:none;}
-body.picking #allsongs-scroll{padding-bottom:110px;}
-body.picking .nav-item-main::after{content:'';flex:0 0 auto;align-self:center;width:22px;height:22px;box-sizing:border-box;margin-left:auto;
-  border:1.6px solid var(--text-faint);border-radius:50%;}
-body.picking .nav-item.pick-on .nav-item-main{background:var(--accent-soft);}
-body.picking .nav-item.pick-on .nav-item-main::after{border-color:var(--accent);background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/14px no-repeat;}
-
-.picker-tabs{display:none;}
-body.picking .picker-tabs{display:flex;}
-body.picking #picker-favs-wrap{padding-bottom:110px;}
-body.picker-favs-on #az-jump{display:none !important;}
-.shared-list{display:flex;flex-direction:column;gap:10px;padding-top:14px;}
-#shared-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
-  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
-#shared-view.open{display:block;}
-#shared-view.open.visible{opacity:1;transform:translateY(0);}
-
-body.picker-favs-on #az-jump{display:none !important;}
-.prog-btn.danger{border-color:var(--danger);color:var(--danger);}
-#mylists-view,#edit-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
-  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
-#mylists-view.open,#edit-view.open{display:block;}
-#mylists-view.open.visible,#edit-view.open.visible{opacity:1;transform:translateY(0);}
-#recent-block,#appearance-recent-row{display:none !important;}
-/* ===== v4: списки на главной, значок в шапке ===== */
-#home-lists{margin-top:34px;}
-#home-lists:empty{display:none;}
-.hl-group+.hl-group{margin-top:22px;}
-.hl-title{font-size:calc(12.5px * var(--scale-menu));letter-spacing:.08em;color:var(--text-faint);font-family:var(--font-ui);font-weight:600;text-transform:uppercase;padding:0 4px 6px;}
-.hl-items{display:flex;flex-direction:column;}
-body[data-ls="cards"] .hl-items{gap:10px;}
-.hl-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;width:100%;padding:10px 4px;text-align:left;border-radius:8px;
-  font-size:calc(15.5px * var(--scale-menu));color:var(--text);}
-.hl-row:active{background:var(--accent-soft);}
-.hl-row .hl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.hl-row .hl-count{flex:0 0 auto;color:var(--text-faint);font-family:var(--font-ui);font-size:calc(12.5px * var(--scale-menu));}
-.hl-more{padding:8px 4px;color:var(--accent);font-family:var(--font-ui);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
-.btn-lists-icon svg{width:21px;height:21px;}
-body.ic-1 .ic2,body.ic-1 .ic3{display:none;} body.ic-2 .ic1,body.ic-2 .ic3{display:none;} body.ic-3 .ic1,body.ic-3 .ic2{display:none;}
-.screen-head{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);font-weight:600;padding:22px 4px 8px;}
-#lists-own,#lists-recv{display:flex;flex-direction:column;gap:10px;}
-body.picking #home-lists{display:none;}
-body.picking .nav-fav-btn,body.picking .nav-drag-handle{display:none;}
-body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
-.pb-name{display:block;font-size:12px;color:var(--text-faint);}
-#btn-song-fav,.fav-btn-title{display:none !important;}
-#picker-bar .pb-text{line-height:1.25;}
-
-#import-text{width:100%;box-sizing:border-box;min-height:120px;padding:12px 14px;border-radius:var(--radius-s);border:1.5px solid var(--border);
-  background:var(--bg);color:var(--text);font-family:var(--font-lyrics);font-size:15px;line-height:1.4;resize:vertical;}
-#import-text:focus{outline:none;border-color:var(--accent);}
-.import-err{color:var(--danger);font-size:13px;min-height:1.2em;margin:8px 0 0;}
-#lists-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
-  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
-#lists-view.open{display:block;}
-#lists-view.open.visible{opacity:1;transform:translateY(0);}
-
-.hdr-row{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 0 4px;border-top:1px solid var(--border);}
-.hdr-input{flex:1;min-width:0;padding:8px 10px;border:1.5px solid transparent;border-radius:var(--radius-s);background:transparent;color:var(--accent);
-  font-family:var(--font-ui);font-size:calc(14px * var(--scale-menu));font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
-.hdr-input:focus{outline:none;border-color:var(--accent);background:var(--bg-elevated);}
-.hdr-input::placeholder{text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-faint);}
-.hdr-add{flex:0 0 auto;padding:6px 12px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-family:var(--font-ui);
-  font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.hdr-add:active{background:var(--accent-soft);}
 </style>
 <style>
 /* ============================================================
@@ -1588,6 +1466,135 @@ input[type="search"]::-webkit-search-decoration{
   .nav-fav-btn{width:44px;height:44px;}
   .nav-fav-btn svg{width:22px;height:22px;}
 }
+
+/* ===== ПРОГРАММА (прототип) ===== */
+.fav-tabs{display:flex;gap:6px;margin-top:12px;padding:3px;background:var(--accent-soft);border-radius:999px;}
+.fav-tab{flex:1;padding:9px 8px;border-radius:999px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:7px;}
+.fav-tab.is-active{background:var(--bg-elevated);color:var(--accent);box-shadow:0 1px 4px rgba(45,74,80,.14);}
+.fav-tab .badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px;letter-spacing:0;display:none;}
+.fav-tab .badge.show{display:inline-block;}
+#program-pane{display:none;}
+#program-pane.show{display:block;}
+.prog-title-wrap{padding:14px 4px 4px;}
+.prog-title-label{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);font-weight:600;padding-bottom:6px;}
+#program-title{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:var(--radius-s);border:1.5px solid var(--border);
+  background:var(--bg-elevated);color:var(--text);font-family:var(--font-lyrics);font-size:calc(17px * var(--scale-menu));}
+#program-title:focus{outline:none;border-color:var(--accent);}
+.prog-count{padding:12px 4px 4px;color:var(--text-faint);font-size:13px;font-family:var(--font-ui);}
+.prog-actions{display:flex;flex-direction:column;gap:10px;padding:14px 4px 6px;}
+.prog-btn{padding:13px 14px;border-radius:999px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;border:1.5px solid var(--accent);color:var(--accent);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;gap:8px;}
+.prog-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.prog-btn.primary{background:var(--accent);color:#fff;}
+.prog-btn:active{opacity:.85;}
+.prog-btn[disabled]{opacity:.4;pointer-events:none;}
+.prog-sublink{align-self:center;}
+.prog-remove{flex:0 0 auto;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text-faint);border-radius:50%;}
+.prog-remove:active{background:var(--accent-soft);}
+.prog-remove svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
+#recent-block,#appearance-recent-row{display:none !important;}
+/* карточки на главной */
+#program-block{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
+#program-block:empty{display:none;}
+.prog-card{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:var(--radius-m);
+  background:var(--bg-elevated);border:1px solid var(--border);text-align:left;}
+.prog-card:active{background:var(--accent-soft);}
+.prog-card .pc-main{flex:1;min-width:0;}
+.prog-card .pc-label{font-family:var(--font-ui);font-size:calc(11px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;}
+.prog-card .pc-title{font-family:var(--font-lyrics);font-size:calc(17px * var(--scale-menu));color:var(--text);line-height:1.25;padding-top:2px;overflow:hidden;text-overflow:ellipsis;}
+.prog-card .pc-meta{font-size:calc(12.5px * var(--scale-menu));color:var(--text-faint);padding-top:2px;font-family:var(--font-ui);}
+.prog-card svg{width:16px;height:16px;stroke:var(--text-faint);fill:none;stroke-width:2;flex:0 0 auto;}
+/* экран полученной программы */
+#program-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
+  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
+#program-view.open{display:block;}
+#program-view.open.visible{opacity:1;transform:translateY(0);}
+.pv-head{padding:16px 4px 6px;}
+.pv-label{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;}
+.pv-title{font-family:var(--font-lyrics);font-size:calc(22px * var(--scale-menu));line-height:1.25;color:var(--text);padding-top:4px;}
+.pv-meta{color:var(--text-faint);font-size:13px;font-family:var(--font-ui);padding-top:6px;}
+.pv-note{color:var(--text-faint);font-size:13px;font-style:italic;padding:10px 4px 0;}
+/* режим подбора песен */
+#picker-bar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;align-items:center;gap:12px;
+  padding:12px calc(var(--safe-r) + 16px) calc(var(--safe-b) + 12px) calc(var(--safe-l) + 16px);
+  background:var(--bg-header);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);}
+body.picking #picker-bar{display:flex;}
+#picker-bar .pb-text{flex:1;font-family:var(--font-ui);font-size:14px;color:var(--text);}
+#picker-bar .pb-text b{color:var(--accent);}
+#picker-bar .prog-btn{padding:11px 22px;}
+body.picking .nav-fav-btn{display:none;}
+body.picking #allsongs-scroll{padding-bottom:110px;}
+body.picking .nav-item-main::after{content:'';flex:0 0 auto;align-self:center;width:22px;height:22px;box-sizing:border-box;margin-left:auto;
+  border:1.6px solid var(--text-faint);border-radius:50%;}
+body.picking .nav-item.pick-on .nav-item-main{background:var(--accent-soft);}
+body.picking .nav-item.pick-on .nav-item-main::after{border-color:var(--accent);background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/14px no-repeat;}
+
+.picker-tabs{display:none;}
+body.picking .picker-tabs{display:flex;}
+body.picking #picker-favs-wrap{padding-bottom:110px;}
+body.picker-favs-on #az-jump{display:none !important;}
+.shared-list{display:flex;flex-direction:column;gap:10px;padding-top:14px;}
+#shared-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
+  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
+#shared-view.open{display:block;}
+#shared-view.open.visible{opacity:1;transform:translateY(0);}
+
+body.picker-favs-on #az-jump{display:none !important;}
+.prog-btn.danger{border-color:var(--danger);color:var(--danger);}
+#mylists-view,#edit-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
+  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
+#mylists-view.open,#edit-view.open{display:block;}
+#mylists-view.open.visible,#edit-view.open.visible{opacity:1;transform:translateY(0);}
+#recent-block,#appearance-recent-row{display:none !important;}
+/* ===== v4: списки на главной, значок в шапке ===== */
+#home-lists{margin-top:34px;}
+#home-lists:empty{display:none;}
+.hl-group+.hl-group{margin-top:22px;}
+.hl-title{font-size:calc(12.5px * var(--scale-menu));letter-spacing:.08em;color:var(--text-faint);font-family:var(--font-ui);font-weight:600;text-transform:uppercase;padding:0 4px 6px;}
+.hl-items{display:flex;flex-direction:column;}
+body[data-ls="cards"] .hl-items{gap:10px;}
+.hl-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;width:100%;padding:10px 4px;text-align:left;border-radius:8px;
+  font-size:calc(15.5px * var(--scale-menu));color:var(--text);}
+.hl-row:active{background:var(--accent-soft);}
+.hl-row .hl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hl-row .hl-count{flex:0 0 auto;color:var(--text-faint);font-family:var(--font-ui);font-size:calc(12.5px * var(--scale-menu));}
+.hl-more{padding:8px 4px;color:var(--accent);font-family:var(--font-ui);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.btn-lists-icon svg{width:21px;height:21px;}
+body.ic-1 .ic2,body.ic-1 .ic3{display:none;} body.ic-2 .ic1,body.ic-2 .ic3{display:none;} body.ic-3 .ic1,body.ic-3 .ic2{display:none;}
+.screen-head{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);font-weight:600;padding:22px 4px 8px;}
+#lists-own,#lists-recv{display:flex;flex-direction:column;gap:10px;}
+body.picking #home-lists{display:none;}
+body.picking .nav-fav-btn,body.picking .nav-drag-handle{display:none;}
+body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
+.pb-name{display:block;font-size:12px;color:var(--text-faint);}
+#btn-song-fav,.fav-btn-title{display:none !important;}
+#picker-bar .pb-text{line-height:1.25;}
+
+#import-text{width:100%;box-sizing:border-box;min-height:120px;padding:12px 14px;border-radius:var(--radius-s);border:1.5px solid var(--border);
+  background:var(--bg);color:var(--text);font-family:var(--font-lyrics);font-size:15px;line-height:1.4;resize:vertical;}
+#import-text:focus{outline:none;border-color:var(--accent);}
+.import-err{color:var(--danger);font-size:13px;min-height:1.2em;margin:8px 0 0;}
+#lists-view{position:fixed;inset:0;background:var(--bg);z-index:35;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;opacity:0;
+  transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
+#lists-view.open{display:block;}
+#lists-view.open.visible{opacity:1;transform:translateY(0);}
+
+.hdr-row{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 0 4px;border-top:1px solid var(--border);}
+.hdr-input{flex:1;min-width:0;padding:8px 10px;border:1.5px solid transparent;border-radius:var(--radius-s);background:transparent;color:var(--accent);
+  font-family:var(--font-ui);font-size:calc(14px * var(--scale-menu));font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.hdr-input:focus{outline:none;border-color:var(--accent);background:var(--bg-elevated);}
+.hdr-input::placeholder{text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-faint);}
+.hdr-add{flex:0 0 auto;padding:6px 12px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-family:var(--font-ui);
+  font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.hdr-add:active{background:var(--accent-soft);}
+/* значки шапок: чётные размеры (иначе кружок с рамкой 1.5px даёт полпикселя сдвига) и чуть крупнее */
+.icon-btn svg{width:24px;height:24px;}
+.icon-btn-sm svg{width:18px;height:18px;}
+.panel-btn svg{width:20px;height:20px;}
+@media (min-width:720px){ .icon-btn-sm svg{width:24px;height:24px;} }
+#btn-appearance-song,#btn-share{width:44px;min-width:44px;padding:0;}
+.icon-btn svg,.icon-btn-sm svg,.panel-btn svg{stroke-width:1.4;}
 </style>
 </head>
 <body>
@@ -1605,9 +1612,9 @@ input[type="search"]::-webkit-search-decoration{
     <div class="home-title ui-caps">Песенник</div>
     <div class="icon-row-right">
       <button class="icon-btn" id="btn-all-songs" title="Все песни" aria-label="Все песни">
-        <svg viewBox="0 0 24 24"><text x="11.6" y="9.7" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="11.6" y="19.6" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg>
+        <svg viewBox="0 0 24 24"><text x="12.2" y="10.3" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="12.2" y="20.2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg>
       </button>
-      <button class="icon-btn" id="btn-favorites" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
+      <button class="icon-btn" id="btn-favorites" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
     </div>
   </div>
 
@@ -1647,7 +1654,7 @@ input[type="search"]::-webkit-search-decoration{
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="icon-btn-sm" id="btn-favorites-list" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
+      <button class="icon-btn-sm" id="btn-favorites-list" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm" id="btn-appearance-list" title="Оформление" aria-label="Оформление">
         <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg>
       </button>
@@ -1696,7 +1703,7 @@ input[type="search"]::-webkit-search-decoration{
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="icon-btn-sm" id="btn-favorites-allsongs" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
+      <button class="icon-btn-sm" id="btn-favorites-allsongs" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm" id="btn-appearance-allsongs" title="Оформление" aria-label="Оформление">
         <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg>
       </button>
@@ -1720,7 +1727,7 @@ input[type="search"]::-webkit-search-decoration{
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="icon-btn-sm" id="btn-favorites-song" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></button>
+      <button class="icon-btn-sm" id="btn-favorites-song" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="translation-pill ui-caps" id="btn-translation-pill" type="button" hidden>Перевод</button>
     </div>
     <div class="quick-search-wrap song-quicksearch">
@@ -1923,7 +1930,7 @@ input[type="search"]::-webkit-search-decoration{
         <p>Настроить тему, размер текста и&nbsp;шрифт куплетов.</p>
       </div>
       <div class="info-item">
-        <span class="info-icon"><svg viewBox="0 0 24 24"><text x="11.6" y="9.7" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="11.6" y="19.6" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg></span>
+        <span class="info-icon"><svg viewBox="0 0 24 24"><text x="12.2" y="10.3" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="12.2" y="20.2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg></span>
         <p>Открыть список всех песен в&nbsp;алфавитном порядке.</p>
       </div>
       <div class="info-item">
@@ -1931,7 +1938,7 @@ input[type="search"]::-webkit-search-decoration{
         <p>Переписать текст русской песни латиницей.</p>
       </div>
       <div class="info-item info-item-group-end">
-        <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="5.6" cy="7" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="5.6" cy="17" r="1.25" fill="currentColor" stroke="none"/><line x1="10" y1="7" x2="19.5" y2="7"/><line x1="10" y1="12" x2="19.5" y2="12"/><line x1="10" y1="17" x2="19.5" y2="17"/></svg></span>
+        <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></span>
         <p>Списки песен: составьте список для&nbsp;встречи и&nbsp;отправьте его ссылкой.</p>
       </div>
     </div>
