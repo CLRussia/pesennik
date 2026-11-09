@@ -1673,6 +1673,11 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .hdr-input:focus{color:var(--text);}
 .hdr-input{color:var(--text);font-weight:700;font-size:calc(17px * var(--scale-menu));}
 .hdr-input{caret-color:var(--accent);}
+/* нижняя панель списка: «+ Подзаголовок» над кнопками, всё закреплено */
+.edit-bar{flex-direction:column;gap:8px;}
+.edit-bar-row{display:flex;gap:8px;}
+.edit-bar .eb-addhdr{width:100%;margin:0;padding:10px;}
+.edit-bar .prog-btn{flex:1;min-width:0;}
 </style>
 </head>
 <body>
@@ -1934,11 +1939,13 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
     <div class="prog-count" id="prog-count"></div>
     <div id="program-list"></div>
     <p class="empty-note" id="program-empty">Пока нет песен. Нажмите «+ Песни».</p>
-    <button class="eb-addhdr" id="btn-add-header" type="button"><span>+ Подзаголовок</span></button>
   </div>
   <div class="edit-bar">
-    <button class="prog-btn" id="btn-prog-add" type="button"><span>+ Песни</span></button>
-    <button class="prog-btn primary" id="btn-prog-share" type="button"><span>Поделиться</span></button>
+    <button class="eb-addhdr" id="btn-add-header" type="button"><span>+ Подзаголовок</span></button>
+    <div class="edit-bar-row">
+      <button class="prog-btn" id="btn-prog-add" type="button"><span>+ Песни</span></button>
+      <button class="prog-btn primary" id="btn-prog-share" type="button"><span>Поделиться</span></button>
+    </div>
   </div>
 </div>
 
