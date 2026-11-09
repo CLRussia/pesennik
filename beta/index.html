@@ -1636,6 +1636,8 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
   font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
 .sl-all svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .sl-all:active{color:var(--accent);}
+.sl-label{display:flex;align-items:center;justify-content:space-between;}
+.sl-label svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-right:2px;}
 </style>
 </head>
 <body>
@@ -3664,6 +3666,7 @@ function slRow(label, meta, cls, onClick, iconHtml){
   b.addEventListener('click', onClick);
   slBody.appendChild(b); return b;
 }
+var SL_RIGHT = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>', SL_DOWN = '<svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg>';
 function slLabel(text){ var d = document.createElement('div'); d.className = 'sl-label'; d.textContent = text; slBody.appendChild(d); }
 function slBottom(text, onClick){
   var a = document.createElement('div'); a.className = 'modal-actions';
@@ -3680,7 +3683,8 @@ function slMenu(){
 }
 function slAdd(){
   slHead('Добавить в список');
-  slRow('Создать новый', '', 'sl-cap sl-new', slNewList);
+  var nr = slRow('Создать новый', '', 'sl-cap sl-new', slNewList);
+  nr.querySelector('.sl-meta').innerHTML = SL_RIGHT;
   var own = sortedLists();
   if(own.length){
     slLabel('Добавить в существующий');
@@ -3700,11 +3704,12 @@ function slDone(l, row, text){
   slBody.style.pointerEvents = 'none';
   setTimeout(function(){ slClose(); slBody.style.pointerEvents = ''; }, 650);
 }
-function slNewList(e){
+function slNewList(){
   var now = Date.now();
   var l = {id: 'l' + now.toString(36), t: '', ids: [currentId], c: now, u: now};
-  lists.push(l);
-  slDone(l, e.currentTarget, 'Создан');
+  lists.push(l); saveLists(); renderHomeLists(); slClose();
+  openEdit(l.id);
+  setTimeout(function(){ document.getElementById('program-title').focus(); }, 350);
 }
 function slPickList(l, row){
   if(!l.ids.some(isHdr)){
