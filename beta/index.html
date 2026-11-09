@@ -1653,21 +1653,21 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .hdr-done{display:none;flex:0 0 auto;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:var(--accent);color:#fff;border:1.5px solid var(--accent);
   font-family:var(--font-ui);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
 .hdr-done svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
-.hdr-row:focus-within .hdr-done{display:inline-flex;}
-.hdr-row:focus-within .hdr-add{display:none;}
+.hdr-input:focus ~ .hdr-done{display:inline-flex;}
+.hdr-input:focus ~ .hdr-add{display:none;}
 .hdr-done{width:34px;height:34px;padding:0;justify-content:center;}
 .hdr-done svg{width:17px;height:17px;}
 /* строка подзаголовка: «⋮⋮» и «×» ровно под теми же у песен; галочка внутри поля, поле на всю длину */
 .hdr-row{gap:0;}
 .hdr-input{margin-right:6px;}
 .hdr-add{margin-right:6px;}
-.hdr-row:focus-within .hdr-input{padding-right:46px;}
-.hdr-row:focus-within .hdr-done{margin-left:-44px;margin-right:6px;position:relative;z-index:1;}
+.hdr-input:focus{padding-right:46px;}
+.hdr-input:focus ~ .hdr-done{margin-left:-44px;margin-right:6px;position:relative;z-index:1;}
 /* галочка в поле подзаголовка: просто значок, без кнопки-плашки */
 .hdr-done{background:transparent;border:none;color:var(--accent);}
 .hdr-done svg{width:20px;height:20px;stroke-width:2.2;}
 /* пока набирается подзаголовок, значок перетаскивания не нужен */
-.hdr-row:focus-within .nav-drag-handle{display:none;}
+.hdr-input:focus ~ .nav-drag-handle{display:none;}
 /* подзаголовки списка -- как некликабельные подзаголовки в остальном приложении (серый, без капса и бирюзы) */
 .hdr-input{color:var(--text-muted);font-weight:600;font-size:calc(15px * var(--scale-menu));text-transform:none;letter-spacing:normal;}
 .hdr-input:focus{color:var(--text);}
