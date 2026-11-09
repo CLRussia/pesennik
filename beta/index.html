@@ -1703,6 +1703,9 @@ body.selecting #lists-view .prog-actions{display:none;}
 .sel-dot.on svg{opacity:1;}
 .prog-card.selected{background:var(--accent-soft);border-color:var(--accent);}
 body.selecting #lists-view .sel-bar{flex-direction:row;}
+/* название списка в меню -- так же, как на карточке: обычным шрифтом, не капсом */
+#songlist-modal.sl-pop h2.sl-name-h{text-transform:none;letter-spacing:normal;font-family:var(--font-lyrics);font-weight:400;font-size:calc(18px * var(--scale-menu));color:var(--text);line-height:1.25;}
+.lists-hint{text-wrap:balance;}
 </style>
 </head>
 <body>
@@ -1942,7 +1945,7 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
     <div id="lists-own"></div>
     <div class="screen-head" id="lists-recv-head">Общие списки</div>
     <div id="lists-recv"></div>
-    <p class="lists-hint" id="lists-hint">Нажмите и удерживайте список, чтобы удалить или поделиться</p>
+    <p class="lists-hint" id="lists-hint">Нажмите и удерживайте список,<br>чтобы удалить или поделиться</p>
     <p class="empty-note" id="lists-empty">Здесь будут ваши списки песен: для&nbsp;встречи, каникул или&nbsp;мессы. Составьте список и&nbsp;отправьте ссылкой&nbsp;— у получателей он откроется в&nbsp;песеннике. Другие его не&nbsp;увидят. Присланные вам списки тоже появятся здесь.</p>
   </div>
   <div class="edit-bar sel-bar">
@@ -3905,6 +3908,7 @@ var IC_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11"
 var IC_TRASH = '<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>';
 function cardMenuOwn(l, el){
   slHead(listTitle(l));
+  slBody.querySelector('h2').classList.add('sl-name-h');
   slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(l.ids, listTitle(l)); }, IC_SHARE);
   slRow('Дублировать', '', 'sl-cap', function(){ slDup(l.ids, ((l.t || '').trim() ? l.t.trim() : listTitle(l)) + ' (копия)'); }, IC_COPY);
   slRow('Удалить', '', 'sl-cap sl-danger', function(){
@@ -3915,6 +3919,7 @@ function cardMenuOwn(l, el){
 }
 function cardMenuRecv(p, el){
   slHead(p.t || 'Список');
+  slBody.querySelector('h2').classList.add('sl-name-h');
   slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список'); }, IC_SHARE);
   slRow('Сохранить как мой', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список'); }, IC_COPY);
   slRow('Убрать', '', 'sl-cap sl-danger', function(){
