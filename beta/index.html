@@ -1682,6 +1682,10 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 #import-modal .import-err{margin:8px 0 0;}
 #import-modal #import-ok{margin-top:12px;}
 #import-modal #import-text{resize:none;}
+.lists-hint{margin:20px 12px 8px;color:var(--text-faint);font-size:13px;line-height:1.4;font-family:var(--font-ui);text-align:center;}
+.prog-card{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.sl-row.sl-danger .sl-name{color:var(--danger);}
+.sl-row.sl-cap .sl-name{padding-left:0;}
 </style>
 </head>
 <body>
@@ -1921,6 +1925,7 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
     <div id="lists-own"></div>
     <div class="screen-head" id="lists-recv-head">Общие списки</div>
     <div id="lists-recv"></div>
+    <p class="lists-hint" id="lists-hint">Нажмите и удерживайте список, чтобы удалить или поделиться</p>
     <p class="empty-note" id="lists-empty">Здесь будут ваши списки песен: для&nbsp;встречи, каникул или&nbsp;мессы. Составьте список и&nbsp;отправьте ссылкой&nbsp;— у получателей он откроется в&nbsp;песеннике. Другие его не&nbsp;увидят. Присланные вам списки тоже появятся здесь.</p>
   </div>
 </div>
@@ -3390,10 +3395,11 @@ var listsView = document.getElementById('lists-view');
 function renderListsScreen(){
   var a = document.getElementById('lists-own'); a.innerHTML = '';
   var own = sortedLists();
-  own.forEach(function(l){ a.appendChild(homeItem('cards', ownItem(l))); });
+  own.forEach(function(l){ var it = homeItem('cards', ownItem(l)); attachLongPress(it, function(el){ cardMenuOwn(l, el); }); a.appendChild(it); });
   document.getElementById('lists-own-head').style.display = own.length ? '' : 'none';
   var r = document.getElementById('lists-recv'); r.innerHTML = '';
-  programs.forEach(function(p){ var o = recvItem(p, false); o.meta += ' · получен ' + dayMonth(p.at); r.appendChild(homeItem('cards', o)); });
+  programs.forEach(function(p){ var o = recvItem(p, false); o.meta += ' · получен ' + dayMonth(p.at); var it = homeItem('cards', o); attachLongPress(it, function(el){ cardMenuRecv(p, el); }); r.appendChild(it); });
+  document.getElementById('lists-hint').style.display = (own.length || programs.length) ? '' : 'none';
   document.getElementById('lists-recv-head').style.display = programs.length ? '' : 'none';
   document.getElementById('lists-empty').classList.toggle('show', !own.length && !programs.length);
 }
@@ -3803,6 +3809,55 @@ function slPlace(){
   sh.style.cssText = 'top:' + Math.round(r.bottom + 8) + 'px;left:' + Math.round(left) + 'px;width:' + w + 'px;--sl-max:' + Math.max(200, window.innerHeight - r.bottom - 24) + 'px;';
 }
 function openSongListsMenu(){ if(currentId == null) return; slModal.classList.toggle('sl-pop', SL_POP); slAdd(); slPlace(); slModal.classList.add('open'); }
+
+/* ---------- долгое нажатие на карточку списка: меню действий ---------- */
+function attachLongPress(el, fn){
+  var timer = null, sx = 0, sy = 0, fired = false;
+  function cancel(){ clearTimeout(timer); }
+  el.addEventListener('pointerdown', function(e){ fired = false; sx = e.clientX; sy = e.clientY; cancel(); timer = setTimeout(function(){ fired = true; try{ if(navigator.vibrate) navigator.vibrate(15); }catch(_){} fn(el); }, 500); });
+  el.addEventListener('pointermove', function(e){ if(Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) cancel(); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ el.addEventListener(t, cancel); });
+  el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  el.addEventListener('click', function(e){ if(fired){ e.stopImmediatePropagation(); e.preventDefault(); fired = false; } }, true);
+}
+function slPlaceAt(el){
+  var sh = slModal.querySelector('.modal-sheet'), r = el.getBoundingClientRect();
+  var w = Math.min(560, window.innerWidth - 28), left = Math.round((window.innerWidth - w) / 2);
+  sh.style.cssText = 'top:' + Math.round(r.bottom + 8) + 'px;left:' + left + 'px;width:' + w + 'px;--sl-max:' + Math.max(200, window.innerHeight - r.bottom - 24) + 'px;';
+  slModal.classList.add('sl-pop');
+  var h = sh.offsetHeight;
+  if(r.bottom + 8 + h > window.innerHeight - 12){ sh.style.top = Math.max(12, Math.round(r.top - 8 - h)) + 'px'; sh.style.setProperty('--sl-max', Math.max(200, r.top - 20) + 'px'); }
+}
+function slOpenFor(el){ slModal.classList.add('open'); slPlaceAt(el); }
+function slDup(srcIds, title){
+  var now = Date.now();
+  lists.push({id: 'l' + now.toString(36), t: title, ids: srcIds.slice(), c: now, u: now});
+  saveLists(); renderListsScreen(); renderHomeLists(); slClose();
+}
+var IC_SHARE = '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg>';
+var IC_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>';
+var IC_TRASH = '<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>';
+function cardMenuOwn(l, el){
+  slHead(listTitle(l));
+  slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(l.ids, listTitle(l)); }, IC_SHARE);
+  slRow('Дублировать', '', 'sl-cap', function(){ slDup(l.ids, ((l.t || '').trim() ? l.t.trim() : listTitle(l)) + ' (копия)'); }, IC_COPY);
+  slRow('Удалить', '', 'sl-cap sl-danger', function(){
+    slClose();
+    showConfirm('Удалить список «' + listTitle(l) + '»?', function(){ lists = lists.filter(function(x){ return x.id !== l.id; }); saveLists(); renderListsScreen(); renderHomeLists(); });
+  }, IC_TRASH);
+  slOpenFor(el);
+}
+function cardMenuRecv(p, el){
+  slHead(p.t || 'Список');
+  slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список'); }, IC_SHARE);
+  slRow('Сохранить как мой', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список'); }, IC_COPY);
+  slRow('Убрать', '', 'sl-cap sl-danger', function(){
+    var key = listKey(p.ids, p.t || 'Список');
+    programs = programs.filter(function(x){ return x.k !== key; }); store.setJSON('sb_programs', programs);
+    renderListsScreen(); renderHomeLists(); slClose();
+  }, IC_TRASH);
+  slOpenFor(el);
+}
 
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
