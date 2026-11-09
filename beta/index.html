@@ -3580,7 +3580,6 @@ function openProgramFromHash(h, pushHash){
     programs.unshift({k:key, t:title, ids:p.ids, at:Date.now()});
     programs = programs.slice(0, 10);
     store.setJSON('sb_programs', programs);
-    showToast('Список сохранён в «Общих списках»');
     renderHomeLists();
   }
   document.getElementById('pv-title').textContent = title;
@@ -4259,11 +4258,22 @@ document.getElementById('btn-share').addEventListener('click', function(){
     showToast(url);
   }
 });
+/* плашек больше нет: подтверждение показываем на самой нажатой кнопке */
+var lastTapBtn = null;
+document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('button'); if(b) lastTapBtn = b; }, true);
+var CHECK_SVG = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function flashButton(b, text){
+  if(!b || b.getAttribute('data-flash')) return;
+  b.setAttribute('data-flash', '1');
+  var label = b.classList.contains('prog-btn') ? b.querySelector('span') : null, old;
+  if(label){ old = label.textContent; label.textContent = text; }
+  else { old = b.innerHTML; b.innerHTML = CHECK_SVG; }
+  setTimeout(function(){ if(label){ label.textContent = old; } else { b.innerHTML = old; } b.removeAttribute('data-flash'); }, 1600);
+}
 function showToast(msg){
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  if(/^Текст скопирован/.test(msg)){ flashButton(lastTapBtn, '\u2713 Вставьте в чат'); return; }
+  if(/^Ссылка скопирована/.test(msg)){ flashButton(lastTapBtn, '\u2713 Ссылка скопирована'); return; }
+  if(/^(Не удалось скопировать|Скопируйте адрес)/.test(msg)){ flashButton(lastTapBtn, 'Скопируйте адрес из строки браузера'); return; }
 }
 
 /* ------------------------------------------------------------
