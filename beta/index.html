@@ -1598,6 +1598,44 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .pv-browser{margin:14px 4px 4px;padding:12px 14px;border:1.5px dashed var(--accent);border-radius:var(--radius-s);}
 .pv-browser p{margin:0 0 10px;font-size:13.5px;color:var(--text-muted);line-height:1.4;}
 .pv-browser .prog-btn{width:100%;}
+/* меню «Списки» на экране песни */
+#songlist-modal .modal-sheet-scroll{padding-bottom:calc(var(--safe-b) + 20px);}
+.sl-sub{margin:-4px 0 14px !important;color:var(--text-muted);font-style:italic;font-family:var(--font-lyrics);font-size:15px !important;line-height:1.35 !important;}
+.sl-label{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);font-weight:600;padding:16px 4px 6px;}
+.sl-row{display:flex;align-items:center;gap:12px;width:100%;padding:13px 6px;text-align:left;border-radius:10px;color:var(--text);font-size:calc(16px * var(--scale-menu));}
+.sl-row:active{background:var(--accent-soft);}
+.sl-row .sl-ic{flex:0 0 auto;width:22px;height:22px;color:var(--accent);display:flex;}
+.sl-row .sl-ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;}
+.sl-row .sl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sl-row .sl-meta{flex:0 0 auto;color:var(--text-faint);font-family:var(--font-ui);font-size:calc(12.5px * var(--scale-menu));}
+.sl-row.sl-new .sl-name{color:var(--accent);font-weight:600;}
+.sl-row.sl-has .sl-name{color:var(--text-muted);}
+.sl-row.sl-has .sl-meta{color:var(--accent);}
+.sl-row.sl-last .sl-name{font-weight:600;}
+#songlist-modal.sl-pop{align-items:flex-start;justify-content:flex-start;background:rgba(0,0,0,.14);}
+#songlist-modal.sl-pop .modal-sheet{position:absolute;border-radius:18px;max-width:none;max-height:var(--sl-max,70vh);}
+#songlist-modal.sl-pop .modal-sheet-scroll{max-height:var(--sl-max,70vh);padding:18px 14px 12px;}
+#songlist-modal.sl-pop h2{font-size:13px;}
+#songlist-modal.sl-pop .sl-sub{font-size:14px !important;margin-bottom:8px !important;}
+#songlist-modal.sl-pop .sl-row{padding:11px 6px;}
+#songlist-modal.sl-pop .modal-actions{margin-top:10px;}
+#songlist-modal.sl-pop .modal-btn{padding:10px;}
+.sl-row.sl-ok{background:var(--accent-soft);}
+.sl-row.sl-ok .sl-meta{color:var(--accent);font-weight:700;}
+.sl-h{display:flex;align-items:center;gap:6px;}
+.sl-back{flex:0 0 auto;width:34px;height:34px;margin:-8px 0 -8px -10px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);}
+.sl-back:active{background:var(--accent-soft);}
+.sl-back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sl-label,.sl-row.sl-cap .sl-name{font-family:var(--font-ui);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--accent);}
+.sl-label{padding:16px 6px 6px;}
+.sl-row.sl-cap{padding-left:6px;}
+.sl-row.sl-new .sl-name{font-weight:700;}
+.sl-row.sl-new .sl-meta svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;display:block;}
+.sl-row.sl-has .sl-name{color:var(--text);}
+.sl-all{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:10px;padding:13px 6px 4px;border-top:1px solid var(--border);
+  font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+.sl-all svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sl-all:active{color:var(--accent);}
 </style>
 </head>
 <body>
@@ -1908,6 +1946,10 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
       <button class="modal-btn primary ui-caps" id="import-ok" type="button">Добавить</button>
     </div>
   </div></div>
+</div>
+
+<div class="modal-overlay" id="songlist-modal">
+  <div class="modal-sheet"><div class="modal-sheet-scroll" id="sl-body"></div></div>
 </div>
 
 <div id="picker-bar">
@@ -2759,7 +2801,7 @@ function openFavorites(pushHash){
 function instantHideFavorites(){ favoritesView.classList.remove('open','visible'); }
 document.getElementById('btn-favorites').addEventListener('click', function(){ openFavorites(); });
 document.getElementById('btn-favorites-list').addEventListener('click', function(){ openFavorites(); });
-document.getElementById('btn-favorites-song').addEventListener('click', function(){ openFavorites(); });
+document.getElementById('btn-favorites-song').addEventListener('click', function(){ openSongListsMenu(); });
 document.getElementById('btn-favorites-allsongs').addEventListener('click', function(){ openFavorites(); });
 document.getElementById('btn-favorites-back').addEventListener('click', goHome);
 /* "Очистить всё" -- быстрое удаление всей коллекции избранного разом,
@@ -3599,6 +3641,105 @@ document.getElementById('import-ok').addEventListener('click', function(){ impor
   document.body.classList.add(q.get('ic') === '2' ? 'ic-2' : (q.get('ic') === '1' ? 'ic-1' : 'ic-3'));
 })();
 renderHomeLists();
+
+/* ---------- кнопка «Списки» на экране песни: меню «Добавить песню в список / Показать списки» ---------- */
+var slModal = document.getElementById('songlist-modal'), slBody = document.getElementById('sl-body');
+function slClose(){ slModal.classList.remove('open'); }
+function slSongTitle(){ var t = document.getElementById('song-title'); return t ? t.textContent : ''; }
+function slHead(title, sub, backFn){
+  slBody.innerHTML = '';
+  var h = document.createElement('h2'); h.className = 'ui-caps sl-h';
+  if(backFn){
+    var bk = document.createElement('button'); bk.type = 'button'; bk.className = 'sl-back'; bk.setAttribute('aria-label', 'Назад');
+    bk.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'; bk.addEventListener('click', backFn); h.appendChild(bk);
+  }
+  var tx = document.createElement('span'); tx.textContent = title; h.appendChild(tx); slBody.appendChild(h);
+  if(sub){ var p = document.createElement('p'); p.className = 'sl-sub'; p.textContent = sub; slBody.appendChild(p); }
+}
+function slRow(label, meta, cls, onClick, iconHtml){
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'sl-row' + (cls ? ' ' + cls : '');
+  b.innerHTML = (iconHtml ? '<span class="sl-ic">' + iconHtml + '</span>' : '') + '<span class="sl-name"></span><span class="sl-meta"></span>';
+  b.querySelector('.sl-name').textContent = label;
+  b.querySelector('.sl-meta').textContent = meta || '';
+  b.addEventListener('click', onClick);
+  slBody.appendChild(b); return b;
+}
+function slLabel(text){ var d = document.createElement('div'); d.className = 'sl-label'; d.textContent = text; slBody.appendChild(d); }
+function slBottom(text, onClick){
+  var a = document.createElement('div'); a.className = 'modal-actions';
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'modal-btn ui-caps'; b.textContent = text;
+  b.addEventListener('click', onClick); a.appendChild(b); slBody.appendChild(a);
+}
+var SL_PLUS = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+var SL_LIST = '<svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg>';
+function slMenu(){
+  slHead('Списки');
+  slRow('Добавить песню в список', '', '', slAdd, SL_PLUS);
+  slRow('Показать списки', '', '', function(){ slClose(); openListsScreen(); }, SL_LIST);
+  if(!SL_POP) slBottom('Закрыть', slClose);
+}
+function slAdd(){
+  slHead('Добавить в список');
+  slRow('Создать новый', '', 'sl-cap sl-new', slNewList);
+  var own = sortedLists();
+  if(own.length){
+    slLabel('Добавить в существующий');
+    own.forEach(function(l){
+      var has = l.ids.indexOf(currentId) !== -1;
+      slRow(listTitle(l), has ? '✓ уже в списке' : songsWord(songCount(l.ids)), has ? 'sl-has' : '', function(e){ slPickList(l, e.currentTarget); });
+    });
+  }
+  var all = document.createElement('button'); all.type = 'button'; all.className = 'sl-all';
+  all.innerHTML = '<span>Все списки</span><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+  all.addEventListener('click', function(){ slClose(); openListsScreen(); });
+  slBody.appendChild(all);
+}
+function slDone(l, row, text){
+  l.u = Date.now(); saveLists(); renderHomeLists();
+  row.classList.add('sl-ok'); row.querySelector('.sl-meta').textContent = '✓ ' + text;
+  slBody.style.pointerEvents = 'none';
+  setTimeout(function(){ slClose(); slBody.style.pointerEvents = ''; }, 650);
+}
+function slNewList(e){
+  var now = Date.now();
+  var l = {id: 'l' + now.toString(36), t: '', ids: [currentId], c: now, u: now};
+  lists.push(l);
+  slDone(l, e.currentTarget, 'Создан');
+}
+function slPickList(l, row){
+  if(!l.ids.some(isHdr)){
+    if(l.ids.indexOf(currentId) !== -1) return;
+    l.ids.push(currentId); slDone(l, row, 'Добавлено'); return;
+  }
+  slSections(l);
+}
+function slSections(l){
+  slHead('В какой раздел?', listTitle(l), slAdd);
+  var opts = [];
+  if(!isHdr(l.ids[0]) && l.ids.length) opts.push(-1);
+  l.ids.forEach(function(x, i){ if(isHdr(x)) opts.push(i); });
+  opts.forEach(function(hi, k){
+    var r = sectionRange(l.ids, hi), has = l.ids.slice(r[0], r[1]).indexOf(currentId) !== -1;
+    var name = hi === -1 ? 'Без раздела' : (l.ids[hi] || 'Без названия');
+    var n = l.ids.slice(r[0], r[1]).filter(function(x){ return !isHdr(x); }).length;
+    slRow(name, has ? '✓ уже здесь' : songsWord(n), (k === opts.length - 1 && !has ? 'sl-last' : '') + (has ? ' sl-has' : ''), function(e){
+      if(has) return;
+      var rr = sectionRange(l.ids, hi); l.ids.splice(rr[1], 0, currentId);
+      slDone(l, e.currentTarget, 'Добавлено');
+    });
+  });
+}
+slModal.addEventListener('click', function(e){ if(e.target === slModal) slClose(); });
+var SL_POP = !/[?&]sl=sheet/.test(location.search);
+function slPlace(){
+  var sh = slModal.querySelector('.modal-sheet');
+  if(!SL_POP){ sh.style.cssText = ''; return; }
+  var r = document.getElementById('btn-favorites-song').getBoundingClientRect();
+  var w = Math.min(560, window.innerWidth - 28);
+  var left = Math.round((window.innerWidth - w) / 2);
+  sh.style.cssText = 'top:' + Math.round(r.bottom + 8) + 'px;left:' + Math.round(left) + 'px;width:' + w + 'px;--sl-max:' + Math.max(200, window.innerHeight - r.bottom - 24) + 'px;';
+}
+function openSongListsMenu(){ if(currentId == null) return; slModal.classList.toggle('sl-pop', SL_POP); slAdd(); slPlace(); slModal.classList.add('open'); }
 
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
