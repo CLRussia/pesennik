@@ -1712,22 +1712,13 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
 .translit-pill.is-on{background:var(--accent);color:#fff;}
 @media (min-width:720px){ #btn-appearance-song,#btn-share{width:46px;min-width:46px;height:46px;} }
 /* узкие экраны: «назад» -- только стрелка в кружке, чтобы всё поместилось в шапку */
-@media (max-width:389px){
-  .song-topbar-row #btn-back{width:34px;height:34px;padding:0;justify-content:center;gap:0;}
-  .song-topbar-row #btn-back span{display:none;}
-}
 .prog-remove svg{width:16px;height:16px;}
 #btn-share svg,#btn-pv-share svg{transform:translateX(-0.55px);}
 /* экран песни: кнопки в шапке 40 px (удобнее пальцу), «назад» -- стрелка, пока экран уже 430 px */
 #song-view .song-topbar-row .icon-btn-sm{width:40px;height:40px;}
 #song-view .song-topbar-row .icon-btn-sm svg{width:20px;height:20px;}
 #song-view .song-topbar-row #btn-appearance-song,#song-view .song-topbar-row #btn-share{width:40px;min-width:40px;height:40px;}
-#song-view .song-topbar-row #btn-back{height:40px;}
 #song-view .song-topbar-row .translation-pill,#song-view .song-topbar-row .translit-pill{height:32px;}
-@media (max-width:429px){
-  #song-view .song-topbar-row #btn-back{width:40px;height:40px;padding:0;justify-content:center;gap:0;}
-  #song-view .song-topbar-row #btn-back span{display:none;}
-}
 /* корзина в редакторе и «Поделиться» на полученном списке -- тоже 40 px */
 #edit-view .eb-del,#program-view #btn-pv-share{width:40px;height:40px;}
 #edit-view .eb-del svg,#program-view #btn-pv-share svg{width:20px;height:20px;}
@@ -1741,14 +1732,67 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
   #song-view .song-topbar-row .icon-btn-sm,
   #song-view .song-topbar-row #btn-appearance-song,#song-view .song-topbar-row #btn-share{width:44px;min-width:44px;height:44px;}
   #song-view .song-topbar-row .icon-btn-sm svg{width:22px;height:22px;}
-  #song-view .song-topbar-row #btn-back{height:44px;}
   #song-view .song-topbar-row .translation-pill,#song-view .song-topbar-row .translit-pill{height:34px;}
   #edit-view .eb-del,#program-view #btn-pv-share,#program-view #btn-pv-remove{width:44px;height:44px;}
   #edit-view .eb-del svg,#program-view #btn-pv-share svg,#program-view #btn-pv-remove svg{width:22px;height:22px;}
 }
-@media (min-width:360px) and (max-width:429px){
-  #song-view .song-topbar-row #btn-back{width:44px;height:44px;}
+
+/* тур: слайды «Кнопки песни» и «Списки» */
+.tour-lists{display:flex;flex-direction:column;gap:8px;width:220px;}
+.tour-lists i{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg-elevated);font-style:normal;font-family:var(--font-ui);font-weight:600;font-size:12.5px;color:var(--text-muted);}
+.tour-lists i:nth-child(2){animation:tour-list-pick 4.5s ease-in-out infinite;}
+.tour-lists i:nth-child(2)::after{content:"\2713";margin-left:auto;color:var(--accent);font-weight:800;opacity:0;animation:tour-list-check 4.5s ease-in-out infinite;}
+@keyframes tour-list-pick{0%,25%,100%{border-color:var(--border);background:var(--bg-elevated);}40%,80%{border-color:var(--accent);background:var(--accent-soft);}}
+@keyframes tour-list-check{0%,35%,100%{opacity:0;}45%,80%{opacity:1;}}
+.tour-az-wrap{display:flex;align-items:center;gap:18px;}
+.tour-az-btn{flex:0 0 auto;width:44px;height:44px;border:1.5px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);background:var(--bg-elevated);}
+.tour-az-btn svg{width:24px;height:24px;}
+
+/* тур, слайд «Поиск»: тап -> появляется строка -> печатается слово (цикл 6 с) */
+.tour-sdemo{position:relative;width:230px;height:104px;border:1.5px solid var(--border);border-radius:18px;overflow:hidden;background:var(--bg);}
+.tour-sdemo-lines{position:absolute;left:18px;right:18px;top:40px;display:flex;flex-direction:column;gap:9px;}
+.tour-sdemo-lines i{display:block;height:7px;border-radius:4px;background:var(--border);}
+.tour-sdemo-lines i.s{width:60%;}
+.tour-sdemo-ripple{position:absolute;left:50%;top:66px;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:tour-sd-ripple 6s ease-out infinite;}
+.tour-sdemo-dot{position:absolute;left:50%;top:66px;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--accent);opacity:0;animation:tour-sd-dot 6s ease-in-out infinite;}
+.tour-sdemo-pill{position:absolute;left:12px;right:12px;top:9px;padding:6px 12px;font-size:13px;opacity:0;animation:tour-sd-pill 6s ease-in-out infinite;}
+.tour-sdemo .tour-typewriter{animation:tour-sd-type 6s steps(1) infinite,tour-caret .6s steps(1) infinite;}
+@keyframes tour-sd-ripple{0%,6%{transform:scale(.4);opacity:0;}8%{opacity:.9;}22%,100%{transform:scale(2.8);opacity:0;}}
+@keyframes tour-sd-dot{0%,5%{opacity:0;}8%,16%{opacity:1;}20%,100%{opacity:0;}}
+@keyframes tour-sd-pill{0%,20%{opacity:0;transform:translateY(-8px);}30%,94%{opacity:1;transform:none;}100%{opacity:0;transform:translateY(-8px);}}
+@keyframes tour-sd-type{0%,34%{width:0;animation-timing-function:steps(8,end);}70%,94%{width:8ch;}100%{width:0;}}
+
+/* «На главную» -- значок «домой» (кнопка ведёт именно на главную, свайп -- на предыдущий экран);
+   кнопки шапок 40 px, от 360 px -- 44 px; порядок: домой, «Оформление», «Списки» */
+.home-btn svg{stroke-linejoin:round;stroke-linecap:round;}
+.list-topbar-row .icon-btn-sm,.song-topbar-row .icon-btn-sm{width:40px;height:40px;}
+.list-topbar-row .icon-btn-sm svg,.song-topbar-row .icon-btn-sm svg{width:20px;height:20px;}
+#edit-view .back-btn{height:40px;}
+@media (min-width:360px){
+  .list-topbar-row .icon-btn-sm,.song-topbar-row .icon-btn-sm{width:44px;height:44px;}
+  .list-topbar-row .icon-btn-sm svg,.song-topbar-row .icon-btn-sm svg{width:22px;height:22px;}
+  #edit-view .back-btn{height:44px;}
 }
+.home-btn svg{transform:translateY(-0.6px);}
+input[type="search"]::placeholder{text-overflow:ellipsis;}
+
+/* ===== единые стили по результатам аудита (2026-11-09) ===== */
+/* 1) подписи разделов -- везде как «МОИ СПИСКИ»: 11.5px / 600 / капс / серый (бирюзовый -- только у кликабельного) */
+.hl-title,.pv-label{font-size:11.5px;font-weight:600;letter-spacing:.08em;color:var(--text-faint);}
+/* 2) название списка -- везде обычным шрифтом с засечками, как на карточке */
+#songlist-modal.sl-pop h2.sl-name-h{font-size:calc(17px * var(--scale-menu));}
+.sl-sub{font-style:normal;font-size:calc(14.5px * var(--scale-menu)) !important;}
+.hl-row .hl-name,.sl-row:not(.sl-cap) .sl-name{font-size:calc(15.5px * var(--scale-menu));}
+/* 3) подзаголовок раздела в полученном списке -- как в редакторе */
+#pv-list .nav-sub{font-size:calc(17px * var(--scale-menu));font-weight:700;color:var(--text);}
+/* 4) подписи на кнопках -- один размер */
+.prog-btn,.edit-bar .prog-btn,.sel-bar .prog-btn{font-size:12px;letter-spacing:.06em;}
+.hdr-add{font-size:12px;letter-spacing:.06em;}
+/* 5) мелкий серый текст -- один размер */
+.prog-count,.pv-meta,.lists-hint,.pb-name,.pc-meta,.hl-count,.sl-meta{font-size:calc(12.5px * var(--scale-menu));}
+/* 6) выделение в панели выбора -- не бирюзовым (это не кнопка) */
+#picker-bar .pb-text b{color:var(--text);}
+#btn-share svg,#btn-pv-share svg{transform:translateX(-0.45px) scale(.85);}
 </style>
 </head>
 <body>
@@ -2035,7 +2079,7 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
       <button class="icon-btn-sm" id="btn-pv-share" title="Поделиться" aria-label="Поделиться">
         <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg>
       </button>
-      <button class="icon-btn-sm eb-del" id="btn-pv-remove" type="button" title="Убрать из «Общих списков»" aria-label="Убрать из «Общих списков»"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button>
+      <button class="icon-btn-sm eb-del" id="btn-pv-remove" type="button" title="Удалить список" aria-label="Удалить список"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button>
     </div>
   </div>
   <div class="list-scroll">
@@ -2099,15 +2143,19 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
         <p>Открыть список всех песен в&nbsp;алфавитном порядке.</p>
       </div>
       <div class="info-item">
-        <span class="info-icon info-icon-text">Abc</span>
+        <span class="info-icon info-icon-text">ABC</span>
         <p>Переписать текст русской песни латиницей.</p>
       </div>
-      <div class="info-item info-item-group-end">
+      <div class="info-item">
         <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></span>
-        <p>Списки песен: составьте список для&nbsp;встречи и&nbsp;отправьте его ссылкой.</p>
+        <p>Составьте список для&nbsp;встречи и&nbsp;отправьте его ссылкой, чтобы друзья могли сохранить его в&nbsp;своем приложении.</p>
+      </div>
+      <div class="info-item info-item-group-end">
+        <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg></span>
+        <p>Когда вы&nbsp;делитесь песней или&nbsp;списком, человек может заодно скачать и&nbsp;все приложение.</p>
       </div>
     </div>
-    <p>Чтобы&nbsp;песенник работал как&nbsp;настоящее приложение, сохраните его через&nbsp;системное меню:</p>
+    <p>Чтобы&nbsp;песенник работал<br>как&nbsp;настоящее приложение,<br>сохраните его<br>через&nbsp;системное меню:</p>
     <p class="info-steps-label">На&nbsp;iPhone или&nbsp;iPad:</p>
     <ol class="info-steps">
       <li>Откройте ссылку в&nbsp;Safari (именно в&nbsp;Safari, не&nbsp;в&nbsp;другом браузере).</li>
@@ -2131,7 +2179,7 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
 <div class="modal-overlay" id="install-notice-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
     <h2 class="ui-caps">Важная информация!</h2>
-    <p>Чтобы&nbsp;песенник работал как&nbsp;настоящее приложение, сохраните его через&nbsp;системное меню:</p>
+    <p>Чтобы&nbsp;песенник работал<br>как&nbsp;настоящее приложение,<br>сохраните его<br>через&nbsp;системное меню:</p>
     <p class="info-steps-label">На&nbsp;iPhone или&nbsp;iPad:</p>
     <ol class="info-steps">
       <li>Откройте ссылку в&nbsp;Safari (именно в&nbsp;Safari, не&nbsp;в&nbsp;другом браузере).</li>
@@ -2167,18 +2215,13 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
     <div class="tour-track" id="tour-track">
 
       <div class="tour-slide">
-        <div class="tour-stage">
-          <div class="tour-pill">
-            <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.5" y2="15.5"/></svg>
-            <span class="tour-typewriter">Аллилуйя</span>
-          </div>
-        </div>
+        <div class="tour-stage"><div class="tour-sdemo"><div class="tour-sdemo-lines"><i></i><i></i><i class="s"></i></div><div class="tour-sdemo-ripple"></div><div class="tour-sdemo-dot"></div><div class="tour-pill tour-sdemo-pill"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.5" y2="15.5"/></svg><span class="tour-typewriter">Аллилуйя</span></div></div></div>
         <h2 class="ui-caps">Поиск</h2>
-        <p>Ищите песню по&nbsp;названию, автору, номеру или&nbsp;словам&nbsp;— с&nbsp;любого экрана.</p>
+        <p>Ищите песню по&nbsp;названию, автору, номеру или&nbsp;словам&nbsp;— с&nbsp;любого экрана.<br>Для вызова строки на&nbsp;экране песни тапните по&nbsp;нему.</p>
       </div>
 
       <div class="tour-slide">
-        <div class="tour-stage">
+        <div class="tour-stage"><div class="tour-az-wrap"><span class="tour-az-btn"><svg viewBox="0 0 24 24"><text x="12.2" y="10.3" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">А–Я</text><text x="12.2" y="20.2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="9.2" font-weight="800" fill="currentColor" stroke="none" letter-spacing="-0.2">A–Z</text></svg></span>
           <div class="tour-az">
             <div class="tour-az-rows">
               <div class="tour-az-row"></div>
@@ -2187,7 +2230,7 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
             </div>
             <div class="tour-az-strip"><span>А</span><span>М</span><span>Р</span><span>Х</span><span>Я</span></div>
           </div>
-        </div>
+        </div></div>
         <h2 class="ui-caps">Все песни</h2>
         <p>Вообще все песни по&nbsp;алфавиту. Проведите пальцем по&nbsp;буквам сбоку, чтобы&nbsp;сразу попасть в&nbsp;нужное место.</p>
       </div>
@@ -2201,31 +2244,13 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
           </div>
         </div>
         <h2 class="ui-caps">Оформление</h2>
-        <p>Настраивайте тему и&nbsp;размер текста на&nbsp;главной странице и&nbsp;в&nbsp;разделах. Этот значок находится в&nbsp;шапке на&nbsp;любом экране.</p>
+        <p>Настраивайте тему, размер текста и&nbsp;шрифт. Значок «Оформление» есть в&nbsp;шапке главной страницы и&nbsp;на&nbsp;экране песни.</p>
       </div>
 
       <div class="tour-slide">
-        <div class="tour-stage">
-          <div class="tour-tap">
-            <div class="tour-tap-panel-top"></div>
-            <div class="tour-tap-ripple"></div>
-            <div class="tour-tap-dot"></div>
-            <div class="tour-tap-panel"></div>
-          </div>
-        </div>
-        <h2 class="ui-caps">Коснитесь экрана</h2>
-        <p>На&nbsp;странице песни одиночный быстрый тап в&nbsp;любом месте открывает и&nbsp;прячет панель навигации и&nbsp;настроек.</p>
-      </div>
-
-      <div class="tour-slide">
-        <div class="tour-stage">
-          <div class="tour-fontswap">
-            <div class="font-card is-active" id="tour-font-a" style="font-family:'Literata',serif;">Literata</div>
-            <div class="font-card is-active" id="tour-font-b" style="font-family:'Nunito',sans-serif;">Nunito</div>
-          </div>
-        </div>
-        <h2 class="ui-caps">Стиль песни</h2>
-        <p>Нажмите на&nbsp;значок «Оформление» на&nbsp;экране песни и&nbsp;выберите шрифт или&nbsp;измените его размер.</p>
+        <div class="tour-stage"><div class="tour-lists"><i>Каникулы, день 1</i><i>Встреча в&nbsp;пятницу</i><i>Для детей</i></div></div>
+        <h2 class="ui-caps">Списки</h2>
+        <p>Соберите песни для&nbsp;встречи или&nbsp;даже каникул в&nbsp;одном месте и&nbsp;отправьте их&nbsp;всем участникам.</p>
       </div>
 
       <div class="tour-slide">
@@ -2247,8 +2272,8 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
             <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
           </div>
         </div>
-        <h2 class="ui-caps">Назад&nbsp;— стрелкой или&nbsp;свайпом</h2>
-        <p>Возвращайтесь на&nbsp;предыдущий экран свайпом от&nbsp;края экрана, стрелкой или&nbsp;системной кнопкой навигации вашего устройства.</p>
+        <h2 class="ui-caps">Назад&nbsp;— свайпом</h2>
+        <p>Возвращайтесь на&nbsp;предыдущий экран свайпом от&nbsp;края экрана или&nbsp;системной кнопкой навигации вашего устройства. Значок «домой» в&nbsp;шапке ведёт сразу на&nbsp;главную.</p>
       </div>
 
       <div class="tour-slide">
@@ -3725,7 +3750,7 @@ document.getElementById('btn-pv-copy').addEventListener('click', function(){
 document.getElementById('btn-pv-remove').addEventListener('click', function(){
   var p = parseAnyHash(currentProgHash || ''); if(!p) return;
   var key = listKey(p.ids, p.t || 'Список');
-  showConfirm('Убрать список «' + (p.t || 'Список') + '» из «Общих списков»?', function(){
+  showConfirm('Удалить список «' + (p.t || 'Список') + '»?', function(){
     programs = programs.filter(function(x){ return x.k !== key; });
     store.setJSON('sb_programs', programs);
     openListsScreen();
@@ -3967,7 +3992,7 @@ function cardMenuRecv(p, el){
   slBody.querySelector('h2').classList.add('sl-name-h');
   slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список'); }, IC_SHARE);
   slRow('Сохранить как мой', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список'); }, IC_COPY);
-  slRow('Убрать', '', 'sl-cap sl-danger', function(){
+  slRow('Удалить', '', 'sl-cap sl-danger', function(){
     var key = listKey(p.ids, p.t || 'Список');
     programs = programs.filter(function(x){ return x.k !== key; }); store.setJSON('sb_programs', programs);
     renderListsScreen(); renderHomeLists(); slClose();
@@ -3984,6 +4009,34 @@ function cardMenuRecv(p, el){
   fav.insertAdjacentElement('beforebegin', app); fav.insertAdjacentElement('afterend', sh);
   tr.className = 'translit-pill ui-caps'; tr.textContent = 'Abc'; tr.setAttribute('aria-label', 'Латиницей'); row.appendChild(tr);
   document.getElementById('song-panel').style.display = 'none';
+})();
+
+
+/* ---------- «На главную» -> значок «домой»; порядок значков: «Оформление» перед «Списки» ---------- */
+(function(){
+  var HOME = '<svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg>';
+  ['btn-back','btn-list-back','btn-allsongs-back','btn-lists-back','btn-program-back','btn-giussani-back','btn-favorites-back'].forEach(function(id){
+    var b = document.getElementById(id); if(!b) return;
+    b.className = 'icon-btn-sm home-btn'; b.innerHTML = HOME; b.setAttribute('title', 'На главную');
+  });
+  ['list', 'allsongs'].forEach(function(k){
+    var fav = document.getElementById('btn-favorites-' + k), app = document.getElementById('btn-appearance-' + k);
+    if(fav && app && app.compareDocumentPosition(fav) & Node.DOCUMENT_POSITION_PRECEDING){ fav.parentNode.insertBefore(app, fav); }
+  });
+})();
+
+
+/* ---------- подсказка в строках поиска: на узких экранах короче (подобрано по замеру ширины текста) ---------- */
+(function(){
+  var V = ['Название, автор, № песни, слово\u2026', 'Название, автор, №, слово\u2026', 'Название, №, слово\u2026'];
+  function pick(){ var w = window.innerWidth; return w >= 394 ? V[0] : (w >= 344 ? V[1] : V[2]); }
+  function apply(){
+    var ph = pick();
+    Array.prototype.forEach.call(document.querySelectorAll('input[type="search"]'), function(i){
+      if(V.indexOf(i.getAttribute('placeholder')) !== -1){ i.setAttribute('placeholder', ph); }
+    });
+  }
+  apply(); window.addEventListener('resize', apply);
 })();
 
 /* ------------------------------------------------------------
