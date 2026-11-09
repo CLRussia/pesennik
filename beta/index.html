@@ -1638,6 +1638,17 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .sl-all:active{color:var(--accent);}
 .sl-label{display:flex;align-items:center;justify-content:space-between;}
 .sl-label svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-right:2px;}
+/* экран списка: закреплённая нижняя панель, список прокручивается над ней */
+#edit-view.open{display:flex;flex-direction:column;}
+#edit-view .list-scroll{flex:1 0 auto;width:100%;box-sizing:border-box;}
+.edit-bar{position:sticky;bottom:0;z-index:5;display:flex;gap:8px;padding:10px 14px calc(var(--safe-b) + 10px);background:var(--bg-header);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);}
+.edit-bar .prog-btn{flex:1;min-width:0;padding:12px 6px;font-size:11.5px;letter-spacing:.04em;}
+.eb-del{margin-left:auto;color:var(--danger);}
+.eb-del svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.eb-addhdr{display:flex;align-items:center;justify-content:center;width:calc(100% - 8px);margin:14px 4px 24px;padding:13px;border:1.5px dashed var(--border);border-radius:999px;
+  font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
+.eb-addhdr:active{background:var(--accent-soft);}
 </style>
 </head>
 <body>
@@ -1888,6 +1899,7 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>Списки</span>
       </button>
+      <button class="icon-btn-sm eb-del" id="btn-prog-clear" type="button" title="Удалить список" aria-label="Удалить список"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button>
     </div>
   </div>
   <div class="list-scroll">
@@ -1897,13 +1909,12 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
     </div>
     <div class="prog-count" id="prog-count"></div>
     <div id="program-list"></div>
-    <p class="empty-note" id="program-empty">Пока нет песен. Нажмите «Добавить песни».</p>
-    <div class="prog-actions">
-      <button class="prog-btn" id="btn-prog-add" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Добавить песни</span></button>
-      <button class="prog-btn" id="btn-add-header" type="button"><svg viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="13" x2="14" y2="13"/><line x1="5" y1="19" x2="19" y2="19"/></svg><span>Добавить подзаголовок</span></button>
-      <button class="prog-btn primary" id="btn-prog-share" type="button"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg><span>Поделиться</span></button>
-      <button class="prog-btn danger" id="btn-prog-clear" type="button"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg><span>Удалить</span></button>
-    </div>
+    <p class="empty-note" id="program-empty">Пока нет песен. Нажмите «+ Песни».</p>
+    <button class="eb-addhdr" id="btn-add-header" type="button"><span>+ Подзаголовок</span></button>
+  </div>
+  <div class="edit-bar">
+    <button class="prog-btn" id="btn-prog-add" type="button"><span>+ Песни</span></button>
+    <button class="prog-btn primary" id="btn-prog-share" type="button"><span>Поделиться</span></button>
   </div>
 </div>
 
@@ -3411,6 +3422,8 @@ function renderEdit(){
   document.getElementById('prog-count').textContent = n ? songsWord(n) : '';
   document.getElementById('program-empty').classList.toggle('show', items.length === 0);
   document.getElementById('btn-prog-share').disabled = n === 0;
+  /* внизу «+ Песни» только пока у списка нет разделов: у разделов свои кнопки */
+  document.getElementById('btn-prog-add').style.display = items.some(isHdr) ? 'none' : '';
   var inp2 = document.getElementById('program-title');
   if(document.activeElement !== inp2) inp2.value = l.t || '';
   inp2.placeholder = 'Список от ' + dayMonth(l.c);
