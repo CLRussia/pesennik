@@ -1649,6 +1649,30 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .eb-addhdr{display:flex;align-items:center;justify-content:center;width:calc(100% - 8px);margin:14px 4px 24px;padding:13px;border:1.5px dashed var(--border);border-radius:999px;
   font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
 .eb-addhdr:active{background:var(--accent-soft);}
+/* подзаголовок: пока набираешь -- вместо «+ песни» кнопка «Готово» */
+.hdr-done{display:none;flex:0 0 auto;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:var(--accent);color:#fff;border:1.5px solid var(--accent);
+  font-family:var(--font-ui);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.hdr-done svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+.hdr-row:focus-within .hdr-done{display:inline-flex;}
+.hdr-row:focus-within .hdr-add{display:none;}
+.hdr-done{width:34px;height:34px;padding:0;justify-content:center;}
+.hdr-done svg{width:17px;height:17px;}
+/* строка подзаголовка: «⋮⋮» и «×» ровно под теми же у песен; галочка внутри поля, поле на всю длину */
+.hdr-row{gap:0;}
+.hdr-input{margin-right:6px;}
+.hdr-add{margin-right:6px;}
+.hdr-row:focus-within .hdr-input{padding-right:46px;}
+.hdr-row:focus-within .hdr-done{margin-left:-44px;margin-right:6px;position:relative;z-index:1;}
+/* галочка в поле подзаголовка: просто значок, без кнопки-плашки */
+.hdr-done{background:transparent;border:none;color:var(--accent);}
+.hdr-done svg{width:20px;height:20px;stroke-width:2.2;}
+/* пока набирается подзаголовок, значок перетаскивания не нужен */
+.hdr-row:focus-within .nav-drag-handle{display:none;}
+/* подзаголовки списка -- как некликабельные подзаголовки в остальном приложении (серый, без капса и бирюзы) */
+.hdr-input{color:var(--text-muted);font-weight:600;font-size:calc(15px * var(--scale-menu));text-transform:none;letter-spacing:normal;}
+.hdr-input:focus{color:var(--text);}
+.hdr-input{color:var(--text);font-weight:700;font-size:calc(17px * var(--scale-menu));}
+.hdr-input{caret-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -3394,15 +3418,25 @@ function renderEdit(){
       item = document.createElement('div');
       item.className = 'nav-item hdr-row';
       var inp = document.createElement('input');
-      inp.type = 'text'; inp.className = 'hdr-input'; inp.value = x; inp.maxLength = 40; inp.placeholder = 'Подзаголовок (например, «Вторник»)';
+      inp.type = 'text'; inp.className = 'hdr-input'; inp.value = x; inp.maxLength = 40; inp.placeholder = '';
       inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done');
       inp.addEventListener('input', function(){ l.ids[idx] = inp.value; l.u = Date.now(); saveLists(); });
       inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ inp.blur(); } });
+      /* пустой подзаголовок при уходе из поля убираем сам */
+      inp.addEventListener('blur', function(){
+        if(inp.value.trim() === '' && l.ids[idx] !== undefined && isHdr(l.ids[idx])){ l.ids.splice(idx, 1); l.u = Date.now(); saveLists(); renderEdit(); }
+      });
       item.appendChild(inp);
       var add = document.createElement('button');
       add.type = 'button'; add.className = 'hdr-add'; add.textContent = '+ песни';
       add.addEventListener('click', function(){ startPicker(idx); });
       item.appendChild(add);
+      var done = document.createElement('button');
+      done.type = 'button'; done.className = 'hdr-done'; done.setAttribute('aria-label', 'Готово'); done.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+      done.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      done.addEventListener('touchstart', function(e){ e.preventDefault(); inp.blur(); }, {passive:false});
+      done.addEventListener('click', function(){ inp.blur(); });
+      item.appendChild(done);
     } else {
       item = makeNavItem(byId[x], SEARCH_ENTRY_BY_ID[x].number);
       item.style.setProperty('--indent', '0px');
