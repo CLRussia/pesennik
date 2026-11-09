@@ -4071,6 +4071,19 @@ function cardMenuRecv(p, el){
   tr.addEventListener('scroll', function(){ clearTimeout(tmr); tmr = setTimeout(function(){ if(!touching && armed){ armed = false; settle(); } }, 140); }, {passive: true});
 })();
 
+
+/* ---------- тур: на последнем слайде надёжно «Закрыть» (даже при дробной ширине экрана и резком свайпе) ---------- */
+(function(){
+  var tr = document.getElementById('tour-track'); if(!tr) return;
+  var t = null;
+  function check(){
+    var atEnd = tr.scrollLeft + tr.clientWidth >= tr.scrollWidth - 2;
+    var i = atEnd ? tr.children.length - 1 : Math.round(tr.scrollLeft / (tr.clientWidth || 1));
+    if(i !== tourIndex){ tourIndex = i; updateTourUI(); }
+  }
+  tr.addEventListener('scroll', function(){ clearTimeout(t); t = setTimeout(check, 160); }, {passive: true});
+})();
+
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
    ------------------------------------------------------------ */
@@ -4635,7 +4648,7 @@ function updateTourUI(){
   var dots = tourDotsWrap.children;
   for(var i=0;i<dots.length;i++){ dots[i].classList.toggle('is-active', i===tourIndex); }
   tourPrevBtn.classList.toggle('is-hidden', tourIndex===0);
-  tourNextBtn.textContent = (tourIndex === TOUR_SLIDE_COUNT-1) ? 'Готово' : 'Далее';
+  tourNextBtn.textContent = (tourIndex === TOUR_SLIDE_COUNT-1) ? 'Закрыть' : 'Далее';
 }
 function goToTourSlide(i){
   tourIndex = Math.max(0, Math.min(TOUR_SLIDE_COUNT-1, i));
