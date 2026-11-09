@@ -3668,7 +3668,18 @@ function parseImport(text){
   });
   return songCount(items2) ? progHash(items2, title) : null;
 }
-document.getElementById('btn-import').addEventListener('click', openImport);
+/* «Вставить ссылку»: сначала молча пробуем буфер; не вышло -- окно с полем для ручной вставки */
+function looksLikeListLink(t){
+  return [t, safeDecode(t)].some(function(v){ return /#[Сс]писок\//.test(v) || /#l=[A-Za-z0-9_-]/.test(v) || /#prog=/.test(v) || /Код списка/i.test(v); });
+}
+function importFromClipboard(){
+  if(!navigator.clipboard || !navigator.clipboard.readText){ openImport(); return; }
+  navigator.clipboard.readText().then(function(t){
+    if(t && looksLikeListLink(t) && importFromText(t)) return;
+    openImport();
+  }).catch(function(){ openImport(); });
+}
+document.getElementById('btn-import').addEventListener('click', importFromClipboard);
 function importFromText(txt){
   var h = parseImport(txt || '');
   if(!h){ document.getElementById('import-err').textContent = 'Не нашёл ссылку на список. Скопируйте ссылку из сообщения целиком.'; return false; }
