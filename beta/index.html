@@ -1678,6 +1678,9 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .edit-bar-row{display:flex;gap:8px;}
 .edit-bar .eb-addhdr{width:100%;margin:0;padding:10px;}
 .edit-bar .prog-btn{flex:1;min-width:0;}
+#import-modal #import-text{min-height:0;margin-top:12px;}
+#import-modal .import-err{margin:8px 0 0;}
+#import-modal #import-ok{margin-top:12px;}
 </style>
 </head>
 <body>
@@ -1979,16 +1982,11 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 
 <div class="modal-overlay" id="import-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
-    <h2 class="ui-caps">Вставить ссылку</h2>
-    <p>Скопируйте ссылку из сообщения или письма и вставьте сюда.</p>
-    <button class="prog-btn primary" id="import-clip" type="button" style="width:100%;margin-bottom:12px"><span>Вставить из буфера</span></button>
-    <p style="margin:0 0 8px;font-size:13px;color:var(--text-faint)">или вставьте вручную:</p>
-    <textarea id="import-text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте ссылку"></textarea>
+    <button class="prog-btn" id="import-clip" type="button" style="width:100%"><span>Взять из буфера</span></button>
+    <button class="prog-btn" id="import-manual" type="button" style="width:100%;margin-top:10px"><span>Вставить вручную</span></button>
+    <textarea id="import-text" rows="2" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте ссылку сюда" style="display:none"></textarea>
     <p class="import-err" id="import-err"></p>
-    <div class="modal-actions">
-      <button class="modal-btn ui-caps" id="import-cancel" type="button">Отмена</button>
-      <button class="modal-btn primary ui-caps" id="import-ok" type="button">Добавить</button>
-    </div>
+    <button class="prog-btn" id="import-ok" type="button" style="width:100%;display:none"><span>Добавить</span></button>
   </div></div>
 </div>
 
@@ -3629,7 +3627,7 @@ function decodeListCode(text){
 }
 /* ---------- «Добавить из чата»: вставить текст сообщения или ссылку ---------- */
 var importModal = document.getElementById('import-modal');
-function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; importModal.classList.add('open'); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
+function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; document.getElementById('import-ok').style.display = 'none'; document.getElementById('import-text').style.display = 'none'; document.getElementById('import-manual').style.display = ''; importModal.classList.add('open'); }
 function closeImport(){ importModal.classList.remove('open'); }
 var HDR_LINE = /^\s*[—–-]\s*(.+?)\s*[—–-]\s*$/;
 function importBody(text){
@@ -3685,9 +3683,15 @@ document.getElementById('import-clip').addEventListener('click', function(){
     importFromText(t);
   }).catch(function(){ err.textContent = 'Нет доступа к буферу: нажмите и удерживайте в поле ниже и выберите «Вставить».'; });
 });
-document.getElementById('import-cancel').addEventListener('click', closeImport);
 importModal.addEventListener('click', function(e){ if(e.target === importModal) closeImport(); });
 document.getElementById('import-ok').addEventListener('click', function(){ importFromText(document.getElementById('import-text').value || ''); });
+/* кнопка «Добавить» нужна, только пока в поле что-то набрано; вставка в поле добавляет сразу */
+(function(){
+  var ta = document.getElementById('import-text'), ok = document.getElementById('import-ok');
+  document.getElementById('import-manual').addEventListener('click', function(){ this.style.display = 'none'; ta.style.display = ''; ta.focus(); });
+  ta.addEventListener('input', function(){ ok.style.display = ta.value.trim() ? '' : 'none'; });
+  ta.addEventListener('paste', function(){ setTimeout(function(){ if(ta.value.trim()) importFromText(ta.value); }, 0); });
+})();
 
 /* варианты оформления для сравнения (?lv=one|two&ls=rows|cards&ic=1|2) */
 (function(){
