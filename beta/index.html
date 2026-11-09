@@ -1731,6 +1731,24 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
 /* корзина в редакторе и «Поделиться» на полученном списке -- тоже 40 px */
 #edit-view .eb-del,#program-view #btn-pv-share{width:40px;height:40px;}
 #edit-view .eb-del svg,#program-view #btn-pv-share svg{width:20px;height:20px;}
+/* полученный список: «Поделиться» и корзина вместе справа */
+#program-view #btn-pv-share{margin-left:auto;}
+#program-view #btn-pv-remove{margin-left:0;}
+#program-view #btn-pv-remove{width:40px;height:40px;}
+#program-view #btn-pv-remove svg{width:20px;height:20px;}
+/* кнопки в шапках 44 px на экранах от 360 px; на более узких остаются 40 */
+@media (min-width:360px){
+  #song-view .song-topbar-row .icon-btn-sm,
+  #song-view .song-topbar-row #btn-appearance-song,#song-view .song-topbar-row #btn-share{width:44px;min-width:44px;height:44px;}
+  #song-view .song-topbar-row .icon-btn-sm svg{width:22px;height:22px;}
+  #song-view .song-topbar-row #btn-back{height:44px;}
+  #song-view .song-topbar-row .translation-pill,#song-view .song-topbar-row .translit-pill{height:34px;}
+  #edit-view .eb-del,#program-view #btn-pv-share,#program-view #btn-pv-remove{width:44px;height:44px;}
+  #edit-view .eb-del svg,#program-view #btn-pv-share svg,#program-view #btn-pv-remove svg{width:22px;height:22px;}
+}
+@media (min-width:360px) and (max-width:429px){
+  #song-view .song-topbar-row #btn-back{width:44px;height:44px;}
+}
 </style>
 </head>
 <body>
@@ -2017,6 +2035,7 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
       <button class="icon-btn-sm" id="btn-pv-share" title="Поделиться" aria-label="Поделиться">
         <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg>
       </button>
+      <button class="icon-btn-sm eb-del" id="btn-pv-remove" type="button" title="Убрать из «Общих списков»" aria-label="Убрать из «Общих списков»"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button>
     </div>
   </div>
   <div class="list-scroll">
@@ -2031,7 +2050,6 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
     </div>
     <div id="pv-list"></div>
     <p class="pv-note" id="pv-note"></p>
-    <div class="prog-actions"><button class="link-btn ui-caps prog-sublink" id="btn-pv-remove" type="button">Убрать из «Общих списков»</button></div>
   </div>
 </div>
 
@@ -3707,9 +3725,11 @@ document.getElementById('btn-pv-copy').addEventListener('click', function(){
 document.getElementById('btn-pv-remove').addEventListener('click', function(){
   var p = parseAnyHash(currentProgHash || ''); if(!p) return;
   var key = listKey(p.ids, p.t || 'Список');
-  programs = programs.filter(function(x){ return x.k !== key; });
-  store.setJSON('sb_programs', programs);
-  openListsScreen();
+  showConfirm('Убрать список «' + (p.t || 'Список') + '» из «Общих списков»?', function(){
+    programs = programs.filter(function(x){ return x.k !== key; });
+    store.setJSON('sb_programs', programs);
+    openListsScreen();
+  });
 });
 
 
