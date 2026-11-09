@@ -1793,6 +1793,17 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 /* 6) выделение в панели выбора -- не бирюзовым (это не кнопка) */
 #picker-bar .pb-text b{color:var(--text);}
 #btn-share svg,#btn-pv-share svg{transform:translateX(-0.45px) scale(.85);}
+
+/* тур: один свайп -- один слайд */
+.tour-slide{scroll-snap-stop:always;}
+.tour-track{overscroll-behavior-x:contain;}
+/* слайд «Поиск»: больше места между строкой поиска и строками ниже */
+.tour-sdemo{height:114px;}
+.tour-sdemo-lines{top:58px;}
+.tour-sdemo-ripple,.tour-sdemo-dot{top:78px;}
+/* «Выбрать / Готово» -- на строке заголовка списков справа */
+.screen-head{display:flex;align-items:center;justify-content:space-between;}
+.screen-head .sel-toggle{margin-left:auto;padding:6px 4px;font-size:12px;letter-spacing:.08em;}
 </style>
 </head>
 <body>
@@ -2023,14 +2034,13 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <button class="sel-toggle" id="btn-lists-select" type="button">Выбрать</button>
     </div>
   </div>
   <div class="list-scroll">
     <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Вставить ссылку</span></button></div>
-    <div class="screen-head" id="lists-own-head">Мои списки</div>
+    <div class="screen-head" id="lists-own-head"><span>Мои списки</span><button class="sel-toggle" id="btn-lists-select" type="button">Выбрать</button></div>
     <div id="lists-own"></div>
-    <div class="screen-head" id="lists-recv-head">Общие списки</div>
+    <div class="screen-head" id="lists-recv-head"><span>Общие списки</span></div>
     <div id="lists-recv"></div>
     <p class="lists-hint" id="lists-hint">Нажмите и удерживайте список,<br>чтобы удалить или поделиться</p>
     <p class="empty-note" id="lists-empty">Здесь будут ваши списки песен: для&nbsp;встречи, каникул или&nbsp;мессы. Составьте список и&nbsp;отправьте ссылкой&nbsp;— у получателей он откроется в&nbsp;песеннике. Другие его не&nbsp;увидят. Присланные вам списки тоже появятся здесь.</p>
@@ -2150,7 +2160,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
         <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></span>
         <p>Составьте список для&nbsp;встречи и&nbsp;отправьте его ссылкой, чтобы друзья могли сохранить его в&nbsp;своем приложении.</p>
       </div>
-      <div class="info-item info-item-group-end">
+      <div class="info-item">
         <span class="info-icon"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg></span>
         <p>Когда вы&nbsp;делитесь песней или&nbsp;списком, человек может заодно скачать и&nbsp;все приложение.</p>
       </div>
@@ -3518,6 +3528,7 @@ function renderListsScreen(){
   /* кнопка «Выбрать / Готово» и нижняя панель выбора */
   var sb = document.getElementById('btn-lists-select');
   sb.style.display = (own.length || programs.length) ? '' : 'none';
+  (own.length ? document.getElementById('lists-own-head') : document.getElementById('lists-recv-head')).appendChild(sb);
   sb.textContent = selectMode ? 'Готово' : 'Выбрать';
   document.body.classList.toggle('selecting', selectMode);
   var n = selCount();
@@ -4037,6 +4048,22 @@ function cardMenuRecv(p, el){
     });
   }
   apply(); window.addEventListener('resize', apply);
+})();
+
+
+/* ---------- тур: один свайп -- один слайд (страховка к CSS scroll-snap-stop для старых браузеров) ---------- */
+(function(){
+  var tr = document.getElementById('tour-track'); if(!tr) return;
+  var startIdx = 0, touching = false, armed = false, tmr = null;
+  function w(){ return tr.clientWidth || 1; }
+  function settle(){
+    var i = Math.round(tr.scrollLeft / w());
+    if(Math.abs(i - startIdx) > 1){ tr.scrollTo({left: (startIdx + (i > startIdx ? 1 : -1)) * w(), behavior: 'smooth'}); }
+  }
+  tr.addEventListener('touchstart', function(){ touching = true; armed = true; startIdx = Math.round(tr.scrollLeft / w()); }, {passive: true});
+  tr.addEventListener('touchend', function(){ touching = false; }, {passive: true});
+  /* срабатывает только после жеста пальцем, не после кнопки «Далее» и точек */
+  tr.addEventListener('scroll', function(){ clearTimeout(tmr); tmr = setTimeout(function(){ if(!touching && armed){ armed = false; settle(); } }, 140); }, {passive: true});
 })();
 
 /* ------------------------------------------------------------
