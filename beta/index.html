@@ -1804,6 +1804,11 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 /* «Выбрать / Готово» -- на строке заголовка списков справа */
 .screen-head{display:flex;align-items:center;justify-content:space-between;}
 .screen-head .sel-toggle{margin-left:auto;padding:6px 4px;font-size:12px;letter-spacing:.08em;}
+
+/* значок «домой» прямо в тексте слайда тура */
+.tour-inline-btn{display:inline-flex;align-items:center;justify-content:center;width:1.55em;height:1.55em;border:1.5px solid var(--border);border-radius:50%;background:var(--bg-elevated);vertical-align:-.42em;margin:0 .1em;}
+.tour-inline-btn svg{width:.95em;height:.95em;stroke:var(--accent);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transform:translateY(-.03em);}
+.tour-inline-btn{vertical-align:-.235em;}
 </style>
 </head>
 <body>
@@ -2283,7 +2288,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
           </div>
         </div>
         <h2 class="ui-caps">Назад&nbsp;— свайпом</h2>
-        <p>Возвращайтесь на&nbsp;предыдущий экран свайпом от&nbsp;края экрана или&nbsp;системной кнопкой навигации вашего устройства. Значок «домой» в&nbsp;шапке ведёт сразу на&nbsp;главную.</p>
+        <p>Возвращайтесь на&nbsp;шаг назад свайпом от&nbsp;края экрана или&nbsp;кнопкой навигации вашего устройства. Значок&nbsp;<span class="tour-inline-btn" role="img" aria-label="домой"><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg></span>&nbsp;ведет сразу на&nbsp;главную.</p>
       </div>
 
       <div class="tour-slide">
@@ -3529,7 +3534,7 @@ function renderListsScreen(){
   var sb = document.getElementById('btn-lists-select');
   sb.style.display = (own.length || programs.length) ? '' : 'none';
   (own.length ? document.getElementById('lists-own-head') : document.getElementById('lists-recv-head')).appendChild(sb);
-  sb.textContent = selectMode ? 'Готово' : 'Выбрать';
+  sb.textContent = selectMode ? 'Отмена' : 'Выбрать';
   document.body.classList.toggle('selecting', selectMode);
   var n = selCount();
   var del = document.getElementById('sel-del'); del.disabled = n === 0; del.querySelector('span').textContent = n ? 'Удалить (' + n + ')' : 'Удалить';
