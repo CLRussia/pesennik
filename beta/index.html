@@ -1687,6 +1687,22 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
 .sl-row.sl-danger .sl-name{color:var(--danger);}
 .sl-row.sl-cap .sl-name{padding-left:0;}
 .sl-row.sl-danger .sl-ic{color:var(--danger);}
+/* экран «Списки»: режим выбора */
+#lists-view.open{display:flex;flex-direction:column;}
+#lists-view .list-scroll{flex:1 0 auto;width:100%;box-sizing:border-box;}
+.sel-bar{display:none;}
+body.selecting #lists-view .sel-bar{display:flex;}
+body.selecting #lists-view .prog-actions{display:none;}
+.sel-bar .prog-btn{flex:1;min-width:0;}
+.sel-toggle{margin-left:auto;padding:8px 4px;font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+.sel-toggle:active{opacity:.6;}
+.prog-card.sel-mode > svg{display:none;}
+.sel-dot{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--text-faint);margin-right:14px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+.sel-dot svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;}
+.sel-dot.on{background:var(--accent);border-color:var(--accent);}
+.sel-dot.on svg{opacity:1;}
+.prog-card.selected{background:var(--accent-soft);border-color:var(--accent);}
+body.selecting #lists-view .sel-bar{flex-direction:row;}
 </style>
 </head>
 <body>
@@ -1917,7 +1933,7 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
-      <div class="list-title">Списки</div>
+      <button class="sel-toggle" id="btn-lists-select" type="button">Выбрать</button>
     </div>
   </div>
   <div class="list-scroll">
@@ -1928,6 +1944,10 @@ body.picking #list-scroll,body.picking #sections-menu{padding-bottom:110px;}
     <div id="lists-recv"></div>
     <p class="lists-hint" id="lists-hint">Нажмите и удерживайте список, чтобы удалить или поделиться</p>
     <p class="empty-note" id="lists-empty">Здесь будут ваши списки песен: для&nbsp;встречи, каникул или&nbsp;мессы. Составьте список и&nbsp;отправьте ссылкой&nbsp;— у получателей он откроется в&nbsp;песеннике. Другие его не&nbsp;увидят. Присланные вам списки тоже появятся здесь.</p>
+  </div>
+  <div class="edit-bar sel-bar">
+    <button class="prog-btn" id="sel-all" type="button"><span>Выбрать все</span></button>
+    <button class="prog-btn danger" id="sel-del" type="button" disabled><span>Удалить</span></button>
   </div>
 </div>
 
@@ -3393,18 +3413,63 @@ function renderHomeLists(){
 }
 /* ---------- экран «Списки» (значок в шапке) ---------- */
 var listsView = document.getElementById('lists-view');
+var selectMode = false, selected = {};
+function recvKey(p){ return 'r:' + listKey(p.ids, p.t || 'Список'); }
+function selCount(){ return Object.keys(selected).length; }
+function selTotal(){ return lists.length + programs.length; }
+function addSelDot(it, on){
+  var d = document.createElement('span'); d.className = 'sel-dot' + (on ? ' on' : '');
+  d.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  it.insertBefore(d, it.firstChild); it.classList.add('sel-mode'); if(on) it.classList.add('selected');
+}
 function renderListsScreen(){
   var a = document.getElementById('lists-own'); a.innerHTML = '';
   var own = sortedLists();
-  own.forEach(function(l){ var it = homeItem('cards', ownItem(l)); attachLongPress(it, function(el){ cardMenuOwn(l, el); }); a.appendChild(it); });
+  own.forEach(function(l){
+    var o = ownItem(l), key = 'o:' + l.id;
+    if(selectMode) o.onClick = function(){ if(selected[key]) delete selected[key]; else selected[key] = 1; renderListsScreen(); };
+    var it = homeItem('cards', o);
+    if(selectMode) addSelDot(it, !!selected[key]); else attachLongPress(it, function(el){ cardMenuOwn(l, el); });
+    a.appendChild(it);
+  });
   document.getElementById('lists-own-head').style.display = own.length ? '' : 'none';
   var r = document.getElementById('lists-recv'); r.innerHTML = '';
-  programs.forEach(function(p){ var o = recvItem(p, false); o.meta += ' · получен ' + dayMonth(p.at); var it = homeItem('cards', o); attachLongPress(it, function(el){ cardMenuRecv(p, el); }); r.appendChild(it); });
-  document.getElementById('lists-hint').style.display = (own.length || programs.length) ? '' : 'none';
+  programs.forEach(function(p){
+    var o = recvItem(p, false), key = recvKey(p); o.meta += ' \u00b7 получен ' + dayMonth(p.at);
+    if(selectMode) o.onClick = function(){ if(selected[key]) delete selected[key]; else selected[key] = 1; renderListsScreen(); };
+    var it = homeItem('cards', o);
+    if(selectMode) addSelDot(it, !!selected[key]); else attachLongPress(it, function(el){ cardMenuRecv(p, el); });
+    r.appendChild(it);
+  });
+  document.getElementById('lists-hint').style.display = (!selectMode && (own.length || programs.length)) ? '' : 'none';
   document.getElementById('lists-recv-head').style.display = programs.length ? '' : 'none';
   document.getElementById('lists-empty').classList.toggle('show', !own.length && !programs.length);
+  /* кнопка «Выбрать / Готово» и нижняя панель выбора */
+  var sb = document.getElementById('btn-lists-select');
+  sb.style.display = (own.length || programs.length) ? '' : 'none';
+  sb.textContent = selectMode ? 'Готово' : 'Выбрать';
+  document.body.classList.toggle('selecting', selectMode);
+  var n = selCount();
+  var del = document.getElementById('sel-del'); del.disabled = n === 0; del.querySelector('span').textContent = n ? 'Удалить (' + n + ')' : 'Удалить';
+  document.getElementById('sel-all').querySelector('span').textContent = (n && n === selTotal()) ? 'Снять все' : 'Выбрать все';
 }
-function openListsScreen(pushHash){ renderListsScreen(); openExtra(listsView, '#lists', pushHash); }
+function exitSelect(){ selectMode = false; selected = {}; renderListsScreen(); }
+document.getElementById('btn-lists-select').addEventListener('click', function(){ if(selectMode){ exitSelect(); } else { selectMode = true; selected = {}; renderListsScreen(); } });
+document.getElementById('sel-all').addEventListener('click', function(){
+  if(selCount() && selCount() === selTotal()){ selected = {}; }
+  else { selected = {}; lists.forEach(function(l){ selected['o:' + l.id] = 1; }); programs.forEach(function(p){ selected[recvKey(p)] = 1; }); }
+  renderListsScreen();
+});
+document.getElementById('sel-del').addEventListener('click', function(){
+  var n = selCount(); if(!n) return;
+  var text = n === 1 ? 'Удалить выбранный список?' : ('Удалить ' + n + ' ' + plural(n, 'список', 'списка', 'списков') + '?');
+  showConfirm(text, function(){
+    lists = lists.filter(function(l){ return !selected['o:' + l.id]; }); saveLists();
+    programs = programs.filter(function(p){ return !selected[recvKey(p)]; }); store.setJSON('sb_programs', programs);
+    renderHomeLists(); exitSelect();
+  });
+});
+function openListsScreen(pushHash){ selectMode = false; selected = {}; renderListsScreen(); openExtra(listsView, '#lists', pushHash); }
 document.getElementById('btn-lists-back').addEventListener('click', goHome);
 document.getElementById('btn-new-list').addEventListener('click', function(){
   var now = Date.now();
