@@ -1706,6 +1706,16 @@ body.selecting #lists-view .sel-bar{flex-direction:row;}
 /* название списка в меню -- так же, как на карточке: обычным шрифтом, не капсом */
 #songlist-modal.sl-pop h2.sl-name-h{text-transform:none;letter-spacing:normal;font-family:var(--font-lyrics);font-weight:400;font-size:calc(18px * var(--scale-menu));color:var(--text);line-height:1.25;}
 .lists-hint{text-wrap:balance;}
+/* шапка песни */
+#btn-appearance-song,#btn-share{width:34px;min-width:34px;height:34px;padding:0;}
+.translit-pill{margin-left:auto;display:inline-flex;align-items:center;flex:0 0 auto;height:28px;padding:0 14px;border:1.5px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font-size:11px;letter-spacing:.05em;cursor:pointer;}
+.translit-pill.is-on{background:var(--accent);color:#fff;}
+@media (min-width:720px){ #btn-appearance-song,#btn-share{width:46px;min-width:46px;height:46px;} }
+/* узкие экраны: «назад» -- только стрелка в кружке, чтобы всё поместилось в шапку */
+@media (max-width:389px){
+  .song-topbar-row #btn-back{width:34px;height:34px;padding:0;justify-content:center;gap:0;}
+  .song-topbar-row #btn-back span{display:none;}
+}
 </style>
 </head>
 <body>
@@ -3929,6 +3939,17 @@ function cardMenuRecv(p, el){
   }, IC_TRASH);
   slOpenFor(el);
 }
+
+/* ---------- шапка песни: «Оформление» и «Поделиться» рядом со «Списки», «Транслит» -- овальная кнопка, как «Перевод» ---------- */
+(function(){
+  var row = document.querySelector('.song-topbar-row'); if(!row) return;
+  var fav = document.getElementById('btn-favorites-song'), app = document.getElementById('btn-appearance-song'),
+      sh = document.getElementById('btn-share'), tr = document.getElementById('btn-translit');
+  [app, sh].forEach(function(b){ b.classList.remove('panel-btn', 'panel-idle-btn'); b.classList.add('icon-btn-sm'); });
+  fav.insertAdjacentElement('beforebegin', app); fav.insertAdjacentElement('afterend', sh);
+  tr.className = 'translit-pill ui-caps'; tr.textContent = 'Abc'; tr.setAttribute('aria-label', 'Латиницей'); row.appendChild(tr);
+  document.getElementById('song-panel').style.display = 'none';
+})();
 
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
