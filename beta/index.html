@@ -1887,6 +1887,24 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 
 /* редактор списка: «домой» и «Списки» слева, корзина справа */
 #edit-view #btn-prog-clear{margin-left:auto;}
+
+/* светлое сообщение на главной */
+.home-notice{display:flex;align-items:flex-start;gap:8px;margin:0 0 14px;padding:12px 6px 12px 14px;border:1.5px dashed var(--accent);border-radius:var(--radius-s);background:var(--bg-elevated);}
+.home-notice p{flex:1;margin:0;font-size:13.5px;line-height:1.4;color:var(--text-muted);}
+.home-notice-x{flex:0 0 auto;width:32px;height:32px;margin:-6px 0 -6px 0;border:none;background:none;color:var(--text-faint);display:flex;align-items:center;justify-content:center;position:relative;}
+.home-notice-x::after{content:'';position:absolute;inset:-6px;}
+.home-notice-x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* окно подтверждения -- компактное, рядом с нажатой кнопкой */
+#confirm-modal.sl-pop{align-items:flex-start;justify-content:flex-start;background:rgba(0,0,0,.14);}
+#confirm-modal.sl-pop .modal-sheet{position:absolute;border-radius:18px;max-width:none;}
+#confirm-modal.sl-pop .modal-sheet-scroll{padding:16px 14px 12px;}
+#confirm-modal.sl-pop h2{display:none;}
+#confirm-modal.sl-pop p{margin:0 0 12px;font-size:15px;line-height:1.4;color:var(--text);}
+#confirm-modal.sl-pop .modal-btn{padding:10px;}
+
+/* названия и подзаголовки: строки ровнее, без одного слова на последней строке (где браузер умеет) */
+.pv-title,.pc-title,.hl-name,.nav-sub,.sl-name-h,.hdr-input,#program-title,.pb-name{text-wrap:balance;}
 </style>
 </head>
 <body>
@@ -1917,15 +1935,15 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 
   <nav id="sections-menu">
     <div class="section-block" id="section-0" data-section="0">
-      <button class="section-head ui-caps"><span>Молитвы и песнопения для&nbsp;мессы</span><span class="chev"></span></button>
+      <button class="section-head ui-caps"><span>Молитвы и&nbsp;песнопения для&nbsp;мессы</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
     <div class="section-block" id="section-1" data-section="1">
-      <button class="section-head ui-caps"><span>Песни для собраний и встреч</span><span class="chev"></span></button>
+      <button class="section-head ui-caps"><span>Песни для собраний и&nbsp;встреч</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
     <div class="section-block" id="section-2" data-section="2">
-      <button class="section-head ui-caps"><span>Песни для детей</span><span class="chev"></span></button>
+      <button class="section-head ui-caps"><span>Песни для&nbsp;детей</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
     <div id="home-lists"></div>
@@ -2413,7 +2431,7 @@ var SONGS = JSON.parse(document.getElementById('songs-json').textContent);
 var byId = {};
 SONGS.forEach(function(s){ byId[s.id] = s; });
 
-var SECTION_NAMES = ['Молитвы и песнопения для мессы','Песни для собраний и встреч','Песни для детей'];
+var SECTION_NAMES = ['Молитвы и песнопения для мессы','Песни для собраний и встреч','Песни для детей'];
 var LANG_ORDER = ['Русский','Итальянский','Испанский','Португальский','Французский','Английский','Белорусский'];
 /* Подписи групп в разделе "Для собраний" -- только для отображения (в
    форме "НА [ЯЗЫКЕ]"), группировка и сортировка по-прежнему идут по
@@ -2824,11 +2842,11 @@ function buildAllLists(){
   // названия и тексты, отдельно их проще искать), поэтому и подпись
   // своя -- намеренно другая, чтобы не выглядело ещё одним языком.
   if(alpine.length) addList('1-alpine', 1, 'АЛЬПИЙСКИЕ ПЕСНИ', [{label:null, songs:alpine}], 'АЛЬПИЙСКИЕ ПЕСНИ');
-  if(ruFolk.length) addList('1-rufolk', 1, 'РУССКИЕ НАРОДНЫЕ ПЕСНИ', [{label:null, songs:ruFolk}], 'РУССКИЕ НАРОДНЫЕ ПЕСНИ');
+  if(ruFolk.length) addList('1-rufolk', 1, 'РУССКИЕ НАРОДНЫЕ ПЕСНИ', [{label:null, songs:ruFolk}], 'РУССКИЕ НАРОДНЫЕ ПЕСНИ');
 
   // Раздел 2 -- Дети (без подразделов -- один список на весь раздел)
   var sec2 = SONGS.filter(function(s){return s.section===2;});
-  if(sec2.length) addList('2', 2, 'Песни для детей', [{label:null, songs:sec2}], 'ДЛЯ\xa0ДЕТЕЙ');
+  if(sec2.length) addList('2', 2, 'Песни для детей', [{label:null, songs:sec2}], 'ДЛЯ\xa0ДЕТЕЙ');
 }
 buildAllLists();
 renderRecent();
@@ -3385,6 +3403,23 @@ enableFavoritesDrag(document.getElementById('program-list'));
    собираются из обычного оглавления (разделы -> подразделы), в
    ссылке -- постоянные id песен.
    ============================================================ */
+/* ---------- неразрывные пробелы в названиях списков и подзаголовках (правила как в вычитке текстов) ----------
+   тире: неразрывный пробел ПЕРЕД; после однобуквенных слов и коротких предлогов; между числом и словом («2026 г.»);
+   два последних слова не разрываем (чтобы на последней строке не оставалось одно слово). Повторное применение ничего не меняет. */
+var TYPO_SHORT = '(?:[вксуоияаВКСУОИЯА]|на|по|за|до|из|от|не|ни|но|то|же|ли|бы|во|со|ко|об|На|По|За|До|Из|От|Не|Ни|Но|То|Во|Со|Ко|Об)';
+var TYPO_RE_SHORT = new RegExp('(^|[^а-яёА-ЯЁA-Za-z0-9\\-])(' + TYPO_SHORT + ') (?=[а-яёА-ЯЁA-Za-z0-9«„(\\[\u201c])', 'g');
+var TYPO_RE_MONTH = /(^|[^а-яё])((?:январ[ьяе]|феврал[ьяе]|март[ае]?|апрел[ьяе]|ма[йяе]|июн[ьяе]|июл[ьяе]|август[ае]?|сентябр[ьяе]|октябр[ьяе]|ноябр[ьяе]|декабр[ьяе]),?) (?=\d)/gi;
+function typo(s){
+  if(!s) return s;
+  var NB = '\u00a0';
+  s = String(s).replace(/[ \u00a0]+\u2014[ \u00a0]*(?=\S)/g, NB + '\u2014 ');
+  s = s.replace(TYPO_RE_SHORT, '$1$2' + NB).replace(TYPO_RE_SHORT, '$1$2' + NB);
+  s = s.replace(/(\d+(?:-го)?) (?=[а-яёА-ЯЁ])/g, '$1' + NB);
+  s = s.replace(TYPO_RE_MONTH, '$1$2' + NB);                      /* «мая, 2026»: месяц и год вместе */
+  s = s.replace(/(\d) (?=\d)/g, '$1' + NB);                      /* число и следующая цифра */
+  s = s.replace(/ ([^ \u00a0]+)$/, NB + '$1');
+  return s;
+}
 var lists = store.getJSON('sb_lists', []);
 if(!Array.isArray(lists)) lists = [];
 var programs = store.getJSON('sb_programs', []);
@@ -3408,7 +3443,7 @@ function plural(n, a, b, c){ var m = n%10, h = n%100; return (m===1&&h!==11)?a:(
 function songsWord(n){ return n+' '+plural(n,'песня','песни','песен'); }
 var MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 function dayMonth(ts){ var d = new Date(ts); return d.getDate()+' '+MONTHS[d.getMonth()]; }
-function listTitle(l){ var t = (l.t||'').trim(); return t || ('Список от ' + dayMonth(l.c)); }
+function listTitle(l){ var t = (l.t||'').trim(); return typo(t) || ('Список от ' + dayMonth(l.c)); }
 function existingIds(ids){ return ids.filter(function(id){ return SEARCH_ENTRY_BY_ID[id]; }); }
 /* элементы списка: число = id песни, строка = подзаголовок («Вторник», «Причастие») */
 function isHdr(x){ return typeof x === 'string'; }
@@ -3545,7 +3580,7 @@ function ownItem(l){
   return {title: listTitle(l), meta: n ? songsWord(n) : 'пусто', onClick: function(){ openEdit(l.id); }};
 }
 function recvItem(p, withTag){
-  return {title: p.t, meta: songsWord(songCount(p.ids)), tag: withTag ? 'Прислали' : '', onClick: function(){ openProgramFromHash(progHash(p.ids, p.t)); }};
+  return {title: typo(p.t), meta: songsWord(songCount(p.ids)), tag: withTag ? 'Прислали' : '', onClick: function(){ openProgramFromHash(progHash(p.ids, p.t)); }};
 }
 function renderHomeLists(){
   var box = document.getElementById('home-lists');
@@ -3660,7 +3695,7 @@ function renderEdit(){
       item = document.createElement('div');
       item.className = 'nav-item hdr-row';
       var inp = document.createElement('textarea');
-      inp.rows = 1; inp.className = 'hdr-input'; inp.value = x; inp.maxLength = 40; inp.placeholder = '';
+      inp.rows = 1; inp.className = 'hdr-input'; inp.value = typo(x); inp.maxLength = 40; inp.placeholder = '';
       /* длинный подзаголовок переносится на вторую строку, а не прячется под кнопкой «+ песни» */
       var fitHdr = function(){ inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 'px'; };
       setTimeout(fitHdr, 0); if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitHdr);
@@ -3669,6 +3704,7 @@ function renderEdit(){
       inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); inp.blur(); } });
       /* пустой подзаголовок при уходе из поля убираем сам */
       inp.addEventListener('blur', function(){
+        if(inp.value.trim() !== '' && isHdr(l.ids[idx])){ var tv = typo(inp.value.trim()); if(tv !== l.ids[idx]){ l.ids[idx] = tv; l.u = Date.now(); saveLists(); } inp.value = tv; }
         if(inp.value.trim() === '' && l.ids[idx] !== undefined && isHdr(l.ids[idx])){ l.ids.splice(idx, 1); l.u = Date.now(); saveLists(); renderEdit(); }
       });
       item.appendChild(inp);
@@ -3704,7 +3740,7 @@ function renderEdit(){
   /* внизу «+ Песни» только пока у списка нет разделов: у разделов свои кнопки */
   document.getElementById('btn-prog-add').style.display = items.some(isHdr) ? 'none' : '';
   var inp2 = document.getElementById('program-title');
-  if(document.activeElement !== inp2) inp2.value = l.t || '';
+  if(document.activeElement !== inp2) inp2.value = typo(l.t || '');
   inp2.placeholder = 'Список от ' + dayMonth(l.c);
   fitTitle(); setTimeout(fitTitle, 0); setTimeout(fitTitle, 400);
 }
@@ -3719,6 +3755,7 @@ function openEdit(id, pushHash){
 function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
 document.getElementById('btn-edit-home').addEventListener('click', goHome);
 document.getElementById('btn-edit-lists').addEventListener('click', function(){ openListsScreen(); });
+document.getElementById('program-title').addEventListener('blur', function(){ var l = getList(curListId); if(l && l.t){ var v = typo(l.t.trim()); if(v !== l.t){ l.t = v; l.u = Date.now(); saveLists(); } this.value = v; fitTitle(); } });
 document.getElementById('program-title').addEventListener('input', function(){ fitTitle(); var l = getList(curListId); if(l){ l.t = this.value; l.u = Date.now(); saveLists(); } });
 document.getElementById('program-title').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); this.blur(); } });
 document.getElementById('btn-prog-clear').addEventListener('click', function(){
@@ -3739,7 +3776,7 @@ function updatePickerBar(){
   var l = getList(curListId); if(!l) return;
   var items = l.ids, r = sectionRange(items, pickHdr);
   var inSec = items.slice(r[0], r[1]).filter(function(x){ return !isHdr(x); }).length;
-  var name = listTitle(l) + (pickHdr >= 0 ? ' → ' + (items[pickHdr] || 'без названия') : '');
+  var name = listTitle(l) + (pickHdr >= 0 ? ' → ' + (typo(items[pickHdr]) || 'без названия') : '');
   document.getElementById('pb-text').innerHTML = '<span class="pb-name"></span>' + (inSec ? (pickHdr >= 0 ? 'В разделе: ' : 'В списке: ') + '<b>' + songsWord(inSec) + '</b>' : 'Откройте раздел и нажимайте на песни');
   document.querySelector('#pb-text .pb-name').textContent = name;
 }
@@ -3790,12 +3827,12 @@ function shareItems(items, title){
   if(!songCount(items)) return;
   var out = [], first = true;
   items.forEach(function(x){
-    if(isHdr(x)){ if(!first) out.push(''); out.push('\u2014 ' + (x.trim() || 'Раздел') + ' \u2014'); }
+    if(isHdr(x)){ if(!first) out.push(''); out.push('\u2014 ' + (typo(x.trim()) || 'Раздел') + ' \u2014'); }
     else { out.push(SEARCH_ENTRY_BY_ID[x].number + '. ' + byId[x].title); }
     first = false;
   });
   var link = location.origin + location.pathname + readableHash(items, title);
-  var text = title + '\n\n' + out.join('\n') + '\n\n' +
+  var text = typo(title) + '\n\n' + out.join('\n') + '\n\n' +
     'Как добавить список в «Песенник»:\n' +
     '1. Скопируйте это сообщение целиком.\n' +
     '2. Откройте «Песенник» и нажмите значок «Списки» в\u00a0шапке.\n' +
@@ -3819,7 +3856,7 @@ var programView = document.getElementById('program-view');
 var currentProgHash = null;
 function openProgramFromHash(h, pushHash){
   var p = parseAnyHash(h);
-  if(!p || !songCount(p.ids)){ showToast('Не удалось открыть список'); history.replaceState({}, '', location.pathname); return; }
+  if(!p || !songCount(p.ids)){ homeNotice('Не удалось открыть список. Скопируйте сообщение со списком целиком и вставьте его: «Списки» \u2192 «Вставить из сообщения».'); history.replaceState({}, '', location.pathname); return; }
   currentProgHash = h;
   var items = existingItems(p.ids), missing = p.ids.filter(function(x){ return !isHdr(x); }).length - songCount(items);
   var title = p.t || 'Список';
@@ -3831,11 +3868,11 @@ function openProgramFromHash(h, pushHash){
     store.setJSON('sb_programs', programs);
     renderHomeLists();
   }
-  document.getElementById('pv-title').textContent = title;
+  document.getElementById('pv-title').textContent = typo(title);
   document.getElementById('pv-meta').textContent = songsWord(songCount(items)) + ' · получен ' + dayMonth((known||programs[0]).at);
   var list = document.getElementById('pv-list'); list.innerHTML = '';
   items.forEach(function(x){
-    if(isHdr(x)){ list.appendChild(makeLabel('nav-sub', x.trim() || 'Раздел', 0)); return; }
+    if(isHdr(x)){ list.appendChild(makeLabel('nav-sub', typo(x.trim()) || 'Раздел', 0)); return; }
     var item = makeNavItem(byId[x], SEARCH_ENTRY_BY_ID[x].number);
     item.style.setProperty('--indent', '0px');
     list.appendChild(item);
@@ -3871,7 +3908,7 @@ document.getElementById('btn-pv-copy').addEventListener('click', function(){
 document.getElementById('btn-pv-remove').addEventListener('click', function(){
   var p = parseAnyHash(currentProgHash || ''); if(!p) return;
   var key = listKey(p.ids, p.t || 'Список');
-  showConfirm('Удалить список «' + (p.t || 'Список') + '»?', function(){
+  showConfirm('Удалить список «' + typo(p.t || 'Список') + '»?', function(){
     programs = programs.filter(function(x){ return x.k !== key; });
     store.setJSON('sb_programs', programs);
     openListsScreen();
@@ -3979,7 +4016,7 @@ function slHead(title, sub, backFn){
     var bk = document.createElement('button'); bk.type = 'button'; bk.className = 'sl-back'; bk.setAttribute('aria-label', 'Назад');
     bk.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'; bk.addEventListener('click', backFn); h.appendChild(bk);
   }
-  var tx = document.createElement('span'); tx.textContent = title; h.appendChild(tx); slBody.appendChild(h);
+  var tx = document.createElement('span'); tx.textContent = typo(title); h.appendChild(tx); slBody.appendChild(h);
   if(sub){ var p = document.createElement('p'); p.className = 'sl-sub'; p.textContent = sub; slBody.appendChild(p); }
 }
 function slRow(label, meta, cls, onClick, iconHtml){
@@ -4215,6 +4252,36 @@ document.querySelectorAll('.theme-switch-btn[data-home-choice]').forEach(functio
   });
 });
 renderHomeSwitch(); renderRecent(); renderHomeLists();
+
+/* светлое сообщение на главной (вместо тёмных всплывающих плашек) */
+function homeNotice(text){
+  var old = document.getElementById('home-notice'); if(old) old.remove();
+  var hdr = document.querySelector('#home .home-header'); if(!hdr) return;
+  var n = document.createElement('div'); n.id = 'home-notice'; n.className = 'home-notice'; n.setAttribute('role', 'status');
+  var p = document.createElement('p'); p.textContent = text; n.appendChild(p);
+  var x = document.createElement('button'); x.type = 'button'; x.className = 'home-notice-x'; x.setAttribute('aria-label', 'Закрыть');
+  x.innerHTML = '<svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+  x.addEventListener('click', function(){ n.remove(); }); n.appendChild(x);
+  hdr.insertAdjacentElement('afterend', n);
+  setTimeout(function(){ if(n.parentNode) n.remove(); }, 12000);
+}
+
+/* ---------- окно подтверждения: рядом с нажатой кнопкой, а не внизу страницы ---------- */
+var lastTapRect = null;
+document.addEventListener('click', function(e){
+  var b = e.target.closest && e.target.closest('button'); if(!b) return;
+  var r = b.getBoundingClientRect(); lastTapRect = {top: r.top, bottom: r.bottom, t: Date.now()};
+}, true);
+function placeConfirm(){
+  var modal = document.getElementById('confirm-modal'), sh = modal.querySelector('.modal-sheet');
+  var r = lastTapRect;
+  if(!r || Date.now() - r.t > 1500 || !(r.bottom > 0)){ modal.classList.remove('sl-pop'); sh.style.cssText = ''; return; }
+  var w = Math.min(420, window.innerWidth - 28), left = Math.round((window.innerWidth - w) / 2);
+  sh.style.cssText = 'top:' + Math.round(r.bottom + 8) + 'px;left:' + left + 'px;width:' + w + 'px;';
+  modal.classList.add('sl-pop');
+  var h = sh.offsetHeight;
+  if(r.bottom + 8 + h > window.innerHeight - 12){ sh.style.top = Math.max(12, Math.round(r.top - 8 - h)) + 'px'; }
+}
 
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
@@ -4731,6 +4798,7 @@ var confirmCancelHandler = null;
 function showConfirm(text, onConfirm){
   document.getElementById('confirm-modal-text').textContent = text;
   confirmModal.classList.add('open');
+  if(typeof placeConfirm === 'function'){ placeConfirm(); }
   confirmModal.querySelector('.modal-sheet-scroll').scrollTop = 0;
   function cleanup(){
     confirmModal.classList.remove('open');
