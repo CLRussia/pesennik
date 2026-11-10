@@ -3415,7 +3415,7 @@ function enableFavoritesDrag(container){
         document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold);
         holdPt = null;
         beginDrag({clientX: pt.lx, clientY: pt.ly, pointerId: pid, preventDefault: function(){}}, hd);
-      }, 230);
+      }, 170);
       document.addEventListener('pointermove', holdMove); document.addEventListener('pointerup', cancelHold); document.addEventListener('pointercancel', cancelHold);
       return;
     }
