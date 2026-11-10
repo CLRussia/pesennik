@@ -1914,8 +1914,8 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 #import-modal.sl-pop .import-err:empty{display:none;}
 #import-modal.sl-pop .modal-sheet-scroll{padding-bottom:14px;}
 
-/* значок «⋮⋮»: прокрутка пальцем с него работает (перетаскивание -- после короткого удержания) */
-.nav-drag-handle{touch-action:pan-y !important;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+/* значок «⋮⋮»: браузерная прокрутка отключена (прокручиваем сами, пока перенос не включился удержанием) */
+.nav-drag-handle{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 </style>
 </head>
 <body>
@@ -3364,7 +3364,6 @@ function enableFavoritesDrag(container){
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', onUp);
     document.removeEventListener('pointercancel', onUp);
-    document.removeEventListener('touchmove', blockScroll);
     row.classList.remove('dragging');
     row.style.position = ''; row.style.left = ''; row.style.top = ''; row.style.width = ''; row.style.zIndex = '';
     container.insertBefore(row, placeholder);
@@ -3381,32 +3380,52 @@ function enableFavoritesDrag(container){
     }
     row = null; placeholder = null; handle = null;
   }
-  var holdTimer = null, holdPt = null;
-  function holdMove(ev){ if(!holdPt) return; if(Math.abs(ev.clientY - holdPt.y) + Math.abs(ev.clientX - holdPt.x) > 10){ cancelHold(); } else { holdPt.lx = ev.clientX; holdPt.ly = ev.clientY; } }
-  function cancelHold(){ if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; } holdPt = null; document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold); }
-  function blockScroll(ev){ ev.preventDefault(); }
+  var holdTimer = null, holdPt = null, scrollMode = false, scroller = null;
+  function getScroller(el){
+    for(var a = el.parentElement; a && a !== document.body; a = a.parentElement){
+      var oy = getComputedStyle(a).overflowY;
+      if((oy === 'auto' || oy === 'scroll') && a.scrollHeight > a.clientHeight + 1) return a;
+    }
+    return document.scrollingElement || document.documentElement;
+  }
+  function holdMove(ev){
+    if(!holdPt) return;
+    if(!scrollMode && Math.abs(ev.clientY - holdPt.y) + Math.abs(ev.clientX - holdPt.x) > 10){
+      if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
+      scrollMode = true; scroller = getScroller(holdPt.hd); holdPt.ly = ev.clientY;
+    }
+    if(scrollMode){ scroller.scrollTop += (holdPt.ly - ev.clientY); holdPt.ly = ev.clientY; }
+    else { holdPt.lx = ev.clientX; holdPt.ly = ev.clientY; }
+  }
+  function cancelHold(){
+    if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
+    holdPt = null; scrollMode = false; scroller = null;
+    document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold);
+  }
   container.addEventListener('pointerdown', function(e){
     var hd = e.target.closest('.nav-drag-handle');
     if(!hd) return;
     if(e.pointerType === 'touch'){
-      if(holdTimer) return;
-      holdPt = {x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY};
+      if(holdTimer || holdPt) return;
+      holdPt = {x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, hd: hd};
       var pid = e.pointerId;
       holdTimer = setTimeout(function(){
-        var pt = holdPt; cancelHold();
-        beginDrag({clientX: pt.lx, clientY: pt.ly, pointerId: pid, preventDefault: function(){}}, hd, true);
+        holdTimer = null;
+        var pt = holdPt; if(!pt || scrollMode) return;
+        document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold);
+        holdPt = null;
+        beginDrag({clientX: pt.lx, clientY: pt.ly, pointerId: pid, preventDefault: function(){}}, hd);
       }, 230);
       document.addEventListener('pointermove', holdMove); document.addEventListener('pointerup', cancelHold); document.addEventListener('pointercancel', cancelHold);
       return;
     }
-    beginDrag(e, hd, false);
+    beginDrag(e, hd);
   });
-  function beginDrag(e, hd, touch){
+  function beginDrag(e, hd){
     handle = hd;
     row = handle.closest('.nav-item');
     if(!row) return;
     e.preventDefault();
-    if(touch){ document.addEventListener('touchmove', blockScroll, {passive: false}); }
     var rect = row.getBoundingClientRect();
     rectHeight = rect.height;
     baseTop = rect.top;
