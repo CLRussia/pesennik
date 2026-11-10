@@ -1905,6 +1905,14 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 
 /* названия и подзаголовки: строки ровнее, без одного слова на последней строке (где браузер умеет) */
 .pv-title,.pc-title,.hl-name,.nav-sub,.sl-name-h,.hdr-input,#program-title,.pb-name{text-wrap:balance;}
+
+/* окно вставки сообщения -- компактное, рядом с кнопкой */
+#import-modal.sl-pop{align-items:flex-start;justify-content:flex-start;background:rgba(0,0,0,.14);}
+#import-modal.sl-pop .modal-sheet{position:absolute;border-radius:18px;max-width:none;}
+#import-modal.sl-pop .modal-sheet-scroll{padding:14px;}
+#import-modal.sl-pop #import-text{margin-top:0;}
+#import-modal.sl-pop .import-err:empty{display:none;}
+#import-modal.sl-pop .modal-sheet-scroll{padding-bottom:14px;}
 </style>
 </head>
 <body>
@@ -3928,8 +3936,19 @@ function decodeListCode(text){
 }
 /* ---------- «Добавить из чата»: вставить текст сообщения или ссылку ---------- */
 var importModal = document.getElementById('import-modal');
-function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; document.getElementById('import-ok').style.display = 'none'; importModal.classList.add('open'); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
+function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; document.getElementById('import-ok').style.display = 'none'; importModal.classList.add('open'); placeImport(); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
 function closeImport(){ importModal.classList.remove('open'); }
+/* окно вставки -- рядом с кнопкой «Вставить из сообщения», а не внизу страницы (там ещё и клавиатура) */
+var importAnchor = null;
+function placeImport(){
+  var sh = importModal.querySelector('.modal-sheet'), r = importAnchor;
+  if(!r){ importModal.classList.remove('sl-pop'); sh.style.cssText = ''; return; }
+  var w = Math.min(420, window.innerWidth - 28), left = Math.round((window.innerWidth - w) / 2);
+  sh.style.cssText = 'top:' + Math.round(r.bottom + 8) + 'px;left:' + left + 'px;width:' + w + 'px;';
+  importModal.classList.add('sl-pop');
+  var h = sh.offsetHeight;
+  if(r.bottom + 8 + h > window.innerHeight - 12){ sh.style.top = Math.max(12, Math.round(r.top - 8 - h)) + 'px'; }
+}
 var HDR_LINE = /^\s*[—–-]\s*(.+?)\s*[—–-]\s*$/;
 function importBody(text){
   var lines = text.split(/\r?\n/), cut = -1, i;
@@ -3975,6 +3994,7 @@ function looksLikeListLink(t){
   return [t, safeDecode(t)].some(function(v){ return /#[Сс]писок\//.test(v) || /#l=[A-Za-z0-9_-]/.test(v) || /#prog=/.test(v) || /Код списка/i.test(v); });
 }
 function importFromClipboard(){
+  var ib = document.getElementById('btn-import'); if(ib){ var ir = ib.getBoundingClientRect(); importAnchor = {top: ir.top, bottom: ir.bottom}; }
   if(!navigator.clipboard || !navigator.clipboard.readText){ openImport(); return; }
   navigator.clipboard.readText().then(function(t){
     if(t && looksLikeListLink(t) && importFromText(t)) return;
