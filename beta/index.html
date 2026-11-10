@@ -1493,7 +1493,7 @@ input[type="search"]::-webkit-search-decoration{
 .prog-remove{flex:0 0 auto;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text-faint);border-radius:50%;}
 .prog-remove:active{background:var(--accent-soft);}
 .prog-remove svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
-#recent-block,#appearance-recent-row{display:none !important;}
+
 /* карточки на главной */
 #program-block{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
 #program-block:empty{display:none;}
@@ -1546,7 +1546,13 @@ body.picker-favs-on #az-jump{display:none !important;}
   transform:translateY(10px);transition:opacity .2s ease, transform .2s ease;}
 #mylists-view.open,#edit-view.open{display:block;}
 #mylists-view.open.visible,#edit-view.open.visible{opacity:1;transform:translateY(0);}
-#recent-block,#appearance-recent-row{display:none !important;}
+
+
+#program-title{resize:none;overflow:hidden;display:block;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere;}
+
+/* ряд «На главной»: три кнопки должны помещаться в строку */
+#appearance-recent-row .theme-switch{gap:6px;}
+#appearance-recent-row .theme-switch-btn{padding-left:11px;padding-right:11px;}
 /* ===== v4: списки на главной, значок в шапке ===== */
 #home-lists{margin-top:34px;}
 #home-lists:empty{display:none;}
@@ -1809,6 +1815,9 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 .tour-inline-btn{display:inline-flex;align-items:center;justify-content:center;width:1.55em;height:1.55em;border:1.5px solid var(--border);border-radius:50%;background:var(--bg-elevated);vertical-align:-.42em;margin:0 .1em;}
 .tour-inline-btn svg{width:.95em;height:.95em;stroke:var(--accent);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transform:translateY(-.03em);}
 .tour-inline-btn{vertical-align:-.235em;}
+
+/* подзаголовок: многострочное поле (перенос длинного текста) */
+.hdr-input{resize:none;overflow:hidden;display:block;line-height:1.25;white-space:pre-wrap;overflow-wrap:anywhere;}
 </style>
 </head>
 <body>
@@ -2015,10 +2024,11 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       </div>
     </div>
     <div class="appearance-row" id="appearance-recent-row">
-      <div class="appearance-label">Недавно открытые</div>
+      <div class="appearance-label">Главная</div>
       <div class="theme-switch">
-        <button class="theme-switch-btn" data-recent-choice="1" type="button"><span>Показывать</span></button>
-        <button class="theme-switch-btn" data-recent-choice="0" type="button"><span>Скрыть</span></button>
+        <button class="theme-switch-btn" data-home-choice="recent" type="button"><span>Открытые</span></button>
+        <button class="theme-switch-btn" data-home-choice="lists" type="button"><span>Списки</span></button>
+        <button class="theme-switch-btn" data-home-choice="none" type="button"><span>Ничего</span></button>
       </div>
     </div>
     <div class="appearance-row" id="appearance-font-row">
@@ -2042,7 +2052,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     </div>
   </div>
   <div class="list-scroll">
-    <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Вставить ссылку</span></button></div>
+    <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Вставить из сообщения</span></button></div>
     <div class="screen-head" id="lists-own-head"><span>Мои списки</span><button class="sel-toggle" id="btn-lists-select" type="button">Выбрать</button></div>
     <div id="lists-own"></div>
     <div class="screen-head" id="lists-recv-head"><span>Общие списки</span></div>
@@ -2069,7 +2079,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
   <div class="list-scroll">
     <div class="prog-title-wrap">
       <div class="prog-title-label">Название</div>
-      <input id="program-title" type="text" maxlength="60" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <textarea id="program-title" rows="1" maxlength="60" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea>
     </div>
     <div class="prog-count" id="prog-count"></div>
     <div id="program-list"></div>
@@ -2104,7 +2114,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       <div class="pv-meta" id="pv-meta"></div>
     </div>
     <div class="pv-browser" id="pv-browser" style="display:none">
-      <p>Вы открыли список в браузере. Чтобы он появился в приложении «Песенник»: скопируйте ссылку, откройте приложение, нажмите значок «Списки» → «Вставить ссылку».</p>
+      <p>Вы открыли список в браузере. Чтобы он появился в приложении «Песенник»: нажмите «Скопировать ссылку», откройте приложение, затем значок «Списки» → «Вставить из сообщения».</p>
       <button class="prog-btn" id="btn-pv-copy" type="button"><span>Скопировать ссылку</span></button>
     </div>
     <div id="pv-list"></div>
@@ -2114,7 +2124,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 
 <div class="modal-overlay" id="import-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
-    <textarea id="import-text" rows="3" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте ссылку на список"></textarea>
+    <textarea id="import-text" rows="3" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте сообщение со списком"></textarea>
     <p class="import-err" id="import-err"></p>
     <button class="prog-btn" id="import-ok" type="button" style="width:100%;display:none"><span>Добавить</span></button>
   </div></div>
@@ -3471,7 +3481,7 @@ function recvItem(p, withTag){
 function renderHomeLists(){
   var box = document.getElementById('home-lists');
   box.innerHTML = '';
-  if(pickerMode) return;
+  if(pickerMode || homeChoice() !== 'lists') return;
   var own = sortedLists(), recv = programs.slice();
   if(!own.length && !recv.length) return;
   var mode = document.body.getAttribute('data-lv') || 'one';
@@ -3580,11 +3590,14 @@ function renderEdit(){
     if(isHdr(x)){
       item = document.createElement('div');
       item.className = 'nav-item hdr-row';
-      var inp = document.createElement('input');
-      inp.type = 'text'; inp.className = 'hdr-input'; inp.value = x; inp.maxLength = 40; inp.placeholder = '';
+      var inp = document.createElement('textarea');
+      inp.rows = 1; inp.className = 'hdr-input'; inp.value = x; inp.maxLength = 40; inp.placeholder = '';
+      /* длинный подзаголовок переносится на вторую строку, а не прячется под кнопкой «+ песни» */
+      var fitHdr = function(){ inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 'px'; };
+      setTimeout(fitHdr, 0); if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitHdr);
       inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done');
-      inp.addEventListener('input', function(){ l.ids[idx] = inp.value; l.u = Date.now(); saveLists(); });
-      inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ inp.blur(); } });
+      inp.addEventListener('input', function(){ fitHdr(); l.ids[idx] = inp.value; l.u = Date.now(); saveLists(); });
+      inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); inp.blur(); } });
       /* пустой подзаголовок при уходе из поля убираем сам */
       inp.addEventListener('blur', function(){
         if(inp.value.trim() === '' && l.ids[idx] !== undefined && isHdr(l.ids[idx])){ l.ids.splice(idx, 1); l.u = Date.now(); saveLists(); renderEdit(); }
@@ -3624,7 +3637,11 @@ function renderEdit(){
   var inp2 = document.getElementById('program-title');
   if(document.activeElement !== inp2) inp2.value = l.t || '';
   inp2.placeholder = 'Список от ' + dayMonth(l.c);
+  fitTitle(); setTimeout(fitTitle, 0); setTimeout(fitTitle, 400);
 }
+/* длинное название переносится на вторую строку, а не обрезается */
+function fitTitle(){ var t = document.getElementById('program-title'); if(!t || !t.offsetWidth) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
 function openEdit(id, pushHash){
   if(!getList(id)){ openListsScreen(false); return; }
   curListId = id; renderEdit();
@@ -3632,8 +3649,8 @@ function openEdit(id, pushHash){
 }
 function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
 document.getElementById('btn-edit-back').addEventListener('click', function(){ openListsScreen(); });
-document.getElementById('program-title').addEventListener('input', function(){ var l = getList(curListId); if(l){ l.t = this.value; l.u = Date.now(); saveLists(); } });
-document.getElementById('program-title').addEventListener('keydown', function(e){ if(e.key==='Enter'){ this.blur(); } });
+document.getElementById('program-title').addEventListener('input', function(){ fitTitle(); var l = getList(curListId); if(l){ l.t = this.value; l.u = Date.now(); saveLists(); } });
+document.getElementById('program-title').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); this.blur(); } });
 document.getElementById('btn-prog-clear').addEventListener('click', function(){
   var l = getList(curListId); if(!l) return;
   showConfirm('Удалить список «' + listTitle(l) + '»?', function(){
@@ -3709,8 +3726,11 @@ function shareItems(items, title){
   });
   var link = location.origin + location.pathname + readableHash(items, title);
   var text = title + '\n\n' + out.join('\n') + '\n\n' +
-    'Открыть список в приложении «Песенник»:\n' + link + '\n\n' +
-    'Если ссылка открылась в браузере: скопируйте её, откройте приложение, нажмите значок «Списки» → «Вставить ссылку» и вставьте.';
+    'Как добавить список в «Песенник»:\n' +
+    '1. Скопируйте это сообщение целиком.\n' +
+    '2. Откройте «Песенник» и нажмите значок «Списки» в\u00a0шапке.\n' +
+    '3. Нажмите «Вставить из сообщения».\n\n' +
+    link;
   if(window.__progShareHook){ window.__progShareHook(text, link); return; }
   if(navigator.share){ navigator.share({title: title, text: text}).catch(function(){}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('Текст скопирован'); }); }
@@ -3842,7 +3862,7 @@ function importFromClipboard(){
 document.getElementById('btn-import').addEventListener('click', importFromClipboard);
 function importFromText(txt){
   var h = parseImport(txt || '');
-  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл ссылку на список. Скопируйте ссылку из сообщения целиком.'; return false; }
+  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл список. Скопируйте сообщение со списком целиком.'; return false; }
   closeImport(); openProgramFromHash(h); return true;
 }
 importModal.addEventListener('click', function(e){ if(e.target === importModal) closeImport(); });
@@ -4083,6 +4103,25 @@ function cardMenuRecv(p, el){
   }
   tr.addEventListener('scroll', function(){ clearTimeout(t); t = setTimeout(check, 160); }, {passive: true});
 })();
+
+/* ---------- что показывать на главной: недавно открытые / списки / ничего ---------- */
+function homeChoice(){
+  var c = store.get('sb_home_block', null);
+  if(c !== 'recent' && c !== 'lists' && c !== 'none') c = store.get('sb_show_recent', '1') === '0' ? 'none' : 'recent';
+  return c;
+}
+function renderHomeSwitch(){
+  var on = homeChoice();
+  document.querySelectorAll('.theme-switch-btn[data-home-choice]').forEach(function(btn){ btn.classList.toggle('is-active', btn.dataset.homeChoice === on); });
+}
+document.querySelectorAll('.theme-switch-btn[data-home-choice]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var c = btn.dataset.homeChoice;
+    store.set('sb_home_block', c); store.set('sb_show_recent', c === 'recent' ? '1' : '0');
+    renderHomeSwitch(); renderRecent(); renderHomeLists();
+  });
+});
+renderHomeSwitch(); renderRecent(); renderHomeLists();
 
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
