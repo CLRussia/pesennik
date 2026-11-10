@@ -1523,15 +1523,15 @@ input[type="search"]::-webkit-search-decoration{
 
   <nav id="sections-menu">
     <div class="section-block" id="section-0" data-section="0">
-      <button class="section-head ui-caps"><span>Молитвы и песнопения для&nbsp;мессы</span><span class="chev"></span></button>
+      <button class="section-head ui-caps"><span>Молитвы и&nbsp;песнопения для&nbsp;мессы</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
     <div class="section-block" id="section-1" data-section="1">
-      <button class="section-head ui-caps"><span>Песни для собраний и встреч</span><span class="chev"></span></button>
+      <button class="section-head ui-caps"><span>Песни для собраний и&nbsp;встреч</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
     <div class="section-block" id="section-2" data-section="2">
-      <button class="section-head ui-caps"><span>Песни для детей</span><span class="chev"></span></button>
+      <button class="section-head ui-caps"><span>Песни для&nbsp;детей</span><span class="chev"></span></button>
       <div class="section-body"><div class="section-list"></div></div>
     </div>
     <div id="recent-block"></div>
@@ -1992,7 +1992,7 @@ var SONGS = JSON.parse(document.getElementById('songs-json').textContent);
 var byId = {};
 SONGS.forEach(function(s){ byId[s.id] = s; });
 
-var SECTION_NAMES = ['Молитвы и песнопения для мессы','Песни для собраний и встреч','Песни для детей'];
+var SECTION_NAMES = ['Молитвы и песнопения для мессы','Песни для собраний и встреч','Песни для детей'];
 var LANG_ORDER = ['Русский','Итальянский','Испанский','Португальский','Французский','Английский','Белорусский'];
 /* Подписи групп в разделе "Для собраний" -- только для отображения (в
    форме "НА [ЯЗЫКЕ]"), группировка и сортировка по-прежнему идут по
@@ -2402,11 +2402,11 @@ function buildAllLists(){
   // названия и тексты, отдельно их проще искать), поэтому и подпись
   // своя -- намеренно другая, чтобы не выглядело ещё одним языком.
   if(alpine.length) addList('1-alpine', 1, 'АЛЬПИЙСКИЕ ПЕСНИ', [{label:null, songs:alpine}], 'АЛЬПИЙСКИЕ ПЕСНИ');
-  if(ruFolk.length) addList('1-rufolk', 1, 'РУССКИЕ НАРОДНЫЕ ПЕСНИ', [{label:null, songs:ruFolk}], 'РУССКИЕ НАРОДНЫЕ ПЕСНИ');
+  if(ruFolk.length) addList('1-rufolk', 1, 'РУССКИЕ НАРОДНЫЕ ПЕСНИ', [{label:null, songs:ruFolk}], 'РУССКИЕ НАРОДНЫЕ ПЕСНИ');
 
   // Раздел 2 -- Дети (без подразделов -- один список на весь раздел)
   var sec2 = SONGS.filter(function(s){return s.section===2;});
-  if(sec2.length) addList('2', 2, 'Песни для детей', [{label:null, songs:sec2}], 'ДЛЯ\xa0ДЕТЕЙ');
+  if(sec2.length) addList('2', 2, 'Песни для детей', [{label:null, songs:sec2}], 'ДЛЯ\xa0ДЕТЕЙ');
 }
 buildAllLists();
 renderRecent();
