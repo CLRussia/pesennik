@@ -1876,6 +1876,17 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 /* маленькие кнопки-ссылки: зона нажатия выше видимой (до ~44 px), внешне без изменений; только по вертикали, чтобы не залезать на соседей */
 .sel-toggle,.hl-more,.hdr-add{position:relative;}
 .sel-toggle::after,.hl-more::after,.hdr-add::after{content:'';position:absolute;left:-6px;right:-6px;top:-8px;bottom:-8px;}
+
+/* страница присланного списка: закреплённая кнопка «Сделать своим» и значок «Списки» в шапке */
+#program-view.open{display:flex;flex-direction:column;}
+#program-view .list-scroll{flex:1 0 auto;width:100%;box-sizing:border-box;}
+#program-view .pv-bar{position:sticky;bottom:0;}
+#program-view #btn-pv-lists{width:40px;height:40px;}
+#program-view #btn-pv-lists svg{width:20px;height:20px;}
+@media (min-width:360px){ #program-view #btn-pv-lists{width:44px;height:44px;} #program-view #btn-pv-lists svg{width:22px;height:22px;} }
+
+/* редактор списка: «домой» и «Списки» слева, корзина справа */
+#edit-view #btn-prog-clear{margin-left:auto;}
 </style>
 </head>
 <body>
@@ -2127,10 +2138,8 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 <div id="edit-view">
   <div class="list-topbar">
     <div class="list-topbar-row">
-      <button class="back-btn" id="btn-edit-back" aria-label="Списки">
-        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>Списки</span>
-      </button>
+      <button class="icon-btn-sm" id="btn-edit-home" aria-label="На главную"></button>
+      <button class="icon-btn-sm" id="btn-edit-lists" title="Списки" aria-label="Списки"><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm eb-del" id="btn-prog-clear" type="button" title="Удалить список" aria-label="Удалить список"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button>
     </div>
   </div>
@@ -2159,6 +2168,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
         <span>На главную</span>
       </button>
+      <button class="icon-btn-sm" id="btn-pv-lists" title="Списки" aria-label="Списки"><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm" id="btn-pv-share" title="Поделиться" aria-label="Поделиться">
         <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg>
       </button>
@@ -2178,6 +2188,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div id="pv-list"></div>
     <p class="pv-note" id="pv-note"></p>
   </div>
+  <div class="edit-bar pv-bar"><button class="prog-btn primary" id="btn-pv-save" type="button"><span>Сделать своим</span></button></div>
 </div>
 
 <div class="modal-overlay" id="import-modal">
@@ -3706,7 +3717,8 @@ function openEdit(id, pushHash){
   openExtra(editView, '#edit=' + id, pushHash);
 }
 function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
-document.getElementById('btn-edit-back').addEventListener('click', function(){ openListsScreen(); });
+document.getElementById('btn-edit-home').addEventListener('click', goHome);
+document.getElementById('btn-edit-lists').addEventListener('click', function(){ openListsScreen(); });
 document.getElementById('program-title').addEventListener('input', function(){ fitTitle(); var l = getList(curListId); if(l){ l.t = this.value; l.u = Date.now(); saveLists(); } });
 document.getElementById('program-title').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); this.blur(); } });
 document.getElementById('btn-prog-clear').addEventListener('click', function(){
@@ -3831,8 +3843,23 @@ function openProgramFromHash(h, pushHash){
   var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
   document.getElementById('pv-browser').style.display = (!isStandalone && pushHash === false) ? '' : 'none';
   document.getElementById('pv-note').textContent = missing > 0 ? ('Часть песен (' + missing + ') больше не входит в песенник.') : '';
+  refreshPvSave();
   openExtra(programView, h, pushHash);
 }
+function pvKey(){ var p = parseAnyHash(currentProgHash || ''); return p ? listKey(p.ids, p.t || 'Список') : null; }
+function refreshPvSave(){
+  var k = pvKey(), b = document.getElementById('btn-pv-save'); if(!b || !k) return;
+  b.querySelector('span').textContent = ownCopyOf(k) ? 'Редактировать мою копию' : 'Сделать своим';
+}
+document.getElementById('btn-pv-save').addEventListener('click', function(){
+  var p = parseAnyHash(currentProgHash || ''); if(!p) return;
+  var k = pvKey(), own = ownCopyOf(k);
+  if(own){ openEdit(own.id); return; }
+  slDup(p.ids, p.t || 'Список', k);
+  flashButton(this, '\u2713 Сохранено в мои списки');
+  setTimeout(refreshPvSave, 1700);
+});
+document.getElementById('btn-pv-lists').addEventListener('click', function(){ openListsScreen(); });
 document.getElementById('btn-program-back').addEventListener('click', goHome);
 document.getElementById('btn-pv-share').addEventListener('click', shareReceived);
 document.getElementById('btn-pv-copy').addEventListener('click', function(){
@@ -4062,13 +4089,17 @@ function slPlaceAt(el){
   if(r.bottom + 8 + h > window.innerHeight - 12){ sh.style.top = Math.max(12, Math.round(r.top - 8 - h)) + 'px'; sh.style.setProperty('--sl-max', Math.max(200, r.top - 20) + 'px'); }
 }
 function slOpenFor(el){ slModal.classList.add('open'); slPlaceAt(el); }
-function slDup(srcIds, title){
+function slDup(srcIds, title, src){
   var now = Date.now();
-  lists.push({id: 'l' + now.toString(36), t: title, ids: srcIds.slice(), c: now, u: now});
+  var nl = {id: 'l' + now.toString(36), t: title, ids: srcIds.slice(), c: now, u: now}; if(src) nl.src = src;
+  lists.push(nl);
   saveLists(); renderListsScreen(); renderHomeLists(); slClose();
 }
 var IC_SHARE = '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg>';
 var IC_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>';
+var IC_SAVE = '<svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="11" x2="20" y2="11"/><line x1="4" y1="16" x2="11" y2="16"/><line x1="17" y1="13" x2="17" y2="20"/><line x1="13.5" y1="16.5" x2="20.5" y2="16.5"/></svg>';
+var IC_EDIT = '<svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><line x1="14" y1="7" x2="17.5" y2="10.5"/></svg>';
+function ownCopyOf(key){ return lists.filter(function(l){ return l.src === key; })[0]; }
 var IC_TRASH = '<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>';
 function cardMenuOwn(l, el){
   slHead(listTitle(l));
@@ -4085,7 +4116,9 @@ function cardMenuRecv(p, el){
   slHead(p.t || 'Список');
   slBody.querySelector('h2').classList.add('sl-name-h');
   slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список'); }, IC_SHARE);
-  slRow('Сохранить как мой', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список'); }, IC_COPY);
+  var rk = listKey(p.ids, p.t || 'Список'), own = ownCopyOf(rk);
+  if(own){ slRow('Открыть мою копию', '', 'sl-cap', function(){ slClose(); openEdit(own.id); }, IC_EDIT); }
+  else { slRow('Сделать своим', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список', rk); }, IC_SAVE); }
   slRow('Удалить', '', 'sl-cap sl-danger', function(){
     var key = listKey(p.ids, p.t || 'Список');
     programs = programs.filter(function(x){ return x.k !== key; }); store.setJSON('sb_programs', programs);
@@ -4109,7 +4142,7 @@ function cardMenuRecv(p, el){
 /* ---------- «На главную» -> значок «домой»; порядок значков: «Оформление» перед «Списки» ---------- */
 (function(){
   var HOME = '<svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg>';
-  ['btn-back','btn-list-back','btn-allsongs-back','btn-lists-back','btn-program-back','btn-giussani-back','btn-favorites-back'].forEach(function(id){
+  ['btn-back','btn-list-back','btn-allsongs-back','btn-lists-back','btn-program-back','btn-edit-home','btn-giussani-back','btn-favorites-back'].forEach(function(id){
     var b = document.getElementById(id); if(!b) return;
     b.className = 'icon-btn-sm home-btn'; b.innerHTML = HOME; b.setAttribute('title', 'На главную');
   });
