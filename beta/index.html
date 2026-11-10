@@ -1467,6 +1467,32 @@ input[type="search"]::-webkit-search-decoration{
   .nav-fav-btn svg{width:22px;height:22px;}
 }
 
+/* ===== узкие экраны (320-375 px) =====
+   Шапка главной (4 кнопки по 42 px + заголовок) требовала 365 px: на телефонах уже страница становилась шире экрана,
+   правая кнопка и края окон срезались. Шире 382 px ничего не меняется. */
+@media (max-width:381px){
+  .home-header,.icon-row-left,.icon-row-right{gap:6px;}
+  .home-header .icon-btn{width:40px;height:40px;}
+  .home-title{font-size:min(22px, calc((100vw - 32px - 172px - 12px) / 6.95));}
+}
+@media (max-width:339px){
+  .home-header,.icon-row-left,.icon-row-right{gap:4px;}
+  .home-header .icon-btn{width:36px;height:36px;}
+  .home-title{font-size:min(22px, calc((100vw - 32px - 152px - 8px) / 6.95));}
+}
+/* «Оформление» на узких экранах: подпись отдельной строкой, чтобы ползунок и кнопки не обрезались справа */
+@media (max-width:359px){
+  .appearance-row:has(.size-slider){flex-wrap:wrap;row-gap:6px;}
+  .appearance-row:has(.size-slider) .appearance-label{flex:0 0 100%;}
+  .appearance-row:has(.size-slider) .size-slider{flex:1 1 100%;max-width:none;}
+}
+@media (max-width:399px){
+  #appearance-recent-row{flex-wrap:wrap;row-gap:10px;}
+  #appearance-recent-row .appearance-label{flex:0 0 100%;}
+  #appearance-recent-row .theme-switch{flex:1 1 100%;}
+  #appearance-recent-row .theme-switch-btn{flex:1 1 0;justify-content:center;padding-left:6px;padding-right:6px;}
+}
+
 /* ===== ПРОГРАММА (прототип) ===== */
 .fav-tabs{display:flex;gap:6px;margin-top:12px;padding:3px;background:var(--accent-soft);border-radius:999px;}
 .fav-tab{flex:1;padding:9px 8px;border-radius:999px;font-family:var(--font-ui);font-size:12.5px;font-weight:700;
@@ -1818,6 +1844,38 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 
 /* подзаголовок: многострочное поле (перенос длинного текста) */
 .hdr-input{resize:none;overflow:hidden;display:block;line-height:1.25;white-space:pre-wrap;overflow-wrap:anywhere;}
+
+/* шапка главной на узких экранах: 4 кнопки по 42 px + заголовок требуют 382 px, а у многих телефонов 320-375 --
+   из-за этого страница становилась шире экрана и правая кнопка уходила за край. Сжимаем кнопки и заголовок. */
+@media (max-width:381px){
+  .home-header,.icon-row-left,.icon-row-right{gap:6px;}
+  .home-header .icon-btn{width:40px;height:40px;}
+  .home-title{font-size:min(22px, calc((100vw - 32px - 172px - 12px) / 6.95));}
+}
+@media (max-width:339px){
+  .home-header,.icon-row-left,.icon-row-right{gap:4px;}
+  .home-header .icon-btn{width:36px;height:36px;}
+  .home-title{font-size:min(22px, calc((100vw - 32px - 152px - 8px) / 6.95));}
+}
+
+/* «Оформление» на самых узких экранах: подпись «Главная» отдельной строкой, три кнопки делят ширину */
+@media (max-width:399px){
+  #appearance-recent-row{flex-wrap:wrap;row-gap:10px;}
+  #appearance-recent-row .appearance-label{flex:0 0 100%;}
+  #appearance-recent-row .theme-switch{flex:1 1 100%;}
+  #appearance-recent-row .theme-switch-btn{flex:1 1 0;padding-left:6px;padding-right:6px;justify-content:center;}
+}
+
+/* «Оформление»: на узких экранах «Размер текста» -- подпись отдельной строкой, чтобы ползунок не обрезался справа */
+@media (max-width:359px){
+  .appearance-row:has(.size-slider){flex-wrap:wrap;row-gap:6px;}
+  .appearance-row:has(.size-slider) .appearance-label{flex:0 0 100%;}
+  .appearance-row:has(.size-slider) .size-slider{flex:1 1 100%;max-width:none;}
+}
+
+/* маленькие кнопки-ссылки: зона нажатия выше видимой (до ~44 px), внешне без изменений; только по вертикали, чтобы не залезать на соседей */
+.sel-toggle,.hl-more,.hdr-add{position:relative;}
+.sel-toggle::after,.hl-more::after,.hdr-add::after{content:'';position:absolute;left:-6px;right:-6px;top:-8px;bottom:-8px;}
 </style>
 </head>
 <body>
@@ -4107,8 +4165,10 @@ function cardMenuRecv(p, el){
 /* ---------- что показывать на главной: недавно открытые / списки / ничего ---------- */
 function homeChoice(){
   var c = store.get('sb_home_block', null);
-  if(c !== 'recent' && c !== 'lists' && c !== 'none') c = store.get('sb_show_recent', '1') === '0' ? 'none' : 'recent';
-  return c;
+  if(c === 'recent' || c === 'lists' || c === 'none') return c;
+  /* явного выбора нет: прежнее «Скрыть» -> ничего; иначе списки, если они есть, а нет -- недавно открытые */
+  if(store.get('sb_show_recent', '1') === '0') return 'none';
+  return ((lists && lists.length) || (programs && programs.length)) ? 'lists' : 'recent';
 }
 function renderHomeSwitch(){
   var on = homeChoice();
@@ -4248,7 +4308,7 @@ function renderRecent(){
   var box = document.getElementById('recent-block'); if(!box) return;
   if(!recent) recent = store.getJSON('sb_recent', []);
   box.innerHTML = '';
-  if(store.get('sb_show_recent', '1') === '0') return;
+  if(typeof homeChoice === 'function' ? homeChoice() !== 'recent' : store.get('sb_show_recent', '1') === '0') return;
   var ids = recent.filter(function(id){ return byId[id]; }).slice(0, 5);
   if(!ids.length) return;
   var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
