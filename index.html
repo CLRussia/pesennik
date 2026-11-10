@@ -1465,6 +1465,32 @@ input[type="search"]::-webkit-search-decoration{
   .nav-fav-btn{width:44px;height:44px;}
   .nav-fav-btn svg{width:22px;height:22px;}
 }
+
+/* ===== узкие экраны (320-375 px) =====
+   Шапка главной (4 кнопки по 42 px + заголовок) требовала 365 px: на телефонах уже страница становилась шире экрана,
+   правая кнопка и края окон срезались. Шире 382 px ничего не меняется. */
+@media (max-width:381px){
+  .home-header,.icon-row-left,.icon-row-right{gap:6px;}
+  .home-header .icon-btn{width:40px;height:40px;}
+  .home-title{font-size:min(22px, calc((100vw - 32px - 172px - 12px) / 6.95));}
+}
+@media (max-width:339px){
+  .home-header,.icon-row-left,.icon-row-right{gap:4px;}
+  .home-header .icon-btn{width:36px;height:36px;}
+  .home-title{font-size:min(22px, calc((100vw - 32px - 152px - 8px) / 6.95));}
+}
+/* «Оформление» на узких экранах: подпись отдельной строкой, чтобы ползунок и кнопки не обрезались справа */
+@media (max-width:359px){
+  .appearance-row:has(.size-slider){flex-wrap:wrap;row-gap:6px;}
+  .appearance-row:has(.size-slider) .appearance-label{flex:0 0 100%;}
+  .appearance-row:has(.size-slider) .size-slider{flex:1 1 100%;max-width:none;}
+}
+@media (max-width:399px){
+  #appearance-recent-row{flex-wrap:wrap;row-gap:10px;}
+  #appearance-recent-row .appearance-label{flex:0 0 100%;}
+  #appearance-recent-row .theme-switch{flex:1 1 100%;}
+  #appearance-recent-row .theme-switch-btn{flex:1 1 0;justify-content:center;padding-left:6px;padding-right:6px;}
+}
 </style>
 </head>
 <body>
