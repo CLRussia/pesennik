@@ -1913,6 +1913,9 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 #import-modal.sl-pop #import-text{margin-top:0;}
 #import-modal.sl-pop .import-err:empty{display:none;}
 #import-modal.sl-pop .modal-sheet-scroll{padding-bottom:14px;}
+
+/* значок «⋮⋮»: прокрутка пальцем с него работает (перетаскивание -- после короткого удержания) */
+.nav-drag-handle{touch-action:pan-y !important;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 </style>
 </head>
 <body>
@@ -1957,12 +1960,12 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div id="home-lists"></div>
     <div id="recent-block"></div>
     <button id="giussani" type="button" aria-label="Высшее выражение человека — Луиджи Джуссани">
-      <div class="q">Пение — это чистая любовь.</div>
-      <div class="who">Луиджи Джуссани</div>
+      <div class="q">Пение&nbsp;— это чистая&nbsp;любовь.</div>
+      <div class="who">Луиджи&nbsp;Джуссани</div>
     </button>
   </nav>
   <div id="results-view"></div>
-  <p id="no-results">Ничего не найдено</p>
+  <p id="no-results">Ничего не&nbsp;найдено</p>
 </div>
 
 <div id="list-view">
@@ -1970,7 +1973,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="list-topbar-row">
       <button class="back-btn" id="btn-list-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
       <button class="icon-btn-sm" id="btn-favorites-list" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm" id="btn-appearance-list" title="Оформление" aria-label="Оформление">
@@ -1992,7 +1995,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="list-topbar-row">
       <button class="back-btn" id="btn-favorites-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
       <button class="icon-btn-sm" id="btn-appearance-favorites" title="Оформление" aria-label="Оформление">
         <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg>
@@ -2007,10 +2010,10 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
   </div>
   <div class="list-scroll">
     <div class="results-toolbar" id="favorites-toolbar">
-      <button class="link-btn ui-caps" id="btn-clear-favs" type="button">Очистить все</button>
+      <button class="link-btn ui-caps" id="btn-clear-favs" type="button">Очистить&nbsp;все</button>
     </div>
     <div id="favorites-list"></div>
-    <p class="empty-note" id="favorites-empty">Пока пусто.</p>
+    <p class="empty-note" id="favorites-empty">Пока&nbsp;пусто.</p>
   </div>
 </div>
 
@@ -2019,13 +2022,13 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="list-topbar-row">
       <button class="back-btn" id="btn-allsongs-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
       <button class="icon-btn-sm" id="btn-favorites-allsongs" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm" id="btn-appearance-allsongs" title="Оформление" aria-label="Оформление">
         <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg>
       </button>
-      <div class="list-title">Все песни</div>
+      <div class="list-title">Все&nbsp;песни</div>
     </div>
     <div class="quick-search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.5" y2="15.5"/></svg>
@@ -2043,7 +2046,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="song-topbar-row">
       <button class="back-btn" id="btn-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
       <button class="icon-btn-sm" id="btn-favorites-song" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="translation-pill ui-caps" id="btn-translation-pill" type="button" hidden>Перевод</button>
@@ -2104,7 +2107,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       </div>
     </div>
     <div class="appearance-row">
-      <div class="appearance-label">Размер текста</div>
+      <div class="appearance-label">Размер&nbsp;текста</div>
       <div class="size-slider">
         <span class="size-slider-edge size-slider-edge-min">A</span>
         <div class="size-slider-track">
@@ -2142,21 +2145,21 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="list-topbar-row">
       <button class="back-btn" id="btn-lists-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
     </div>
   </div>
   <div class="list-scroll">
-    <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Вставить из сообщения</span></button></div>
-    <div class="screen-head" id="lists-own-head"><span>Мои списки</span><button class="sel-toggle" id="btn-lists-select" type="button">Выбрать</button></div>
+    <div class="prog-actions" style="padding-top:16px"><button class="prog-btn primary" id="btn-new-list" type="button"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Новый&nbsp;список</span></button><button class="prog-btn" id="btn-import" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="9" height="4" rx="1"/><path d="M6 6H5.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H17"/></svg><span>Вставить из&nbsp;сообщения</span></button></div>
+    <div class="screen-head" id="lists-own-head"><span>Мои&nbsp;списки</span><button class="sel-toggle" id="btn-lists-select" type="button">Выбрать</button></div>
     <div id="lists-own"></div>
-    <div class="screen-head" id="lists-recv-head"><span>Общие списки</span></div>
+    <div class="screen-head" id="lists-recv-head"><span>Общие&nbsp;списки</span></div>
     <div id="lists-recv"></div>
-    <p class="lists-hint" id="lists-hint">Нажмите и удерживайте список,<br>чтобы удалить или поделиться</p>
-    <p class="empty-note" id="lists-empty">Здесь будут ваши списки песен: для&nbsp;встречи, каникул или&nbsp;мессы. Составьте список и&nbsp;отправьте ссылкой&nbsp;— у получателей он откроется в&nbsp;песеннике. Другие его не&nbsp;увидят. Присланные вам списки тоже появятся здесь.</p>
+    <p class="lists-hint" id="lists-hint">Нажмите и&nbsp;удерживайте&nbsp;список,<br>чтобы удалить или&nbsp;поделиться</p>
+    <p class="empty-note" id="lists-empty">Здесь будут ваши списки песен: для&nbsp;встречи, каникул или&nbsp;мессы. Составьте список и&nbsp;отправьте ссылкой&nbsp;— у&nbsp;получателей он откроется в&nbsp;песеннике. Другие его не&nbsp;увидят. Присланные вам списки тоже появятся здесь.</p>
   </div>
   <div class="edit-bar sel-bar">
-    <button class="prog-btn" id="sel-all" type="button"><span>Выбрать все</span></button>
+    <button class="prog-btn" id="sel-all" type="button"><span>Выбрать&nbsp;все</span></button>
     <button class="prog-btn danger" id="sel-del" type="button" disabled><span>Удалить</span></button>
   </div>
 </div>
@@ -2176,12 +2179,12 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     </div>
     <div class="prog-count" id="prog-count"></div>
     <div id="program-list"></div>
-    <p class="empty-note" id="program-empty">Пока нет песен. Нажмите «+ Песни».</p>
+    <p class="empty-note" id="program-empty">Пока нет песен. Нажмите «+&nbsp;Песни».</p>
   </div>
   <div class="edit-bar">
-    <button class="eb-addhdr" id="btn-add-header" type="button"><span>+ Подзаголовок</span></button>
+    <button class="eb-addhdr" id="btn-add-header" type="button"><span>+&nbsp;Подзаголовок</span></button>
     <div class="edit-bar-row">
-      <button class="prog-btn" id="btn-prog-add" type="button"><span>+ Песни</span></button>
+      <button class="prog-btn" id="btn-prog-add" type="button"><span>+&nbsp;Песни</span></button>
       <button class="prog-btn primary" id="btn-prog-share" type="button"><span>Поделиться</span></button>
     </div>
   </div>
@@ -2192,7 +2195,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="list-topbar-row">
       <button class="back-btn" id="btn-program-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
       <button class="icon-btn-sm" id="btn-pv-lists" title="Списки" aria-label="Списки"><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="icon-btn-sm" id="btn-pv-share" title="Поделиться" aria-label="Поделиться">
@@ -2203,23 +2206,23 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
   </div>
   <div class="list-scroll">
     <div class="pv-head">
-      <div class="pv-label">Вам прислали список</div>
+      <div class="pv-label">Вам прислали&nbsp;список</div>
       <div class="pv-title" id="pv-title"></div>
       <div class="pv-meta" id="pv-meta"></div>
     </div>
     <div class="pv-browser" id="pv-browser" style="display:none">
-      <p>Вы открыли список в браузере. Чтобы он появился в приложении «Песенник»: нажмите «Скопировать ссылку», откройте приложение, затем значок «Списки» → «Вставить из сообщения».</p>
-      <button class="prog-btn" id="btn-pv-copy" type="button"><span>Скопировать ссылку</span></button>
+      <p>Вы открыли список в&nbsp;браузере. Чтобы он появился в&nbsp;приложении «Песенник»: нажмите «Скопировать ссылку», откройте приложение, затем значок «Списки» → «Вставить из&nbsp;сообщения».</p>
+      <button class="prog-btn" id="btn-pv-copy" type="button"><span>Скопировать&nbsp;ссылку</span></button>
     </div>
     <div id="pv-list"></div>
     <p class="pv-note" id="pv-note"></p>
   </div>
-  <div class="edit-bar pv-bar"><button class="prog-btn primary" id="btn-pv-save" type="button"><span>Сделать своим</span></button></div>
+  <div class="edit-bar pv-bar"><button class="prog-btn primary" id="btn-pv-save" type="button"><span>Сделать&nbsp;своим</span></button></div>
 </div>
 
 <div class="modal-overlay" id="import-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
-    <textarea id="import-text" rows="3" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте сообщение со списком"></textarea>
+    <textarea id="import-text" rows="3" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте сообщение со списком"></textarea>
     <p class="import-err" id="import-err"></p>
     <button class="prog-btn" id="import-ok" type="button" style="width:100%;display:none"><span>Добавить</span></button>
   </div></div>
@@ -2239,14 +2242,14 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
     <div class="list-topbar-row">
       <button class="back-btn" id="btn-giussani-back" aria-label="На главную">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На главную</span>
+        <span>На&nbsp;главную</span>
       </button>
-      <div class="list-title">ВЫСШЕЕ ВЫРАЖЕНИЕ ЧЕЛОВЕКА</div>
+      <div class="list-title">ВЫСШЕЕ ВЫРАЖЕНИЕ&nbsp;ЧЕЛОВЕКА</div>
     </div>
   </div>
   <div class="list-scroll giussani-scroll">
-    <div class="g-text"><p>Никакое выражение человеческих чувств не может превзойти музыку. Кого не трогает скрипичный концерт и как можно остаться равнодушным, слушая сонату для фортепиано? Кажется, это высшая точка. Однако когда я слышу человеческий голос… Не знаю, происходит ли то же самое и с вами, но это то, выше чего ничего не может быть. На самом деле не существует для общины служения, сравнимого по своему значению с пением. Пение — это чистая любовь.</p><p>Я хотел бы дать вам совет. Не беспокойтесь за себя самих, за вашу способность выразиться. Предметом беспокойства и заботы должно быть не выражение самого себя, а лишь выражение сознания народа. Поэтому хор, пение — самое полезное и бескорыстное служение общине. Если в общине нет хора, это значит, что в ней нет любви, что что-то разрушено.</p><p>Песня исходит из сердца и из груди сознательно, только если человек принадлежит чему-то. Вы когда-либо были в доме молодой ласковой матери? Не может быть, чтобы ее малыш не напевал чего-то. Он поет, напевает. К нему приходят созвучия, неизвестно откуда взявшиеся, а ему только четыре года! Это выражение радости и покоя, которые происходят от того, что он чувствует себя любимым, происходят от принадлежности.</p></div>
-    <div class="g-sign">Луиджи Джуссани</div>
+    <div class="g-text"><p>Никакое выражение человеческих чувств не&nbsp;может превзойти музыку. Кого не&nbsp;трогает скрипичный концерт и&nbsp;как можно остаться равнодушным, слушая сонату для фортепиано? Кажется, это высшая точка. Однако когда я&nbsp;слышу человеческий голос… Не&nbsp;знаю, происходит ли&nbsp;то&nbsp;же&nbsp;самое и&nbsp;с&nbsp;вами, но&nbsp;это то, выше чего ничего не&nbsp;может быть. На&nbsp;самом деле не&nbsp;существует для общины служения, сравнимого по&nbsp;своему значению с&nbsp;пением. Пение&nbsp;— это чистая любовь.</p><p>Я&nbsp;хотел бы&nbsp;дать вам совет. Не&nbsp;беспокойтесь за&nbsp;себя самих, за&nbsp;вашу способность выразиться. Предметом беспокойства и&nbsp;заботы должно быть не&nbsp;выражение самого себя, а&nbsp;лишь выражение сознания народа. Поэтому хор, пение&nbsp;— самое полезное и&nbsp;бескорыстное служение общине. Если в&nbsp;общине нет хора, это значит, что в&nbsp;ней нет любви, что что-то разрушено.</p><p>Песня исходит из&nbsp;сердца и&nbsp;из&nbsp;груди сознательно, только если человек принадлежит чему-то. Вы когда-либо были в&nbsp;доме молодой ласковой матери? Не&nbsp;может быть, чтобы ее малыш не&nbsp;напевал чего-то. Он поет, напевает. К&nbsp;нему приходят созвучия, неизвестно откуда взявшиеся, а&nbsp;ему только четыре года! Это выражение радости и&nbsp;покоя, которые происходят от&nbsp;того, что он чувствует себя любимым, происходят от&nbsp;принадлежности.</p></div>
+    <div class="g-sign">Луиджи&nbsp;Джуссани</div>
   </div>
 </div>
 
@@ -2275,7 +2278,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
         <p>Когда вы&nbsp;делитесь песней или&nbsp;списком, человек может заодно скачать и&nbsp;все приложение.</p>
       </div>
     </div>
-    <p>Чтобы&nbsp;песенник работал<br>как&nbsp;настоящее приложение,<br>сохраните его<br>через&nbsp;системное меню:</p>
+    <p>Чтобы&nbsp;песенник&nbsp;работал<br>как&nbsp;настоящее&nbsp;приложение,<br>сохраните&nbsp;его<br>через&nbsp;системное&nbsp;меню:</p>
     <p class="info-steps-label">На&nbsp;iPhone или&nbsp;iPad:</p>
     <ol class="info-steps">
       <li>Откройте ссылку в&nbsp;Safari (именно в&nbsp;Safari, не&nbsp;в&nbsp;другом браузере).</li>
@@ -2288,18 +2291,18 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       <li>Откройте ссылку в&nbsp;браузере Google Chrome.</li>
       <li>Нажмите на&nbsp;три точки в&nbsp;правом верхнем углу.</li>
       <li>Выберите «Установить и&nbsp;создать ярлык»&nbsp;— «Установить».</li>
-      <li>Подтвердите действие.</li>
+      <li>Подтвердите&nbsp;действие.</li>
     </ol>
     <p>Если&nbsp;при&nbsp;отсутствии доступа в&nbsp;интернет песенник долго не&nbsp;загружается, переведите устройство в&nbsp;авиарежим&nbsp;— это решит проблему.</p>
-    <button class="modal-close ui-caps secondary" id="tour-replay" type="button">Тур по приложению</button>
+    <button class="modal-close ui-caps secondary" id="tour-replay" type="button">Тур по&nbsp;приложению</button>
     <button class="modal-close ui-caps" id="info-close">Понятно</button>
   </div></div>
 </div>
 
 <div class="modal-overlay" id="install-notice-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
-    <h2 class="ui-caps">Важная информация!</h2>
-    <p>Чтобы&nbsp;песенник работал<br>как&nbsp;настоящее приложение,<br>сохраните его<br>через&nbsp;системное меню:</p>
+    <h2 class="ui-caps">Важная&nbsp;информация!</h2>
+    <p>Чтобы&nbsp;песенник&nbsp;работал<br>как&nbsp;настоящее&nbsp;приложение,<br>сохраните&nbsp;его<br>через&nbsp;системное&nbsp;меню:</p>
     <p class="info-steps-label">На&nbsp;iPhone или&nbsp;iPad:</p>
     <ol class="info-steps">
       <li>Откройте ссылку в&nbsp;Safari (именно в&nbsp;Safari, не&nbsp;в&nbsp;другом браузере).</li>
@@ -2312,7 +2315,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       <li>Откройте ссылку в&nbsp;браузере Google Chrome.</li>
       <li>Нажмите на&nbsp;три точки в&nbsp;правом верхнем углу.</li>
       <li>Выберите «Установить и&nbsp;создать ярлык»&nbsp;— «Установить».</li>
-      <li>Подтвердите действие.</li>
+      <li>Подтвердите&nbsp;действие.</li>
     </ol>
     <button class="modal-close ui-caps" id="install-notice-close" type="button">Понятно</button>
   </div></div>
@@ -2351,7 +2354,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
             <div class="tour-az-strip"><span>А</span><span>М</span><span>Р</span><span>Х</span><span>Я</span></div>
           </div>
         </div></div>
-        <h2 class="ui-caps">Все песни</h2>
+        <h2 class="ui-caps">Все&nbsp;песни</h2>
         <p>Вообще все песни по&nbsp;алфавиту. Проведите пальцем по&nbsp;буквам сбоку, чтобы&nbsp;сразу попасть в&nbsp;нужное место.</p>
       </div>
 
@@ -2368,7 +2371,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       </div>
 
       <div class="tour-slide">
-        <div class="tour-stage"><div class="tour-lists"><i>Каникулы, день 1</i><i>Встреча в&nbsp;пятницу</i><i>Для детей</i></div></div>
+        <div class="tour-stage"><div class="tour-lists"><i>Каникулы, день&nbsp;1</i><i>Встреча в&nbsp;пятницу</i><i>Для&nbsp;детей</i></div></div>
         <h2 class="ui-caps">Списки</h2>
         <p>Соберите песни для&nbsp;встречи или&nbsp;даже каникул в&nbsp;одном месте и&nbsp;отправьте их&nbsp;всем участникам.</p>
       </div>
@@ -2381,7 +2384,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
             <span>Slava</span>
           </div>
         </div>
-        <h2 class="ui-caps">Кнопка «Abc»</h2>
+        <h2 class="ui-caps">Кнопка&nbsp;«Abc»</h2>
         <p>Показывает текст русской песни латиницей&nbsp;— удобно, если&nbsp;кто-то не&nbsp;читает кириллицу.</p>
       </div>
 
@@ -2392,7 +2395,7 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
             <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
           </div>
         </div>
-        <h2 class="ui-caps">Назад&nbsp;— свайпом</h2>
+        <h2 class="ui-caps">Назад&nbsp;—&nbsp;свайпом</h2>
         <p>Возвращайтесь на&nbsp;шаг назад свайпом от&nbsp;края экрана или&nbsp;кнопкой навигации вашего устройства. Значок&nbsp;<span class="tour-inline-btn" role="img" aria-label="домой"><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg></span>&nbsp;ведет сразу на&nbsp;главную.</p>
       </div>
 
@@ -2445,9 +2448,9 @@ var LANG_ORDER = ['Русский','Итальянский','Испанский'
    форме "НА [ЯЗЫКЕ]"), группировка и сортировка по-прежнему идут по
    исходным ключам LANG_ORDER/song.lang. */
 var LANG_LABELS = {
-  'Русский':'НА РУССКОМ', 'Итальянский':'НА ИТАЛЬЯНСКОМ', 'Испанский':'НА ИСПАНСКОМ',
-  'Португальский':'НА ПОРТУГАЛЬСКОМ', 'Французский':'НА ФРАНЦУЗСКОМ', 'Английский':'НА АНГЛИЙСКОМ',
-  'Белорусский':'НА БЕЛОРУССКОМ'
+  'Русский':'НА РУССКОМ', 'Итальянский':'НА ИТАЛЬЯНСКОМ', 'Испанский':'НА ИСПАНСКОМ',
+  'Португальский':'НА ПОРТУГАЛЬСКОМ', 'Французский':'НА ФРАНЦУЗСКОМ', 'Английский':'НА АНГЛИЙСКОМ',
+  'Белорусский':'НА БЕЛОРУССКОМ'
 };
 var LANG_CODE = {'Русский':'ru','Итальянский':'it','Испанский':'es','Португальский':'pt','Французский':'fr','Английский':'en','Белорусский':'be'};
 
@@ -3150,8 +3153,8 @@ function renderAllSongs(){
       scroll.appendChild(item);
     });
   }
-  renderBlock('РУССКИЕ ПЕСНИ', ALLSONGS_RU);
-  renderBlock('ИНОСТРАННЫЕ ПЕСНИ', ALLSONGS_FOREIGN, true);
+  renderBlock('РУССКИЕ ПЕСНИ', ALLSONGS_RU);
+  renderBlock('ИНОСТРАННЫЕ ПЕСНИ', ALLSONGS_FOREIGN, true);
 }
 
 /* АЗ-СКРАББЕР -- буква под пальцем подсвечивается и слегка растёт,
@@ -3336,7 +3339,8 @@ function enableFavoritesDrag(container){
   function reposition(){
     rafPending = false;
     if(!row) return;
-    var centerY = parseFloat(row.style.top) + rectHeight/2;
+    var rr = row.getBoundingClientRect();
+    var centerY = rr.top + rr.height/2;
     var rows = otherRows();
     var target = null;
     for(var i=0;i<rows.length;i++){
@@ -3360,6 +3364,7 @@ function enableFavoritesDrag(container){
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', onUp);
     document.removeEventListener('pointercancel', onUp);
+    document.removeEventListener('touchmove', blockScroll);
     row.classList.remove('dragging');
     row.style.position = ''; row.style.left = ''; row.style.top = ''; row.style.width = ''; row.style.zIndex = '';
     container.insertBefore(row, placeholder);
@@ -3376,12 +3381,32 @@ function enableFavoritesDrag(container){
     }
     row = null; placeholder = null; handle = null;
   }
+  var holdTimer = null, holdPt = null;
+  function holdMove(ev){ if(!holdPt) return; if(Math.abs(ev.clientY - holdPt.y) + Math.abs(ev.clientX - holdPt.x) > 10){ cancelHold(); } else { holdPt.lx = ev.clientX; holdPt.ly = ev.clientY; } }
+  function cancelHold(){ if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; } holdPt = null; document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold); }
+  function blockScroll(ev){ ev.preventDefault(); }
   container.addEventListener('pointerdown', function(e){
-    handle = e.target.closest('.nav-drag-handle');
-    if(!handle) return;
+    var hd = e.target.closest('.nav-drag-handle');
+    if(!hd) return;
+    if(e.pointerType === 'touch'){
+      if(holdTimer) return;
+      holdPt = {x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY};
+      var pid = e.pointerId;
+      holdTimer = setTimeout(function(){
+        var pt = holdPt; cancelHold();
+        beginDrag({clientX: pt.lx, clientY: pt.ly, pointerId: pid, preventDefault: function(){}}, hd, true);
+      }, 230);
+      document.addEventListener('pointermove', holdMove); document.addEventListener('pointerup', cancelHold); document.addEventListener('pointercancel', cancelHold);
+      return;
+    }
+    beginDrag(e, hd, false);
+  });
+  function beginDrag(e, hd, touch){
+    handle = hd;
     row = handle.closest('.nav-item');
     if(!row) return;
     e.preventDefault();
+    if(touch){ document.addEventListener('touchmove', blockScroll, {passive: false}); }
     var rect = row.getBoundingClientRect();
     rectHeight = rect.height;
     baseTop = rect.top;
@@ -3396,11 +3421,17 @@ function enableFavoritesDrag(container){
     row.style.top = rect.top + 'px';
     row.style.width = rect.width + 'px';
     row.style.zIndex = '50';
+    /* position:fixed считается не от экрана, если у предка есть transform (экраны открываются с анимацией) --
+       тогда строка "улетала" вверх на величину прокрутки. Измеряем, где строка оказалась на самом деле, и вводим поправку. */
+    var rect2 = row.getBoundingClientRect();
+    var offY = rect2.top - rect.top, offX = rect2.left - rect.left;
+    if(offY || offX){ row.style.top = (rect.top - offY) + 'px'; row.style.left = (rect.left - offX) + 'px'; }
+    baseTop = rect.top - offY;
     try{ handle.setPointerCapture(e.pointerId); }catch(err){}
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
     document.addEventListener('pointercancel', onUp);
-  });
+  }
 }
 enableFavoritesDrag(document.getElementById('favorites-list'));
 enableFavoritesDrag(document.getElementById('program-list'));
@@ -3613,8 +3644,8 @@ function renderHomeLists(){
     box.appendChild(g);
   }
   if(mode === 'two'){
-    if(own.length) group('Мои списки', own.map(ownItem));
-    if(recv.length) group('Общие списки', recv.map(function(p){ return recvItem(p, false); }));
+    if(own.length) group('Мои списки', own.map(ownItem));
+    if(recv.length) group('Общие списки', recv.map(function(p){ return recvItem(p, false); }));
   } else {
     group('Списки', own.map(ownItem).concat(recv.map(function(p){ return recvItem(p, true); })));
   }
@@ -3660,7 +3691,7 @@ function renderListsScreen(){
   document.body.classList.toggle('selecting', selectMode);
   var n = selCount();
   var del = document.getElementById('sel-del'); del.disabled = n === 0; del.querySelector('span').textContent = n ? 'Удалить (' + n + ')' : 'Удалить';
-  document.getElementById('sel-all').querySelector('span').textContent = (n && n === selTotal()) ? 'Снять все' : 'Выбрать все';
+  document.getElementById('sel-all').querySelector('span').textContent = (n && n === selTotal()) ? 'Снять все' : 'Выбрать все';
 }
 function exitSelect(){ selectMode = false; selected = {}; renderListsScreen(); }
 document.getElementById('btn-lists-select').addEventListener('click', function(){ if(selectMode){ exitSelect(); } else { selectMode = true; selected = {}; renderListsScreen(); } });
@@ -3671,7 +3702,7 @@ document.getElementById('sel-all').addEventListener('click', function(){
 });
 document.getElementById('sel-del').addEventListener('click', function(){
   var n = selCount(); if(!n) return;
-  var text = n === 1 ? 'Удалить выбранный список?' : ('Удалить ' + n + ' ' + plural(n, 'список', 'списка', 'списков') + '?');
+  var text = n === 1 ? 'Удалить выбранный список?' : ('Удалить ' + n + ' ' + plural(n, 'список', 'списка', 'списков') + '?');
   showConfirm(text, function(){
     lists = lists.filter(function(l){ return !selected['o:' + l.id]; }); saveLists();
     programs = programs.filter(function(p){ return !selected[recvKey(p)]; }); store.setJSON('sb_programs', programs);
@@ -3784,8 +3815,8 @@ function updatePickerBar(){
   var l = getList(curListId); if(!l) return;
   var items = l.ids, r = sectionRange(items, pickHdr);
   var inSec = items.slice(r[0], r[1]).filter(function(x){ return !isHdr(x); }).length;
-  var name = listTitle(l) + (pickHdr >= 0 ? ' → ' + (typo(items[pickHdr]) || 'без названия') : '');
-  document.getElementById('pb-text').innerHTML = '<span class="pb-name"></span>' + (inSec ? (pickHdr >= 0 ? 'В разделе: ' : 'В списке: ') + '<b>' + songsWord(inSec) + '</b>' : 'Откройте раздел и нажимайте на песни');
+  var name = listTitle(l) + (pickHdr >= 0 ? ' → ' + (typo(items[pickHdr]) || 'без названия') : '');
+  document.getElementById('pb-text').innerHTML = '<span class="pb-name"></span>' + (inSec ? (pickHdr >= 0 ? 'В разделе: ' : 'В списке: ') + '<b>' + songsWord(inSec) + '</b>' : 'Откройте раздел и нажимайте на песни');
   document.querySelector('#pb-text .pb-name').textContent = name;
 }
 function draftHas(id){
@@ -3841,10 +3872,10 @@ function shareItems(items, title){
   });
   var link = location.origin + location.pathname + readableHash(items, title);
   var text = typo(title) + '\n\n' + out.join('\n') + '\n\n' +
-    'Как добавить список в «Песенник»:\n' +
+    'Как добавить список в «Песенник»:\n' +
     '1. Скопируйте это сообщение целиком.\n' +
-    '2. Откройте «Песенник» и нажмите значок «Списки» в\u00a0шапке.\n' +
-    '3. Нажмите «Вставить из сообщения».\n\n' +
+    '2. Откройте «Песенник» и нажмите значок «Списки» в шапке.\n' +
+    '3. Нажмите «Вставить из сообщения».\n\n' +
     link;
   if(window.__progShareHook){ window.__progShareHook(text, link); return; }
   if(navigator.share){ navigator.share({title: title, text: text}).catch(function(){}); }
@@ -3864,7 +3895,7 @@ var programView = document.getElementById('program-view');
 var currentProgHash = null;
 function openProgramFromHash(h, pushHash){
   var p = parseAnyHash(h);
-  if(!p || !songCount(p.ids)){ homeNotice('Не удалось открыть список. Скопируйте сообщение со списком целиком и вставьте его: «Списки» \u2192 «Вставить из сообщения».'); history.replaceState({}, '', location.pathname); return; }
+  if(!p || !songCount(p.ids)){ homeNotice('Не удалось открыть список. Скопируйте сообщение со списком целиком и вставьте его: «Списки» \u2192 «Вставить из сообщения».'); history.replaceState({}, '', location.pathname); return; }
   currentProgHash = h;
   var items = existingItems(p.ids), missing = p.ids.filter(function(x){ return !isHdr(x); }).length - songCount(items);
   var title = p.t || 'Список';
@@ -3887,21 +3918,21 @@ function openProgramFromHash(h, pushHash){
   });
   var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
   document.getElementById('pv-browser').style.display = (!isStandalone && pushHash === false) ? '' : 'none';
-  document.getElementById('pv-note').textContent = missing > 0 ? ('Часть песен (' + missing + ') больше не входит в песенник.') : '';
+  document.getElementById('pv-note').textContent = missing > 0 ? ('Часть песен (' + missing + ') больше не входит в песенник.') : '';
   refreshPvSave();
   openExtra(programView, h, pushHash);
 }
 function pvKey(){ var p = parseAnyHash(currentProgHash || ''); return p ? listKey(p.ids, p.t || 'Список') : null; }
 function refreshPvSave(){
   var k = pvKey(), b = document.getElementById('btn-pv-save'); if(!b || !k) return;
-  b.querySelector('span').textContent = ownCopyOf(k) ? 'Редактировать мою копию' : 'Сделать своим';
+  b.querySelector('span').textContent = ownCopyOf(k) ? 'Редактировать мою копию' : 'Сделать своим';
 }
 document.getElementById('btn-pv-save').addEventListener('click', function(){
   var p = parseAnyHash(currentProgHash || ''); if(!p) return;
   var k = pvKey(), own = ownCopyOf(k);
   if(own){ openEdit(own.id); return; }
   slDup(p.ids, p.t || 'Список', k);
-  flashButton(this, '\u2713 Сохранено в мои списки');
+  flashButton(this, '\u2713 Сохранено в мои списки');
   setTimeout(refreshPvSave, 1700);
 });
 document.getElementById('btn-pv-lists').addEventListener('click', function(){ openListsScreen(); });
@@ -3964,7 +3995,7 @@ function guessImportTitle(body){
   return '';
 }
 function parseImport(text){
-  var body = importBody(text), title = guessImportTitle(body) || 'Список из чата';
+  var body = importBody(text), title = guessImportTitle(body) || 'Список из чата';
   var names = body.filter(function(ln){ return HDR_LINE.test(ln); }).map(function(ln){ return ln.match(HDR_LINE)[1]; });
   var variants = [text, safeDecode(text)];
   for(var vi = 0; vi < variants.length; vi++){
@@ -4004,7 +4035,7 @@ function importFromClipboard(){
 document.getElementById('btn-import').addEventListener('click', importFromClipboard);
 function importFromText(txt){
   var h = parseImport(txt || '');
-  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл список. Скопируйте сообщение со списком целиком.'; return false; }
+  if(!h){ document.getElementById('import-err').textContent = 'Не нашёл список. Скопируйте сообщение со списком целиком.'; return false; }
   closeImport(); openProgramFromHash(h); return true;
 }
 importModal.addEventListener('click', function(e){ if(e.target === importModal) closeImport(); });
@@ -4025,7 +4056,7 @@ document.getElementById('import-ok').addEventListener('click', function(){ impor
 })();
 renderHomeLists();
 
-/* ---------- кнопка «Списки» на экране песни: меню «Добавить песню в список / Показать списки» ---------- */
+/* ---------- кнопка «Списки» на экране песни: меню «Добавить песню в список / Показать списки» ---------- */
 var slModal = document.getElementById('songlist-modal'), slBody = document.getElementById('sl-body');
 function slClose(){ slModal.classList.remove('open'); }
 function slSongTitle(){ var t = document.getElementById('song-title'); return t ? t.textContent : ''; }
@@ -4058,20 +4089,20 @@ var SL_PLUS = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><l
 var SL_LIST = '<svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg>';
 function slMenu(){
   slHead('Списки');
-  slRow('Добавить песню в список', '', '', slAdd, SL_PLUS);
-  slRow('Показать списки', '', '', function(){ slClose(); openListsScreen(); }, SL_LIST);
+  slRow('Добавить песню в список', '', '', slAdd, SL_PLUS);
+  slRow('Показать списки', '', '', function(){ slClose(); openListsScreen(); }, SL_LIST);
   if(!SL_POP) slBottom('Закрыть', slClose);
 }
 function slAdd(){
-  slHead('Добавить в список');
-  var nr = slRow('Создать новый', '', 'sl-cap sl-new', slNewList);
+  slHead('Добавить в список');
+  var nr = slRow('Создать новый', '', 'sl-cap sl-new', slNewList);
   nr.querySelector('.sl-meta').innerHTML = SL_RIGHT;
   var own = sortedLists();
   if(own.length){
-    slLabel('Добавить в существующий');
+    slLabel('Добавить в существующий');
     own.forEach(function(l){
       var has = l.ids.indexOf(currentId) !== -1;
-      slRow(listTitle(l), has ? '✓ уже в списке' : songsWord(songCount(l.ids)), has ? 'sl-has' : '', function(e){ slPickList(l, e.currentTarget); });
+      slRow(listTitle(l), has ? '✓ уже в списке' : songsWord(songCount(l.ids)), has ? 'sl-has' : '', function(e){ slPickList(l, e.currentTarget); });
     });
   }
   var all = document.createElement('button'); all.type = 'button'; all.className = 'sl-all';
@@ -4100,15 +4131,15 @@ function slPickList(l, row){
   slSections(l);
 }
 function slSections(l){
-  slHead('В какой раздел?', listTitle(l), slAdd);
+  slHead('В какой раздел?', listTitle(l), slAdd);
   var opts = [];
   if(!isHdr(l.ids[0]) && l.ids.length) opts.push(-1);
   l.ids.forEach(function(x, i){ if(isHdr(x)) opts.push(i); });
   opts.forEach(function(hi, k){
     var r = sectionRange(l.ids, hi), has = l.ids.slice(r[0], r[1]).indexOf(currentId) !== -1;
-    var name = hi === -1 ? 'Без раздела' : (l.ids[hi] || 'Без названия');
+    var name = hi === -1 ? 'Без раздела' : (l.ids[hi] || 'Без названия');
     var n = l.ids.slice(r[0], r[1]).filter(function(x){ return !isHdr(x); }).length;
-    slRow(name, has ? '✓ уже здесь' : songsWord(n), (k === opts.length - 1 && !has ? 'sl-last' : '') + (has ? ' sl-has' : ''), function(e){
+    slRow(name, has ? '✓ уже здесь' : songsWord(n), (k === opts.length - 1 && !has ? 'sl-last' : '') + (has ? ' sl-has' : ''), function(e){
       if(has) return;
       var rr = sectionRange(l.ids, hi); l.ids.splice(rr[1], 0, currentId);
       slDone(l, e.currentTarget, 'Добавлено');
@@ -4174,8 +4205,8 @@ function cardMenuRecv(p, el){
   slBody.querySelector('h2').classList.add('sl-name-h');
   slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список'); }, IC_SHARE);
   var rk = listKey(p.ids, p.t || 'Список'), own = ownCopyOf(rk);
-  if(own){ slRow('Открыть мою копию', '', 'sl-cap', function(){ slClose(); openEdit(own.id); }, IC_EDIT); }
-  else { slRow('Сделать своим', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список', rk); }, IC_SAVE); }
+  if(own){ slRow('Открыть мою копию', '', 'sl-cap', function(){ slClose(); openEdit(own.id); }, IC_EDIT); }
+  else { slRow('Сделать своим', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список', rk); }, IC_SAVE); }
   slRow('Удалить', '', 'sl-cap sl-danger', function(){
     var key = listKey(p.ids, p.t || 'Список');
     programs = programs.filter(function(x){ return x.k !== key; }); store.setJSON('sb_programs', programs);
@@ -4431,7 +4462,7 @@ function renderRecent(){
   if(typeof homeChoice === 'function' ? homeChoice() !== 'recent' : store.get('sb_show_recent', '1') === '0') return;
   var ids = recent.filter(function(id){ return byId[id]; }).slice(0, 5);
   if(!ids.length) return;
-  var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
+  var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
   ids.forEach(function(id){ var it = makeNavItem(byId[id], numberById[id]); it.style.setProperty('--indent','0px'); box.appendChild(it); });
 }
 function openSong(id, pushHash){
@@ -4661,7 +4692,7 @@ function renderQuickResults(inputEl, containerEl, query){
   if(!matches.length){
     var empty = document.createElement('p');
     empty.className = 'quick-search-empty';
-    empty.textContent = 'Ничего не найдено';
+    empty.textContent = 'Ничего не найдено';
     containerEl.appendChild(empty);
   } else {
     matches.forEach(function(entry){
