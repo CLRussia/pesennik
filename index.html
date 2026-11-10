@@ -143,11 +143,13 @@ input{font-family:inherit;color:inherit;}
 #giussani{display:block;width:100%;margin:auto 0 4px;padding:14px 12px;border-radius:var(--radius-m);text-align:center;
   background:transparent;-webkit-tap-highlight-color:transparent;cursor:pointer;}
 #giussani:active{background:var(--accent-soft);}
-#giussani .q{font-family:var(--font-lyrics);font-style:italic;font-size:calc(23px * var(--scale-menu));line-height:1.35;color:var(--text);}
+/* цитата не зависит от настройки размера шрифта: всегда в одну строку, 23px, а на узких экранах сжимается так, чтобы по бокам оставались поля
+   (13.7 -- ширина фразы в em, 72px -- поля главной + внутренние отступы + запас) */
+#giussani .q{font-family:var(--font-lyrics);font-style:italic;font-size:min(23px, calc((100vw - 72px) / 13.7));line-height:1.35;color:var(--text);white-space:nowrap;}
 /* минимальный зазор над цитатой, даже когда она прижата вниз вплотную к списку */
 #giussani{border-top:30px solid transparent;background-clip:padding-box;}
 #giussani .who{margin-top:10px;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-weight:600;
-  font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
 #giussani-view .g-text p{font-family:var(--font-lyrics);font-size:calc(18px * var(--scale-menu));line-height:1.62;color:var(--text);margin:0 0 1.62em;text-align:left;}
 #giussani-view .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(14px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
 
