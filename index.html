@@ -3567,14 +3567,40 @@ document.getElementById('tour-replay').addEventListener('click', function(){
 /* ------------------------------------------------------------
    WAKE LOCK
    ------------------------------------------------------------ */
+/* Экран не гасим только на телефоне/планшете (основной указатель -- палец) и только пока человек
+   что-то делает с приложением: через WAKE_IDLE_MS без касаний и прокрутки блокировка снимается
+   (иначе окно, забытое на экране, вечно не даёт уснуть; на компьютере блокировки нет вообще). */
+var WAKE_IDLE_MS = 15 * 60 * 1000;
+var wakeIdleTimer = null, wakePending = false;
+function wakeAllowed(){ return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }
 function requestWakeLock(){
-  if('wakeLock' in navigator){
-    navigator.wakeLock.request('screen').then(function(wl){ wakeLock = wl; }).catch(function(){});
-  }
+  if(!wakeAllowed() || !('wakeLock' in navigator) || wakeLock || wakePending) return;
+  wakePending = true;
+  navigator.wakeLock.request('screen').then(function(wl){
+    wakePending = false;
+    if(currentId === null){ wl.release().catch(function(){}); return; }
+    wakeLock = wl;
+    wl.addEventListener('release', function(){ if(wakeLock === wl){ wakeLock = null; } });
+  }).catch(function(){ wakePending = false; });
+  armWakeIdle();
 }
 function releaseWakeLock(){
+  clearTimeout(wakeIdleTimer); wakeIdleTimer = null;
   if(wakeLock){ wakeLock.release().catch(function(){}); wakeLock=null; }
 }
+function armWakeIdle(){
+  clearTimeout(wakeIdleTimer);
+  wakeIdleTimer = setTimeout(function(){
+    if(wakeLock){ wakeLock.release().catch(function(){}); wakeLock = null; }
+  }, WAKE_IDLE_MS);
+}
+/* любое касание/прокрутка/клавиша: продлеваем; если блокировка уже снята, а песня открыта -- берём снова */
+['touchstart','pointerdown','scroll','keydown'].forEach(function(ev){
+  document.addEventListener(ev, function(){
+    if(currentId === null) return;
+    if(wakeLock){ armWakeIdle(); } else { requestWakeLock(); }
+  }, {passive:true, capture:true});
+});
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState==='visible' && currentId!==null){ requestWakeLock(); }
 });
