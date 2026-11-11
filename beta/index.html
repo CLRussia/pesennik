@@ -4683,7 +4683,7 @@ function navUnder(top){
    Перенос отдельных песен (и подзаголовка нет в этом режиме) работает старым кодом: сюда попадают только ручки подзаголовков. */
 (function(){
   var list = document.getElementById('program-list');
-  var row = null, placeholder = null, handle = null, blockRows = [], baseTop = 0, startY = 0, curY = 0, rafPending = false;
+  var row = null, placeholder = null, handle = null, blockRows = [], baseTop = 0, startY = 0, curY = 0, rafPending = false, scr = null, origScroll = 0;
   var holdTimer = null, holdPt = null, scrollMode = false, scroller = null;
   function hdrRows(){ return Array.prototype.filter.call(list.querySelectorAll('.hdr-row'), function(el){ return el !== row; }); }
   function reposition(){
@@ -4694,17 +4694,18 @@ function navUnder(top){
     if(target){ if(placeholder.nextSibling !== target){ list.insertBefore(placeholder, target); } }
     else if(list.lastElementChild !== placeholder){ list.appendChild(placeholder); }
   }
-  function onMove(e){ if(!row) return; curY = e.clientY; row.style.top = (baseTop + e.clientY - startY) + 'px'; if(!rafPending){ rafPending = true; requestAnimationFrame(reposition); } }
+  function onMove(e){ if(!row) return; curY = e.clientY; row.style.transform = 'translate3d(0,' + (e.clientY - startY) + 'px,0)'; if(!rafPending){ rafPending = true; requestAnimationFrame(reposition); } }
   function unfold(){
     Array.prototype.forEach.call(list.querySelectorAll('.blk-hidden'), function(el){ el.classList.remove('blk-hidden'); });
     Array.prototype.forEach.call(list.querySelectorAll('.blk-count'), function(el){ el.remove(); });
     list.classList.remove('blk-folding');
+    list.style.paddingTop = ''; list.style.minHeight = '';
   }
   function onUp(){
     if(!row) return;
     document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); document.removeEventListener('pointercancel', onUp);
     row.classList.remove('dragging');
-    row.style.position = ''; row.style.left = ''; row.style.top = ''; row.style.width = ''; row.style.zIndex = ''; row.style.transition = '';
+    row.style.position = ''; row.style.left = ''; row.style.top = ''; row.style.width = ''; row.style.zIndex = ''; row.style.transition = ''; row.style.transform = ''; row.style.willChange = '';
     list.insertBefore(row, placeholder);
     blockRows.forEach(function(r){ list.insertBefore(r, placeholder); });
     placeholder.remove();
@@ -4712,13 +4713,17 @@ function navUnder(top){
     unfold();
     row = null; placeholder = null; handle = null; blockRows = [];
     onProgramReorder(order);
+    if(scr){ scr.scrollTop = origScroll; }                  // экран выглядит как до захвата, только блоки переставлены
   }
   function begin(e, hd, r){
     handle = hd; row = r;
     var rect = row.getBoundingClientRect();
     /* песни этого блока: всё до следующего подзаголовка */
     blockRows = []; for(var n = row.nextElementSibling; n && !n.classList.contains('hdr-row'); n = n.nextElementSibling){ if(n.classList.contains('nav-item')) blockRows.push(n); }
-    /* сворачиваем все блоки, кроме безымянного первого (песни до первого подзаголовка) */
+    /* сворачиваем все блоки, кроме безымянного первого (песни до первого подзаголовка);
+       высоту списка на время переноса сохраняем, иначе страница «проваливается» к началу и теряется то место, где держали блок */
+    scr = getScroller(row); origScroll = scr.scrollTop;
+    list.style.minHeight = list.offsetHeight + 'px';
     list.classList.add('blk-folding');
     var cur = null, cnt = 0, kids = Array.prototype.slice.call(list.children);
     function badge(){ if(!cur) return; var b = document.createElement('span'); b.className = 'blk-count'; b.textContent = cnt ? songsWord(cnt) : 'пусто'; cur.insertBefore(b, cur.querySelector('.nav-drag-handle')); }
@@ -4731,19 +4736,25 @@ function navUnder(top){
     placeholder = document.createElement('div'); placeholder.className = 'nav-item-placeholder'; placeholder.style.height = rect.height + 'px';
     list.insertBefore(placeholder, row);
     startY = curY = e.clientY;
-    /* после сворачивания список стал короче: строка занимает свою свёрнутую ячейку (плавно «приезжает» туда из-под пальца),
-       дальше двигается за пальцем от неё -- иначе отпускание на месте сдвигало бы блок */
+    /* после сворачивания строка остаётся там, где была (под пальцем); дальше двигается за пальцем от этой точки */
     var slotTop = placeholder.getBoundingClientRect().top;
+    /* список стал короче, и ячейка блока поднялась выше пальца; подсдвигаем свёрнутый список вниз ровно настолько,
+       чтобы ячейка оказалась там, где был блок (плашка остаётся под пальцем, никуда не «улетает») */
+    var diff = slotTop - rect.top;                               // > 0: ячейка ниже плашки -- прокручиваем вниз; < 0: выше -- подталкиваем список вниз
+    if(diff > 0.5){ var s0 = scr.scrollTop; scr.scrollTop = s0 + diff; diff -= (scr.scrollTop - s0); }
+    if(diff < -0.5){ list.style.paddingTop = (-diff) + 'px'; }
+    slotTop = placeholder.getBoundingClientRect().top;
     row.classList.add('dragging');
     row.style.position = 'fixed'; row.style.left = rect.left + 'px'; row.style.top = rect.top + 'px'; row.style.width = rect.width + 'px'; row.style.zIndex = '50';
     var r2 = row.getBoundingClientRect(), offY = r2.top - rect.top, offX = r2.left - rect.left;
     row.style.left = (rect.left - offX) + 'px';
     row.style.top = (rect.top - offY) + 'px';
     baseTop = slotTop - offY;
-    row.style.transition = 'none'; void row.offsetHeight;
-    row.style.transition = 'top .16s ease';
+    /* строка стоит на месте (подсдвинутый список подставил под неё ячейку), а за пальцем едет через transform -- он не вызывает пересчёта вёрстки,
+       поэтому на слабых телефонах идёт плавнее, чем смена top */
     row.style.top = baseTop + 'px';
-    var thisRow = row; setTimeout(function(){ if(thisRow === row){ row.style.transition = ''; } }, 200);
+    row.style.willChange = 'transform';
+    row.style.transform = 'translate3d(0,0,0)';
     try{ handle.setPointerCapture(e.pointerId); }catch(err){}
     document.addEventListener('pointermove', onMove); document.addEventListener('pointerup', onUp); document.addEventListener('pointercancel', onUp);
   }
