@@ -3972,7 +3972,7 @@ function freeRow(text, onEdit){
 function freeInputRow(l, idx){
   var item = document.createElement('div'); item.className = 'nav-item free-row free-editing';
   var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'free-input'; inp.maxLength = 60; inp.value = l.ids[idx].f;
-  inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', 'Своя строка');
+  inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', 'Своё название'); inp.placeholder = 'Название песни';
   var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'free-ok'; ok.setAttribute('aria-label', 'Готово'); ok.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var done = false;
   function commit(){
@@ -3990,14 +3990,14 @@ function freeInputRow(l, idx){
   item.appendChild(inp); item.appendChild(ok);
   return item;
 }
-/* меню у «+ песни»: «Из песенника» (как раньше) или «Своя строка» */
+/* меню у «+ песни»: «Из песенника» (как раньше) или «Своё название» */
 var addMenuEl = null;
 function closeAddMenu(){ if(addMenuEl){ addMenuEl.remove(); addMenuEl = null; } document.removeEventListener('pointerdown', addMenuOutside, true); window.removeEventListener('scroll', closeAddMenu, true); }
 function addMenuOutside(e){ if(addMenuEl && !addMenuEl.contains(e.target)){ closeAddMenu(); } }
 function openAddMenu(anchor, hdrIdx){
   closeAddMenu();
   var m = document.createElement('div'); m.className = 'add-menu'; m.setAttribute('role', 'menu');
-  [['Из песенника', function(){ startPicker(hdrIdx); }], ['Своя строка', function(){ addFreeLine(hdrIdx); }]].forEach(function(o){
+  [['Из песенника', function(){ startPicker(hdrIdx); }], ['Своё название', function(){ addFreeLine(hdrIdx); }]].forEach(function(o){
     var b = document.createElement('button'); b.type = 'button'; b.className = 'add-menu-item'; b.setAttribute('role', 'menuitem'); b.textContent = o[0];
     b.addEventListener('click', function(){ closeAddMenu(); o[1](); });
     m.appendChild(b);
