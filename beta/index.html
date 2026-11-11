@@ -2066,6 +2066,303 @@ button.free-main{cursor:pointer;}
 .card-grip:active{color:var(--accent);}
 .prog-card.card-dragging{background:var(--bg-elevated);box-shadow:var(--shadow);border-color:var(--accent);}
 .prog-card-placeholder{border:1.5px dashed var(--border);border-radius:var(--radius-m);box-sizing:border-box;}
+
+/* первый слайд «Что нового»: логотип заметно парит и переливается */
+.wn-logo-wrap{position:relative;width:120px;height:120px;border-radius:28px;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.1);}
+.wn-logo-wrap .wn-logo{display:block;width:100%;height:100%;border-radius:0;box-shadow:none;animation:none !important;}
+.wn-logo-wrap::after{content:"";position:absolute;inset:-35%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.16) 50%,transparent 60%);transform:translateX(-130%);}
+.wn-slide.on .wn-logo-wrap{animation:wn-logo-float 4.2s ease-in-out infinite,wn-logo-halo 4.2s ease-in-out infinite;}
+.wn-slide.on .wn-logo-wrap::after{animation:wn-logo-shine 3.4s ease-in-out .9s infinite;}
+@keyframes wn-logo-float{0%,100%{transform:translateY(0) rotate(-2.5deg) scale(1);}50%{transform:translateY(-16px) rotate(2.5deg) scale(1.06);}}
+@keyframes wn-logo-halo{0%,100%{box-shadow:0 22px 50px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.1),0 0 0 0 rgba(124,196,208,0);}50%{box-shadow:0 30px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.18),0 0 38px 6px rgba(124,196,208,.45);}}
+@keyframes wn-logo-shine{0%{transform:translateX(-130%);}50%,100%{transform:translateX(130%);}}
+@media (max-height:640px){.wn-logo-wrap{width:92px;height:92px;border-radius:22px;}}
+/* три строки подписи не переносятся ни на какой ширине */
+.wn-text.wn-lines{max-width:none;white-space:nowrap;text-wrap:nowrap;}
+@media (prefers-reduced-motion:reduce){.wn-slide.on .wn-logo-wrap,.wn-slide.on .wn-logo-wrap::after{animation:none !important;}}
+
+/* второй слайд: список разворачивается, видно песни внутри (цикл 8 с) */
+.wn-art.wn-art-lists{height:clamp(300px,40vh,330px);align-items:flex-start;}
+.wn-lists i{flex-wrap:wrap;}
+.wn-lists .wn-songs{flex:0 0 100%;display:flex;flex-direction:column;gap:2px;max-height:0;opacity:0;overflow:hidden;text-decoration:none;margin-top:0;}
+.wn-lists .wn-songs em{display:flex;gap:10px;align-items:baseline;font-style:normal;font:500 13.5px var(--font-lyrics);letter-spacing:.02em;text-transform:uppercase;padding:6px 0;border-top:1px solid rgba(23,50,58,.16);opacity:0;}
+.wn-lists .wn-songs em::before{content:"•";color:#2B5560;font-size:15px;line-height:1;flex:0 0 auto;}
+.wn-lists .wn-songs s{text-decoration:none;color:#2B5560;font:600 12px var(--font-ui);min-width:34px;}
+.wn-slide.on .wn-lists i.is-hi{animation:none;}
+.wn-slide.on .wn-lists .wn-songs{animation:wn-songs-grow 8s ease-in-out .1s infinite;}
+.wn-slide.on .wn-lists .wn-songs em{animation:wn-song-in 8s ease-in-out .1s infinite;}
+.wn-slide.on .wn-lists .wn-songs em:nth-child(2){animation-delay:.5s;}
+.wn-slide.on .wn-lists .wn-songs em:nth-child(3){animation-delay:.7s;}
+@keyframes wn-songs-grow{0%,3%{max-height:0;opacity:0;margin-top:0;}13%,78%{max-height:130px;opacity:1;margin-top:10px;}90%,100%{max-height:0;opacity:0;margin-top:0;}}
+@keyframes wn-song-in{0%,9%{opacity:0;transform:translateX(-12px);}18%,76%{opacity:1;transform:none;}84%,100%{opacity:0;transform:translateX(-12px);}}
+@media (max-height:640px){.wn-art.wn-art-lists{height:auto;min-height:232px;}}
+@media (prefers-reduced-motion:reduce){.wn-lists .wn-songs{max-height:130px;opacity:1;margin-top:10px;}.wn-lists .wn-songs em{opacity:1;}}
+
+/* третий слайд: история в двух сценах (чат -> приложение), цикл 10 с */
+.wn-art.wn-art-story{position:relative;height:clamp(262px,35vh,290px);align-items:flex-start;}
+.wn-phone{position:absolute;left:50%;top:0;width:min(330px,100%);height:100%;transform:translateX(-50%);box-sizing:border-box;border:2px solid rgba(255,255,255,.22);border-bottom:0;border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0));-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 98%);mask-image:linear-gradient(180deg,#000 55%,transparent 98%);}
+.wn-island{position:absolute;left:50%;top:9px;width:86px;height:23px;border-radius:12px;background:#08131a;transform:translateX(-50%);}
+.wn-status{position:absolute;top:11px;left:26px;right:24px;display:flex;justify-content:space-between;align-items:center;font:700 12.5px var(--font-ui);color:rgba(255,255,255,.75);}
+.wn-sig{display:flex;align-items:flex-end;gap:2px;height:11px;}
+.wn-sig i{display:block;width:3px;border-radius:1px;background:rgba(255,255,255,.75);}
+.wn-sig i:nth-child(1){height:4px;}.wn-sig i:nth-child(2){height:6px;}.wn-sig i:nth-child(3){height:8px;}.wn-sig i:nth-child(4){height:11px;}
+.wn-sig u{display:block;width:22px;height:11px;margin-left:6px;border-radius:3.5px;border:1.5px solid rgba(255,255,255,.75);box-sizing:border-box;background:linear-gradient(90deg,rgba(255,255,255,.75) 78%,transparent 78%);text-decoration:none;}
+.wn-scene{position:absolute;left:50%;top:46px;width:min(292px,92%);height:calc(100% - 46px);transform:translateX(-50%);display:flex;flex-direction:column;gap:12px;}
+.wn-scene-app{opacity:0;}
+.wn-notif{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 26px rgba(0,0,0,.3);opacity:0;transform:translateY(-26px);}
+.wn-notif img{width:30px;height:30px;border-radius:8px;flex:0 0 auto;}
+.wn-notif div{display:flex;flex-direction:column;text-align:left;min-width:0;}
+.wn-notif small{font:600 11px var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:#9FCAD2;}
+.wn-notif b{font:600 14.5px var(--font-ui);color:#F2F7F8;}
+.wn-bubble{position:relative;align-self:flex-start;max-width:90%;box-sizing:border-box;padding:12px 14px 9px;border-radius:20px 20px 20px 0;background:#2F4F5A;text-align:left;display:flex;flex-direction:column;gap:7px;opacity:0;transform:translateY(10px);margin-left:9px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)) brightness(1);}
+.wn-bubble::before{content:"";position:absolute;left:-9px;bottom:0;width:10px;height:17px;background:#2F4F5A;clip-path:polygon(100% 0,100% 100%,0 100%,22% 94%,45% 82%,68% 58%,88% 28%);}
+.wn-time{align-self:flex-end;text-decoration:none;font:500 11px var(--font-ui);color:rgba(255,255,255,.5);margin-top:-1px;}
+.wn-bubble b{font:600 15px var(--font-ui);color:#F2F7F8;}
+.wn-bubble i{display:block;height:7px;border-radius:4px;background:rgba(255,255,255,.28);}
+.wn-bubble i.short{width:62%;}
+.wn-bubble span{font-size:13px;color:#9FCAD2;}
+.wn-bubble .wn-chip{margin:0;position:absolute;right:10px;top:-22px;font-style:normal;font:700 14px var(--font-ui);letter-spacing:.01em;white-space:nowrap;padding:8px 15px;border-radius:999px;background:#9ADBE6;color:#0F2A31;box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 3px rgba(154,219,230,.25);opacity:0;transform:scale(.8);}
+.wn-pastebtn{align-self:center;padding:13px 24px;border-radius:999px;background:#7CC4D0;color:#17323A;font:700 14px var(--font-ui);letter-spacing:.02em;margin-top:6px;}
+.wn-got{display:flex;flex-direction:column;gap:3px;text-align:left;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.07);border:1.5px solid #7CC4D0;opacity:0;transform:translateY(22px);}
+.wn-got small{font:600 11px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:#7CC4D0;}
+.wn-got b{font:600 17px var(--font-ui);color:#F2F7F8;}
+.wn-got span{font-size:13px;color:#9FCAD2;}
+.wn-slide.on .wn-scene-chat{animation:wn-scene-chat 10s ease-in-out .1s infinite;}
+.wn-slide.on .wn-scene-app{animation:wn-scene-app 10s ease-in-out .1s infinite;}
+.wn-slide.on .wn-notif{animation:wn-notif 10s ease-in-out .1s infinite;}
+.wn-slide.on .wn-bubble{animation:wn-bubble 10s ease-in-out .1s infinite;}
+.wn-slide.on .wn-chip{animation:wn-chip 10s ease-in-out .1s infinite;}
+.wn-slide.on .wn-pastebtn{animation:wn-tap 10s ease-in-out .1s infinite;}
+.wn-slide.on .wn-got{animation:wn-got 10s ease-in-out .1s infinite;}
+@keyframes wn-scene-chat{0%,50%{opacity:1;}54%,100%{opacity:0;}}
+@keyframes wn-scene-app{0%,52%{opacity:0;}58%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-notif{0%,2%{opacity:0;transform:translateY(-26px);}9%,14%{opacity:1;transform:none;}18%,100%{opacity:0;transform:translateY(-14px);}}
+@keyframes wn-bubble{0%,14%{opacity:0;transform:translateY(10px);filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)) brightness(1);}21%,29%{opacity:1;transform:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)) brightness(1);}34%,44%{opacity:1;transform:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)) brightness(1.5);}50%{opacity:1;transform:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)) brightness(1);}54%,100%{opacity:0;transform:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25)) brightness(1);}}
+@keyframes wn-chip{0%,29%{opacity:0;transform:scale(.8);}33%,46%{opacity:1;transform:scale(1);}50%,100%{opacity:0;transform:scale(1);}}
+@keyframes wn-tap{0%,60%{transform:scale(1);box-shadow:0 0 0 0 rgba(124,196,208,.5);}63%{transform:scale(.95);}69%{transform:scale(1);box-shadow:0 0 0 14px rgba(124,196,208,0);}100%{transform:scale(1);}}
+@keyframes wn-got{0%,68%{opacity:0;transform:translateY(22px);}77%,90%{opacity:1;transform:none;}96%,100%{opacity:0;transform:translateY(8px);}}
+@media (max-height:640px){.wn-art.wn-art-story{height:auto;min-height:228px;}.wn-scene{zoom:.8;}.wn-phone{zoom:.9;}}
+@media (max-height:620px){.wn-art.wn-art-story{min-height:170px;margin-bottom:6px;}.wn-scene{zoom:.64;}.wn-slide .wn-text{font-size:14px;line-height:1.3;}}
+@media (prefers-reduced-motion:reduce){.wn-scene-chat{display:none;}.wn-scene-app{opacity:1 !important;}.wn-got{opacity:1 !important;transform:none !important;}}
+
+/* слайд про составление списка (цикл 11 с) */
+.wn-art.wn-art-build{height:clamp(284px,38vh,300px);align-items:flex-start;}
+.wn-build{position:relative;width:min(300px,100%);height:284px;opacity:0;text-align:left;}
+.wn-slide.on .wn-build{animation:wn-b-scene 11s ease-in-out .1s infinite;}
+.wn-bt{position:absolute;left:0;right:0;top:0;height:42px;border-radius:12px;background:rgba(255,255,255,.1);border:1.5px solid rgba(124,196,208,.55);box-sizing:border-box;display:flex;align-items:center;padding:0 14px;font:600 16px var(--font-lyrics);color:#F2F7F8;}
+.wn-bt span{display:block;white-space:nowrap;overflow:hidden;width:0;}
+.wn-slide.on .wn-bt span{animation:wn-b-type 11s steps(8,end) .1s infinite;}
+.wn-br{position:absolute;left:0;right:0;height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 14px;box-sizing:border-box;border-bottom:1px solid rgba(255,255,255,.1);opacity:0;}
+.wn-br em{font:500 14px var(--font-lyrics);font-style:normal;text-transform:uppercase;letter-spacing:.02em;color:#DCEEF1;}
+.wn-br em.own{font-style:italic;text-transform:none;font-size:15px;color:#F2F7F8;}
+.wn-br em.own span{display:inline-block;white-space:nowrap;overflow:hidden;vertical-align:bottom;width:0;}
+.wn-br small{font:600 11px var(--font-ui);color:#9FCAD2;opacity:0;white-space:nowrap;flex:0 0 auto;}
+.wn-br.r3{height:52px;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding-left:20px;}
+.wn-br.r3 em{padding-left:0;}
+.wn-br::before{content:"\2022";position:absolute;left:0;color:#7CC4D0;}
+.wn-br em{padding-left:6px;}
+.wn-bhd{position:absolute;left:0;right:0;top:52px;height:34px;display:flex;align-items:center;padding:0 14px;border-radius:10px;background:rgba(124,196,208,.2);opacity:0;}
+.wn-bhd b{font:700 15px var(--font-ui);color:#F2F7F8;}
+.wn-bchips{position:absolute;left:0;right:0;top:244px;display:flex;gap:6px;justify-content:center;}
+.wn-bchips i{font-style:normal;font:700 11.5px var(--font-ui);padding:8px 11px;border-radius:999px;border:1.5px solid rgba(124,196,208,.5);color:#9FCAD2;white-space:nowrap;}
+.wn-slide.on .wn-br.r1{top:52px;animation:wn-b-r1 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-br.r2{top:92px;animation:wn-b-r2 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-br.r3{top:132px;animation:wn-b-r3 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-br.r3 em.own span{animation:wn-b-own 11s steps(30,end) .1s infinite;}
+.wn-slide.on .wn-br.r3 small{animation:wn-b-tag 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-bhd{animation:wn-b-hd 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-bchips .c1{animation:wn-b-chip1 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-bchips .c2{animation:wn-b-chip2 11s ease-in-out .1s infinite;}
+.wn-slide.on .wn-bchips .c3{animation:wn-b-chip3 11s ease-in-out .1s infinite;}
+@keyframes wn-b-scene{0%{opacity:0;}3%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-b-type{0%,2%{width:0;}12%,100%{width:5.6em;}}
+@keyframes wn-b-r1{0%,16%{opacity:0;transform:translateX(-14px);top:52px;}22%,58%{opacity:1;transform:none;top:52px;}68%,92%{opacity:1;transform:none;top:94px;padding-left:28px;}97%,100%{opacity:0;top:94px;padding-left:28px;}}
+@keyframes wn-b-r2{0%,22%{opacity:0;transform:translateX(-14px);top:92px;}28%,58%{opacity:1;transform:none;top:92px;}68%,92%{opacity:1;transform:none;top:134px;padding-left:28px;}97%,100%{opacity:0;top:134px;padding-left:28px;}}
+@keyframes wn-b-r3{0%,34%{opacity:0;transform:translateX(-14px);top:132px;}38%,58%{opacity:1;transform:none;top:132px;}68%,92%{opacity:1;transform:none;top:174px;padding-left:28px;}97%,100%{opacity:0;top:174px;padding-left:28px;}}
+@keyframes wn-b-own{0%,38%{width:0;}50%,100%{width:16em;}}
+@keyframes wn-b-tag{0%,50%{opacity:0;}54%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-b-hd{0%,60%{opacity:0;transform:translateY(-12px);}67%,92%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+@keyframes wn-b-chip1{0%,12%{color:#9FCAD2;background:transparent;transform:none;}15%,19%{color:#17323A;background:#7CC4D0;transform:scale(1.08);}23%,100%{color:#9FCAD2;background:transparent;transform:none;}}
+@keyframes wn-b-chip2{0%,31%{color:#9FCAD2;background:transparent;transform:none;}34%,38%{color:#17323A;background:#7CC4D0;transform:scale(1.08);}42%,100%{color:#9FCAD2;background:transparent;transform:none;}}
+@keyframes wn-b-chip3{0%,56%{color:#9FCAD2;background:transparent;transform:none;}59%,63%{color:#17323A;background:#7CC4D0;transform:scale(1.08);}67%,100%{color:#9FCAD2;background:transparent;transform:none;}}
+@media (max-height:720px){.wn-art.wn-art-build{height:auto;min-height:236px;}.wn-build{zoom:.82;}}
+@media (max-height:620px){.wn-art.wn-art-build{min-height:196px;margin-bottom:6px;}.wn-build{zoom:.7;}.wn-slide .wn-text{font-size:14px;line-height:1.3;}}
+@media (prefers-reduced-motion:reduce){.wn-build,.wn-br,.wn-bhd,.wn-br small{opacity:1 !important;}.wn-bt span,.wn-br em.own span{width:auto !important;}.wn-br.r1{top:94px !important;}.wn-br.r2{top:134px !important;}.wn-br.r3{top:174px !important;}}
+
+/* надпись над заголовком (Списки, Навигация...): крупнее и ярче, мигание мягче */
+.wn-kicker{font:700 15px var(--font-ui);letter-spacing:.2em;color:#8ED3DE;}
+@keyframes wn-tw{0%,100%{opacity:1;}50%{opacity:.78;}}
+@media (max-width:359px){.wn-kicker{font-size:14px;letter-spacing:.16em;}}
+
+/* слайд про порядок (цикл 11 с): акт 1 -- перенос списка, акт 2 -- «Каникулы» раскрываются, песня переезжает */
+.wn-art.wn-art-order{height:clamp(256px,34vh,272px);align-items:flex-start;}
+.wn-lst{position:relative;width:min(300px,100%);height:250px;opacity:0;text-align:left;}
+.wn-slide.on .wn-lst{animation:wn-o-scene 11s ease-in-out .05s infinite;}
+.wn-lh{position:absolute;left:2px;right:2px;top:0;height:28px;display:flex;align-items:center;justify-content:space-between;}
+.wn-lh b{font:700 11.5px var(--font-ui);letter-spacing:.1em;text-transform:uppercase;color:#9FCAD2;}
+.wn-act{position:relative;display:block;width:70px;height:20px;text-align:right;}
+.wn-act i{position:absolute;right:0;top:0;font:700 11.5px var(--font-ui);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:#7CC4D0;}
+.wn-act i.b{opacity:0;}
+.wn-lc{position:absolute;left:0;right:0;height:58px;overflow:hidden;box-sizing:border-box;border-radius:14px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.12);}
+.wn-lrow{display:flex;align-items:center;gap:12px;height:55px;padding:0 10px 0 16px;box-sizing:border-box;}
+.wn-lrow div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+.wn-lrow b{font:500 16.5px var(--font-lyrics);color:#F2F7F8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wn-lrow small{font:600 12px var(--font-ui);color:#9FCAD2;}
+.wn-lc .wn-dot{display:block;flex:0 0 auto;box-sizing:border-box;width:0;height:22px;margin-right:-12px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);opacity:0;text-decoration:none;}
+.wn-lc .wn-grip{opacity:0;}
+.wn-grip{display:block;flex:0 0 auto;width:14px;height:18px;background:radial-gradient(circle,#BFD8DD 1.6px,transparent 1.9px) 0 0/7px 6px;}
+.wn-lc .wn-sr .wn-grip{opacity:.85;}
+.wn-songs2{position:relative;height:128px;margin:0 12px 0 16px;border-top:1px solid rgba(255,255,255,.1);}
+.wn-sr{position:absolute;left:0;right:0;height:24px;margin:0;display:flex;align-items:center;justify-content:space-between;font:500 13px var(--font-lyrics);text-transform:uppercase;letter-spacing:.02em;color:#DCEEF1;border-radius:8px;opacity:0;}
+.wn-sr span{padding-left:14px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wn-sr span::before{content:"\2022";position:absolute;left:2px;color:#7CC4D0;}
+.wn-sr.s0{top:6px;}.wn-sr.s1{top:30px;}.wn-sr.s2{top:54px;}.wn-sr.s3{top:78px;}.wn-sr.s4{top:102px;}
+.wn-slide.on .wn-lc.a{top:36px;animation:wn-o-ta 11s ease-in-out .05s infinite;z-index:3;}
+.wn-slide.on .wn-lc.b{top:104px;animation:wn-o-tb 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-lc.c{top:172px;animation:wn-o-tc 11s ease-in-out .05s infinite;z-index:2;}
+.wn-slide.on .wn-lc .wn-dot{animation:wn-o-dot 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-lrow .wn-grip{animation:wn-o-grip 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-lc.c .wn-lrow .wn-grip{animation:wn-o-gripc 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-act i:first-child{animation:wn-o-act1 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-act i.b{animation:wn-o-act2 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-sr{animation:wn-o-sr 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-sr.s1{animation:wn-o-sr 11s ease-in-out .05s infinite,wn-o-s1 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-sr.s2{animation:wn-o-sr 11s ease-in-out .05s infinite,wn-o-s2 11s ease-in-out .05s infinite;}
+.wn-slide.on .wn-sr.s3{animation:wn-o-sr 11s ease-in-out .05s infinite,wn-o-s3 11s ease-in-out .05s infinite;z-index:2;}
+.wn-slide.on .wn-sr.s0{animation-delay:.2s;}
+.wn-slide.on .wn-sr.s1,.wn-slide.on .wn-sr.s2,.wn-slide.on .wn-sr.s3{animation-delay:.05s;}
+.wn-slide.on .wn-sr.s4{animation-delay:.5s;}
+@keyframes wn-o-scene{0%{opacity:0;}3%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-o-act1{0%,2%{opacity:1;transform:none;}4%{opacity:1;transform:scale(1.25);}7%{opacity:0;transform:none;}92%,100%{opacity:0;}}
+@keyframes wn-o-act2{0%,6%{opacity:0;}9%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-o-dot{0%,7%{width:0;margin-right:-12px;opacity:0;}13%,90%{width:22px;margin-right:0;opacity:1;}97%,100%{width:0;margin-right:-12px;opacity:0;}}
+@keyframes wn-o-grip{0%,9%{opacity:0;}15%,90%{opacity:.85;}97%,100%{opacity:0;}}
+@keyframes wn-o-gripc{0%,9%{opacity:0;transform:none;}15%,16%{opacity:.85;transform:none;}18%{opacity:1;transform:scale(1.6);}21%,90%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+/* акт 1: «Для детей» наверх; акт 2: «Каникулы» поднимаются на место, раскрываются; остальные уходят */
+@keyframes wn-o-ta{0%,22%{top:36px;height:58px;}30%,40%{top:104px;height:58px;}47%{top:36px;height:58px;}55%,92%{top:36px;height:190px;}97%,100%{top:36px;height:58px;}}
+@keyframes wn-o-tb{0%,22%{top:104px;opacity:1;}30%,36%{top:172px;opacity:1;}42%,95%{top:172px;opacity:0;}97%,100%{top:104px;opacity:0;}}
+@keyframes wn-o-tc{0%,17%{top:172px;transform:none;box-shadow:none;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);opacity:1;}20%,27%{top:172px;transform:scale(1.04);box-shadow:0 14px 28px rgba(0,0,0,.4);background:rgba(124,196,208,.26);border-color:#7CC4D0;opacity:1;}28%{top:36px;transform:scale(1.04);box-shadow:0 14px 28px rgba(0,0,0,.4);background:rgba(124,196,208,.26);border-color:#7CC4D0;opacity:1;}33%,36%{top:36px;transform:none;box-shadow:none;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);opacity:1;}42%,95%{top:36px;opacity:0;}97%,100%{top:172px;opacity:0;}}
+@keyframes wn-o-sr{0%,50%{opacity:0;transform:translateX(-10px);}56%,92%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+@keyframes wn-o-s3{0%,64%{top:78px;transform:none;background:transparent;box-shadow:none;}67%,70%{top:78px;transform:scale(1.03);background:rgba(124,196,208,.3);box-shadow:0 10px 22px rgba(0,0,0,.4);}77%{top:30px;transform:scale(1.03);background:rgba(124,196,208,.3);box-shadow:0 10px 22px rgba(0,0,0,.4);}81%,100%{top:30px;transform:none;background:transparent;box-shadow:none;}}
+@keyframes wn-o-s1{0%,70%{top:30px;}77%,100%{top:54px;}}
+@keyframes wn-o-s2{0%,70%{top:54px;}77%,100%{top:78px;}}
+@media (max-height:720px){.wn-art.wn-art-order{height:auto;min-height:214px;}.wn-lst{zoom:.84;}}
+@media (prefers-reduced-motion:reduce){.wn-lst{opacity:1 !important;}.wn-lc .wn-dot{width:22px !important;margin-right:0 !important;opacity:1 !important;}.wn-lrow .wn-grip{opacity:.85 !important;}.wn-lc.c{top:36px !important;}.wn-lc.a{top:104px !important;}.wn-lc.b{top:172px !important;}.wn-sr{opacity:0 !important;}.wn-act i:first-child{opacity:0 !important;}.wn-act i.b{opacity:1 !important;}}
+
+/* слайд про новые версии списка (цикл 10 с) */
+.wn-art.wn-art-ver{height:clamp(288px,38vh,304px);align-items:flex-start;}
+.wn-ver{position:relative;width:min(300px,100%);height:286px;opacity:0;text-align:left;}
+.wn-slide.on .wn-ver{animation:wn-v-scene 10s ease-in-out .05s infinite;}
+.wn-vnote{position:absolute;left:0;right:0;top:0;height:54px;box-sizing:border-box;border-radius:12px;background:rgba(124,196,208,.2);border:1.5px solid #7CC4D0;padding:0 14px;display:flex;align-items:center;font:600 13px/1.3 var(--font-ui);color:#F2F7F8;opacity:0;transform:translateY(-14px);}
+.wn-vnote span{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);}
+.wn-vnote .n2{opacity:0;font-weight:700;}
+.wn-vlist{position:absolute;left:0;right:0;top:64px;height:128px;}
+.wn-vr{position:absolute;left:0;right:0;height:25px;margin:0;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 14px;box-sizing:border-box;border-radius:8px;font:500 13px var(--font-lyrics);text-transform:uppercase;letter-spacing:.02em;color:#DCEEF1;opacity:0;}
+.wn-vr::before{content:"\2022";position:absolute;left:3px;color:#7CC4D0;}
+.wn-vr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wn-vr em{font:700 10.5px var(--font-ui);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#17323A;background:#9ADBE6;border-radius:999px;padding:3px 8px;flex:0 0 auto;margin-left:8px;}
+.wn-vr:nth-child(1){top:0;}.wn-vr:nth-child(2){top:26px;}.wn-vr:nth-child(3){top:52px;}.wn-vr:nth-child(4){top:78px;}.wn-vr:nth-child(5){top:104px;}
+.wn-vbtns{position:absolute;left:0;right:0;top:204px;display:flex;flex-direction:column;gap:7px;}
+.wn-vb1,.wn-vb2{position:relative;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:700 12.5px var(--font-ui);letter-spacing:.04em;text-transform:uppercase;opacity:0;}
+.wn-vb1{background:#7CC4D0;color:#17323A;}
+.wn-vb2{border:1.5px solid rgba(124,196,208,.6);color:#9FCAD2;box-sizing:border-box;}
+.wn-vb1 span{position:absolute;left:0;right:0;text-align:center;}
+.wn-vb1 .t2{opacity:0;}
+.wn-slide.on .wn-vnote{animation:wn-v-note 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vnote .n1{animation:wn-v-n1 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vnote .n2{animation:wn-v-n2 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vr{animation:wn-v-row 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vr:nth-child(2){animation:wn-v-row 10s ease-in-out .35s infinite,wn-v-new 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vr:nth-child(3){animation-delay:.2s;}
+.wn-slide.on .wn-vr:nth-child(4){animation:wn-v-row 10s ease-in-out .5s infinite,wn-v-new 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vr:nth-child(5){animation-delay:.3s;}
+.wn-slide.on .wn-vr em{animation:wn-v-tag 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vb1{animation:wn-v-b1 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vb1 .t1{animation:wn-v-t1 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vb1 .t2{animation:wn-v-t2 10s ease-in-out .05s infinite;}
+.wn-slide.on .wn-vb2{animation:wn-v-b2 10s ease-in-out .05s infinite;}
+@keyframes wn-v-scene{0%{opacity:0;}3%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-v-note{0%,3%{opacity:0;transform:translateY(-14px);}10%,92%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+@keyframes wn-v-n1{0%,52%{opacity:1;}58%,100%{opacity:0;}}
+@keyframes wn-v-n2{0%,52%{opacity:0;}58%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-v-row{0%,10%{opacity:0;transform:translateX(-10px);}18%,92%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+@keyframes wn-v-new{0%,26%{background:transparent;}32%,50%{background:rgba(154,219,230,.2);}60%,100%{background:transparent;}}
+@keyframes wn-v-tag{0%,26%{opacity:0;transform:scale(.7);}32%,50%{opacity:1;transform:scale(1);}58%,100%{opacity:0;}}
+@keyframes wn-v-b1{0%,22%{opacity:0;transform:none;box-shadow:none;}28%{opacity:1;}42%{transform:none;box-shadow:0 0 0 0 rgba(124,196,208,.5);}46%{transform:scale(.95);}52%{transform:none;box-shadow:0 0 0 14px rgba(124,196,208,0);}56%,92%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+@keyframes wn-v-t1{0%,54%{opacity:1;}58%,100%{opacity:0;}}
+@keyframes wn-v-t2{0%,54%{opacity:0;}60%,92%{opacity:1;}97%,100%{opacity:0;}}
+@keyframes wn-v-b2{0%,24%{opacity:0;}30%,54%{opacity:1;}60%,100%{opacity:0;}}
+@media (max-height:720px){.wn-art.wn-art-ver{height:auto;min-height:214px;margin-bottom:6px;}.wn-ver{zoom:.74;}.wn-slide .wn-text.wn-long{font-size:15px;line-height:1.35;}.wn-slide h2.wn-h-long{font-size:23px;margin-bottom:10px;}}
+@media (max-height:620px){.wn-art.wn-art-ver{min-height:166px;margin-bottom:4px;}.wn-ver{zoom:.56;}.wn-slide .wn-text.wn-long{font-size:14px;line-height:1.3;}.wn-slide h2.wn-h-long{font-size:20px;margin-bottom:8px;}}
+@media (prefers-reduced-motion:reduce){.wn-ver,.wn-vnote,.wn-vr,.wn-vb1{opacity:1 !important;transform:none !important;}.wn-vnote .n1,.wn-vb2{opacity:0 !important;}.wn-vnote .n2,.wn-vb1 .t2{opacity:1 !important;}.wn-vb1 .t1{opacity:0 !important;}}
+
+/* итоговый слайд: шапка песни с настоящими значками + «Главная» в «Оформлении» (цикл 12 с) */
+.wn-art.wn-art-nav{height:clamp(240px,32vh,262px);align-items:flex-start;}
+.wn-nav{position:relative;width:min(300px,100%);height:236px;opacity:0;}
+.wn-slide.on .wn-nav{animation:wn-n-scene 12s ease-in-out .05s infinite;}
+.wn-hdr{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;justify-content:center;gap:8px;}
+.wn-hb{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);color:#BFD8DD;}
+.wn-inl{display:inline-block;vertical-align:-4px;line-height:0;color:#8ED3DE;}
+.wn-inl svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.wn-hb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.wn-pill{display:grid;place-items:center;height:32px;padding:0 13px;border-radius:999px;border:1.5px solid rgba(124,196,208,.7);color:#7CC4D0;font:700 12.5px var(--font-ui);letter-spacing:.08em;margin-left:4px;}
+.wn-hlab{position:absolute;left:0;right:0;top:54px;height:22px;text-align:center;}
+.wn-hlab i{position:absolute;left:0;right:0;top:0;font:700 12.5px var(--font-ui);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:#9ADBE6;opacity:0;}
+.wn-sheet{position:absolute;left:0;right:0;top:86px;border-radius:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:14px 14px 16px;opacity:0;transform:translateY(26px);text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.35);}
+.wn-sh-t{font:700 12.5px var(--font-ui);letter-spacing:.12em;text-transform:uppercase;color:#F2F7F8;margin-bottom:14px;}
+.wn-sh-r{display:block;}
+.wn-sh-r>span{display:block;font:700 11.5px var(--font-ui);letter-spacing:.1em;text-transform:uppercase;color:#9FCAD2;margin-bottom:8px;}
+.wn-seg2{position:relative;display:flex;padding:3px;border-radius:999px;background:rgba(0,0,0,.22);}
+.wn-seg2 b{position:relative;z-index:1;flex:1 1 0;text-align:center;font:600 13px var(--font-ui);padding:8px 4px;color:#9FCAD2;white-space:nowrap;}
+.wn-seg2 .hl{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px) / 3);border-radius:999px;background:#7CC4D0;}
+.wn-seg2 .s1{color:#17323A;}
+.wn-slide.on .wn-seg2 .hl{animation:wn-n-hl 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-seg2 .s1{animation:wn-n-s1 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-seg2 .s2{animation:wn-n-s2 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-seg2 .s3{animation:wn-n-s3 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-sheet{animation:wn-n-sheet 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hb.b-home{animation:wn-n-b1 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hb.b-lists{animation:wn-n-b2 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hb.b-share{animation:wn-n-b3 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-pill{animation:wn-n-b4 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hb.b-sl{animation:wn-n-b5 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hlab .l-home{animation:wn-n-l1 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hlab .l-lists{animation:wn-n-l2 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hlab .l-share{animation:wn-n-l3 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hlab .l-abc{animation:wn-n-l4 12s ease-in-out .05s infinite;}
+.wn-slide.on .wn-hlab .l-sl{animation:wn-n-l5 12s ease-in-out .05s infinite;}
+@keyframes wn-n-scene{0%{opacity:0;}3%,92%{opacity:1;}97%,100%{opacity:0;}}
+/* значки по очереди: домой 5-12, списки 14-21, поделиться 23-30, ABC 32-39, оформление 42-48 */
+@keyframes wn-n-b1{0%,5%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}7%,11%{background:#7CC4D0;color:#17323A;transform:scale(1.12);}13%,100%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}}
+@keyframes wn-n-b2{0%,14%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}16%,20%{background:#7CC4D0;color:#17323A;transform:scale(1.12);}22%,100%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}}
+@keyframes wn-n-b3{0%,23%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}25%,29%{background:#7CC4D0;color:#17323A;transform:scale(1.12);}31%,100%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}}
+@keyframes wn-n-b4{0%,32%{background:transparent;color:#7CC4D0;transform:none;}34%,38%{background:#7CC4D0;color:#17323A;transform:scale(1.12);}40%,100%{background:transparent;color:#7CC4D0;transform:none;}}
+@keyframes wn-n-b5{0%,41%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}43%,92%{background:#7CC4D0;color:#17323A;transform:scale(1.12);}97%,100%{background:rgba(255,255,255,.1);color:#BFD8DD;transform:none;}}
+@keyframes wn-n-l1{0%,5%{opacity:0;}7%,11%{opacity:1;}13%,100%{opacity:0;}}
+@keyframes wn-n-l2{0%,14%{opacity:0;}16%,20%{opacity:1;}22%,100%{opacity:0;}}
+@keyframes wn-n-l3{0%,23%{opacity:0;}25%,29%{opacity:1;}31%,100%{opacity:0;}}
+@keyframes wn-n-l4{0%,32%{opacity:0;}34%,38%{opacity:1;}40%,100%{opacity:0;}}
+@keyframes wn-n-l5{0%,41%{opacity:0;}43%,50%{opacity:1;}54%,100%{opacity:0;}}
+@keyframes wn-n-sheet{0%,48%{opacity:0;transform:translateY(26px);}56%,92%{opacity:1;transform:none;}97%,100%{opacity:0;}}
+/* выбор «Главная»: Открытые -> Списки -> Ничего -> Списки */
+@keyframes wn-n-hl{0%,62%{left:3px;}68%,76%{left:calc(3px + (100% - 6px) / 3);}82%,85%{left:calc(3px + (100% - 6px) * 2 / 3);}90%,100%{left:calc(3px + (100% - 6px) / 3);}}
+@keyframes wn-n-s1{0%,64%{color:#17323A;}68%,100%{color:#9FCAD2;}}
+@keyframes wn-n-s2{0%,64%{color:#9FCAD2;}68%,78%{color:#17323A;}82%,86%{color:#9FCAD2;}90%,100%{color:#17323A;}}
+@keyframes wn-n-s3{0%,80%{color:#9FCAD2;}83%,86%{color:#17323A;}90%,100%{color:#9FCAD2;}}
+@media (max-height:720px){.wn-art.wn-art-nav{height:auto;min-height:196px;margin-bottom:6px;}.wn-nav{zoom:.82;}}
+@media (max-height:620px){.wn-art.wn-art-nav{min-height:150px;margin-bottom:4px;}.wn-nav{zoom:.6;}}
+@media (prefers-reduced-motion:reduce){.wn-nav,.wn-sheet{opacity:1 !important;transform:none !important;}.wn-seg2 .hl{left:calc(3px + (100% - 6px) / 3) !important;}.wn-seg2 .s1{color:#9FCAD2 !important;}.wn-seg2 .s2{color:#17323A !important;}}
+
+/* прощальный слайд: ноты плывут снизу вверх по всему фону */
+.wn-bye-slide{position:relative;overflow:hidden;}
+.wn-bye-slide h2,.wn-bye-slide .wn-text{position:relative;z-index:1;}
+.wn-bgnotes{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.wn-bgnote{position:absolute;bottom:-70px;font-family:var(--font-ui);font-weight:600;line-height:1;color:#8ED3DE;opacity:0;}
+.wn-slide.on .wn-bgnote{animation-name:wn-bgnote-up;animation-timing-function:linear;animation-iteration-count:infinite;}
+@keyframes wn-bgnote-up{0%{opacity:0;transform:translateY(0) rotate(-10deg);}12%{opacity:.34;}50%{transform:translateY(-52vh) rotate(8deg);}88%{opacity:.34;}100%{opacity:0;transform:translateY(-108vh) rotate(-8deg);}}
+/* на последнем слайде нет «Пропустить» */
+.wn-skip.wn-skip-off{visibility:hidden;pointer-events:none;}
+@media (prefers-reduced-motion:reduce){.wn-slide.on .wn-bgnote{animation:none;opacity:.22;transform:translateY(-45vh);}}
 </style>
 </head>
 <body>
@@ -2498,48 +2795,125 @@ button.free-main{cursor:pointer;}
   <div class="wn-track" id="wn-track">
 
     <section class="wn-slide">
-      <div class="wn-art"><img class="wn-logo" src="icon-192.png" alt="" width="120" height="120"></div>
-      <p class="wn-kicker">Обновление</p>
-      <h2>Что нового в&nbsp;«Песеннике»</h2>
-      <p class="wn-text">Списки песен и&nbsp;более удобная&nbsp;навигация.</p>
+      <div class="wn-art"><div class="wn-logo-wrap"><img class="wn-logo" src="icon-192.png" alt="" width="120" height="120"></div></div>
+      <h2>Что нового</h2>
+      <p class="wn-text wn-lines">Списки песен,<br>более удобная навигация<br>и&nbsp;много других улучшений</p>
     </section>
 
     <section class="wn-slide">
-      <div class="wn-art"><div class="wn-lists">
+      <div class="wn-art wn-art-lists"><div class="wn-lists">
         <i><b>Каникулы, день&nbsp;1</b><span>5&nbsp;песен</span></i>
-        <i class="is-hi"><b>Встреча в&nbsp;пятницу</b><span>8&nbsp;песен</span></i>
+        <i class="is-hi"><b>Встреча в&nbsp;пятницу</b><span>3&nbsp;песни</span>
+          <u class="wn-songs"><em>Povera voce</em><em>Forever young</em><em>Матерь неба и&nbsp;земли</em></u>
+        </i>
         <i><b>Для&nbsp;детей</b><span>4&nbsp;песни</span></i>
       </div></div>
       <p class="wn-kicker">Списки</p>
-      <h2>Песни для&nbsp;встречи&nbsp;— в&nbsp;одном&nbsp;списке</h2>
-      <p class="wn-text">Соберите песни для&nbsp;встречи или&nbsp;даже каникул в&nbsp;одном месте и&nbsp;отправьте их&nbsp;всем участникам.</p>
+      <h2>Одни на&nbsp;всех</h2>
+      <p class="wn-text">Соберите песни для&nbsp;встречи, вечера с&nbsp;друзьями или&nbsp;даже каникул в&nbsp;одном месте и&nbsp;поделитесь ими с&nbsp;друзьями.</p>
     </section>
 
     <section class="wn-slide">
-      <div class="wn-art"><div class="wn-msg">
-        <div class="wn-bubble"><b>Встреча в&nbsp;пятницу</b><u></u><u></u><u class="s"></u><em>Как добавить список в&nbsp;«Песенник»…</em></div>
-        <div class="wn-paste">Вставить из&nbsp;сообщения</div>
+      <div class="wn-art wn-art-build"><div class="wn-build">
+        <div class="wn-bt"><span>Каникулы</span></div>
+        <div class="wn-bhd"><b>День&nbsp;первый</b></div>
+        <div class="wn-br r1"><em>Noi non sappiamo chi era</em></div>
+        <div class="wn-br r2"><em>Город золотой</em></div>
+        <div class="wn-br r3"><em class="own"><span>When the Saints go marching in</span></em><small>нет в&nbsp;песеннике</small></div>
+        <div class="wn-bchips"><i class="c1">+&nbsp;песни</i><i class="c2">Свое название</i><i class="c3">+&nbsp;Подзаголовок</i></div>
       </div></div>
-      <p class="wn-kicker">Поделиться</p>
-      <h2>Список&nbsp;— одним&nbsp;сообщением</h2>
-      <p class="wn-text">Получатель копирует сообщение, нажимает «Вставить из&nbsp;сообщения» в&nbsp;разделе «Списки»&nbsp;— и&nbsp;список уже в&nbsp;его «Песеннике».</p>
+      <p class="wn-kicker">Начнем</p>
+      <h2>Всё по&nbsp;порядку</h2>
+      <p class="wn-text">Добавьте песни или&nbsp;впишите название вручную, если чего-то в&nbsp;песеннике еще&nbsp;нет. Используйте подзаголовки для&nbsp;четкой&nbsp;структуры.</p>
     </section>
 
     <section class="wn-slide">
-      <div class="wn-art"><div class="wn-bar">
-        <span><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg></span><span class="wn-aa">Aa</span><span><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></span><span><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg></span><span><svg viewBox="0 0 24 24"><path d="M4 5h9a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H9l-3 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M17 10h3a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v3l-3-3h-3"/></svg></span>
+      <div class="wn-art wn-art-order"><div class="wn-lst">
+        <div class="wn-lh"><b>Мои списки</b><span class="wn-act"><i>Выбрать</i><i class="b">Отмена</i></span></div>
+        <div class="wn-lc a">
+          <div class="wn-lrow"><u class="wn-dot"></u><div><b>Каникулы, день&nbsp;1</b><small>5&nbsp;песен</small></div><i class="wn-grip"></i></div>
+          <div class="wn-songs2">
+            <p class="wn-sr s0"><span>Noi non sappiamo chi era</span><i class="wn-grip"></i></p>
+            <p class="wn-sr s1"><span>Город золотой</span><i class="wn-grip"></i></p>
+            <p class="wn-sr s2"><span>Povera voce</span><i class="wn-grip"></i></p>
+            <p class="wn-sr s3"><span>Forever young</span><i class="wn-grip"></i></p>
+            <p class="wn-sr s4"><span>Матерь неба и&nbsp;земли</span><i class="wn-grip"></i></p>
+          </div>
+        </div>
+        <div class="wn-lc b"><div class="wn-lrow"><u class="wn-dot"></u><div><b>Встреча в&nbsp;пятницу</b><small>3&nbsp;песни</small></div><i class="wn-grip"></i></div></div>
+        <div class="wn-lc c"><div class="wn-lrow"><u class="wn-dot"></u><div><b>Для&nbsp;детей</b><small>4&nbsp;песни</small></div><i class="wn-grip"></i></div></div>
       </div></div>
-      <p class="wn-kicker">Навигация</p>
-      <h2>Все нужное&nbsp;— в&nbsp;шапке&nbsp;песни</h2>
-      <p class="wn-text">Домой, оформление, списки, поделиться и&nbsp;перевод&nbsp;— прямо на&nbsp;экране песни.</p>
+      <p class="wn-kicker">Гибкая организация</p>
+      <h2>Это меняет дело</h2>
+      <p class="wn-text">Переставляйте песни и&nbsp;даже целые списки, достаточно зажать и&nbsp;потянуть за&nbsp;значок&nbsp;справа.</p>
     </section>
 
     <section class="wn-slide">
-      <div class="wn-art"><div class="wn-seg"><span>Открытые</span><span>Списки</span><span>Ничего</span></div></div>
-      <p class="wn-kicker">Главная</p>
-      <h2>Главная&nbsp;— как вам&nbsp;удобно</h2>
-      <p class="wn-text">В&nbsp;«Оформлении» выберите, что показывать на&nbsp;главной: недавно открытые песни, ваши списки или&nbsp;ничего.</p>
+      <div class="wn-art wn-art-ver"><div class="wn-ver">
+        <div class="wn-vnote"><span class="n1">Вы получили измененную версию списка «Встреча в&nbsp;пятницу».</span><span class="n2">✓ Список обновлен</span></div>
+        <div class="wn-vlist">
+          <p class="wn-vr"><span>Povera voce</span></p>
+          <p class="wn-vr new"><span>Город золотой</span><em>новое</em></p>
+          <p class="wn-vr"><span>Forever young</span></p>
+          <p class="wn-vr new"><span>Noi non sappiamo chi era</span><em>новое</em></p>
+          <p class="wn-vr"><span>Матерь неба и&nbsp;земли</span></p>
+        </div>
+        <div class="wn-vbtns">
+          <div class="wn-vb1"><span class="t1">Обновить мой список</span><span class="t2">Редактировать мою копию</span></div>
+          <div class="wn-vb2">Оставить обе версии</div>
+        </div>
+      </div></div>
+      <p class="wn-kicker">Версия 2.0</p>
+      <h2>В&nbsp;центре внимания</h2>
+      <p class="wn-text wn-long">Если вам прислали измененный список, приложение это поймет и&nbsp;предложит обновить ваш или&nbsp;сохранить&nbsp;копию. Удобно, если в&nbsp;последний момент добавились песни или&nbsp;вы попросили друга доработать ваш&nbsp;список.</p>
     </section>
+
+    <section class="wn-slide">
+      <div class="wn-art wn-art-story">
+        <div class="wn-phone" aria-hidden="true"><span class="wn-status"><b>9:41</b><span class="wn-sig"><i></i><i></i><i></i><i></i><u></u></span></span><span class="wn-island"></span></div>
+        <div class="wn-scene wn-scene-chat">
+          <div class="wn-notif"><img src="icon-192.png" alt="" width="30" height="30"><div><small>Новое сообщение</small><b>Встреча в&nbsp;пятницу</b></div></div>
+          <div class="wn-bubble"><b>Встреча в&nbsp;пятницу</b><i></i><i></i><i class="short"></i><span>Как добавить список в&nbsp;«Песенник»…</span><s class="wn-time">9:40</s><em class="wn-chip">✓ Скопировано</em></div>
+        </div>
+        <div class="wn-scene wn-scene-app">
+          <div class="wn-pastebtn">Вставить из&nbsp;сообщения</div>
+          <div class="wn-got"><small>Вам прислали список</small><b>Встреча в&nbsp;пятницу</b><span>3&nbsp;песни</span></div>
+        </div>
+      </div>
+      <p class="wn-kicker">Послать легко</p>
+      <h2>Дойдет до&nbsp;всех!</h2>
+      <p class="wn-text">Отправьте список через&nbsp;мессенджер или&nbsp;письмом, получатель скопирует сообщение, в&nbsp;одно касание вставит его, и&nbsp;список откроется у&nbsp;него на&nbsp;устройстве.</p>
+    </section>
+
+    <section class="wn-slide">
+      <div class="wn-art wn-art-nav"><div class="wn-nav">
+        <div class="wn-hdr">
+          <span class="wn-hb b-home"><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg></span>
+          <span class="wn-hb b-sl"><svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><circle cx="6" cy="10" r="2"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="15" r="2"/><line x1="18" y1="5" x2="18" y2="19"/><circle cx="18" cy="8" r="2"/></svg></span>
+          <span class="wn-hb b-lists"><svg  viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></span>
+          <span class="wn-hb b-share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg></span>
+          <span class="wn-pill">ABC</span>
+        </div>
+        <div class="wn-hlab"><i class="l-home">На главную</i><i class="l-lists">Списки</i><i class="l-share">Поделиться</i><i class="l-abc">Перевод / транслит</i><i class="l-sl">Оформление</i></div>
+        <div class="wn-sheet">
+          <div class="wn-sh-t">Оформление</div>
+          <div class="wn-sh-r"><span>Главная</span>
+            <div class="wn-seg2"><i class="hl"></i><b class="s1">Открытые</b><b class="s2">Списки</b><b class="s3">Ничего</b></div>
+          </div>
+        </div>
+      </div></div>
+      <p class="wn-kicker">Нужное под&nbsp;рукой</p>
+      <h2>Просто&nbsp;— и&nbsp;в&nbsp;точку</h2>
+      <p class="wn-text wn-long">Кнопки управления теперь всегда на&nbsp;виду. Настройте главную страницу: на&nbsp;ней можно закрепить списки или&nbsp;недавно открытые песни. Кстати, для&nbsp;удобства размер шрифта здесь и&nbsp;на&nbsp;экране песни настраивается&nbsp;отдельно.</p>
+    </section>
+
+    <section class="wn-slide wn-bye-slide">
+      <div class="wn-bgnotes" aria-hidden="true"><span class="wn-bgnote" style="left:99%;font-size:26px;animation-delay:0.5s;animation-duration:10.0s">♫</span><span class="wn-bgnote" style="left:4%;font-size:22px;animation-delay:0.6s;animation-duration:9.8s">♪</span><span class="wn-bgnote" style="left:6%;font-size:22px;animation-delay:3.5s;animation-duration:8.4s">♫</span><span class="wn-bgnote" style="left:8%;font-size:40px;animation-delay:8.4s;animation-duration:10.1s">♪</span><span class="wn-bgnote" style="left:11%;font-size:26px;animation-delay:6.5s;animation-duration:11.2s">♫</span><span class="wn-bgnote" style="left:13%;font-size:40px;animation-delay:9.7s;animation-duration:10.0s">♪</span><span class="wn-bgnote" style="left:16%;font-size:54px;animation-delay:3.6s;animation-duration:8.7s">♫</span><span class="wn-bgnote" style="left:21%;font-size:40px;animation-delay:7.8s;animation-duration:9.5s">♪</span><span class="wn-bgnote" style="left:23%;font-size:40px;animation-delay:2.0s;animation-duration:10.9s">♫</span><span class="wn-bgnote" style="left:25%;font-size:46px;animation-delay:0.5s;animation-duration:8.3s">♪</span><span class="wn-bgnote" style="left:29%;font-size:46px;animation-delay:8.3s;animation-duration:10.7s">♫</span><span class="wn-bgnote" style="left:32%;font-size:34px;animation-delay:2.4s;animation-duration:9.8s">♪</span><span class="wn-bgnote" style="left:34%;font-size:54px;animation-delay:5.3s;animation-duration:9.2s">♫</span><span class="wn-bgnote" style="left:38%;font-size:30px;animation-delay:3.4s;animation-duration:11.6s">♪</span><span class="wn-bgnote" style="left:43%;font-size:22px;animation-delay:1.7s;animation-duration:10.6s">♫</span><span class="wn-bgnote" style="left:44%;font-size:34px;animation-delay:9.7s;animation-duration:10.1s">♪</span><span class="wn-bgnote" style="left:46%;font-size:40px;animation-delay:9.5s;animation-duration:10.9s">♫</span><span class="wn-bgnote" style="left:49%;font-size:46px;animation-delay:4.8s;animation-duration:9.8s">♪</span><span class="wn-bgnote" style="left:54%;font-size:22px;animation-delay:11.5s;animation-duration:12.2s">♫</span><span class="wn-bgnote" style="left:56%;font-size:46px;animation-delay:6.1s;animation-duration:8.3s">♪</span><span class="wn-bgnote" style="left:58%;font-size:40px;animation-delay:10.7s;animation-duration:13.0s">♫</span><span class="wn-bgnote" style="left:61%;font-size:34px;animation-delay:4.3s;animation-duration:12.4s">♪</span><span class="wn-bgnote" style="left:66%;font-size:30px;animation-delay:1.0s;animation-duration:8.8s">♫</span><span class="wn-bgnote" style="left:66%;font-size:54px;animation-delay:7.0s;animation-duration:9.4s">♪</span><span class="wn-bgnote" style="left:70%;font-size:54px;animation-delay:1.7s;animation-duration:10.5s">♫</span><span class="wn-bgnote" style="left:73%;font-size:30px;animation-delay:10.2s;animation-duration:12.4s">♪</span><span class="wn-bgnote" style="left:78%;font-size:30px;animation-delay:11.4s;animation-duration:11.5s">♫</span><span class="wn-bgnote" style="left:80%;font-size:34px;animation-delay:1.9s;animation-duration:12.8s">♪</span><span class="wn-bgnote" style="left:81%;font-size:26px;animation-delay:0.1s;animation-duration:11.3s">♫</span><span class="wn-bgnote" style="left:86%;font-size:26px;animation-delay:0.0s;animation-duration:9.3s">♪</span><span class="wn-bgnote" style="left:88%;font-size:30px;animation-delay:3.5s;animation-duration:11.0s">♫</span><span class="wn-bgnote" style="left:90%;font-size:54px;animation-delay:6.5s;animation-duration:10.6s">♪</span><span class="wn-bgnote" style="left:95%;font-size:22px;animation-delay:9.0s;animation-duration:10.3s">♫</span><span class="wn-bgnote" style="left:98%;font-size:46px;animation-delay:4.7s;animation-duration:12.0s">♪</span></div>
+      <h2>Вперед и&nbsp;с&nbsp;песней!</h2>
+      <p class="wn-text wn-long">Пойте больше, пойте вместе. А&nbsp;если у&nbsp;вас будут идеи или&nbsp;замечания, связанные с&nbsp;приложением, делитесь&nbsp;ими!</p>
+    </section>
+
+    
 
   </div>
   <div class="wn-foot">
@@ -4437,7 +4811,7 @@ document.getElementById('btn-pv-update').addEventListener('click', function(){
   if((st.p.t || '').trim()){ own.t = st.p.t; }
   own.src = st.k; own.oid = listOid(own); own.u = Date.now();
   saveLists(); renderListsScreen(); renderHomeLists();
-  flashButton(this, '\u2713 Список обновлён');
+  flashButton(this, '\u2713 Список обновлен');
   setTimeout(refreshPvSave, 1700);
 });
 document.getElementById('btn-pv-lists').addEventListener('click', goListsScreen);
@@ -4881,7 +5255,8 @@ function showWhatsNew(){
   for(var i = 0; i < n; i++){ dots.appendChild(document.createElement('i')); }
   function ui(){
     for(var i = 0; i < n; i++){ dots.children[i].classList.toggle('on', i === idx); slides[i].classList.toggle('on', i === idx); }
-    nx.textContent = (idx === n - 1) ? 'Продолжить' : 'Далее';
+    nx.textContent = (idx === n - 1) ? 'Завершить' : 'Далее';
+    document.getElementById('wn-skip').classList.toggle('wn-skip-off', idx === n - 1);
   }
   function close(){
     store.set('sb_wn_seen', '1');
@@ -4896,6 +5271,7 @@ function showWhatsNew(){
   wn.classList.add('open');
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ wn.classList.add('visible'); }); });
 }
+window.showWhatsNew = showWhatsNew;  /* можно открыть вручную (консоль, проверки) */
 
 
 /* ---------- переходы между экранами: что сейчас сверху и что под ним ---------- */
