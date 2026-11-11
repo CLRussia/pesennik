@@ -2026,6 +2026,13 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 .blk-hidden{display:none !important;}
 .blk-count{margin-left:auto;margin-right:6px;align-self:center;font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text-faint);white-space:nowrap;}
 .blk-folding .hdr-add,.blk-folding .hdr-done,.blk-folding .prog-remove{display:none !important;}
+
+/* свёрнутые блоки при переносе -- ровные карточки с одинаковыми промежутками, без тонких линий */
+.blk-folding .hdr-row{margin:0 0 8px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-s);background:var(--bg-elevated);}
+.blk-folding .nav-item-placeholder{margin:0 0 8px;}
+.blk-pseudo{align-items:center;}
+.blk-pseudo-title{flex:1;font-family:var(--font-ui);font-size:15px;font-weight:600;font-style:italic;color:var(--text-faint);}
+.blk-folding .hdr-row.dragging{box-shadow:var(--shadow);}
 </style>
 </head>
 <body>
@@ -3993,7 +4000,7 @@ function openEdit(id, pushHash){
   curListId = id; renderEdit();
   openExtra(editView, '#edit=' + id, pushHash);
 }
-function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
+function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return i === 'NEW' ? 'Раздел' : old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
 document.getElementById('btn-edit-home').addEventListener('click', goHome);
 document.getElementById('btn-edit-lists').addEventListener('click', function(){ openListsScreen(); });
 document.getElementById('program-title').addEventListener('blur', function(){ var l = getList(curListId); if(l && l.t){ var v = typo(l.t.trim()); if(v !== l.t){ l.t = v; l.u = Date.now(); saveLists(); } this.value = v; fitTitle(); } });
@@ -4683,7 +4690,7 @@ function navUnder(top){
    Перенос отдельных песен (и подзаголовка нет в этом режиме) работает старым кодом: сюда попадают только ручки подзаголовков. */
 (function(){
   var list = document.getElementById('program-list');
-  var row = null, placeholder = null, handle = null, blockRows = [], baseTop = 0, startY = 0, curY = 0, rafPending = false, scr = null, origScroll = 0;
+  var row = null, placeholder = null, handle = null, blockRows = [], baseTop = 0, startY = 0, curY = 0, rafPending = false, scr = null, origScroll = 0, pseudo = null;
   var holdTimer = null, holdPt = null, scrollMode = false, scroller = null;
   function hdrRows(){ return Array.prototype.filter.call(list.querySelectorAll('.hdr-row'), function(el){ return el !== row; }); }
   function reposition(){
@@ -4699,7 +4706,7 @@ function navUnder(top){
     Array.prototype.forEach.call(list.querySelectorAll('.blk-hidden'), function(el){ el.classList.remove('blk-hidden'); });
     Array.prototype.forEach.call(list.querySelectorAll('.blk-count'), function(el){ el.remove(); });
     list.classList.remove('blk-folding');
-    list.style.paddingTop = ''; list.style.minHeight = '';
+    list.style.paddingTop = ''; list.style.minHeight = ''; list.style.overflowAnchor = ''; if(scr){ scr.style.overflowAnchor = ''; }
   }
   function onUp(){
     if(!row) return;
@@ -4709,7 +4716,12 @@ function navUnder(top){
     list.insertBefore(row, placeholder);
     blockRows.forEach(function(r){ list.insertBefore(r, placeholder); });
     placeholder.remove();
-    var order = Array.prototype.map.call(list.querySelectorAll('.nav-item'), function(el){ return +el.getAttribute('data-fav-id'); });
+    var order = [];
+    Array.prototype.forEach.call(list.querySelectorAll('.nav-item'), function(el){
+      if(el === pseudo){ if(order.length){ order.push('NEW'); } return; }   // выше «Без раздела» стоит блок -- эти песни получают заголовок
+      order.push(+el.getAttribute('data-fav-id'));
+    });
+    if(pseudo){ pseudo.remove(); pseudo = null; }
     unfold();
     row = null; placeholder = null; handle = null; blockRows = [];
     onProgramReorder(order);
@@ -4720,38 +4732,47 @@ function navUnder(top){
     var rect = row.getBoundingClientRect();
     /* песни этого блока: всё до следующего подзаголовка */
     blockRows = []; for(var n = row.nextElementSibling; n && !n.classList.contains('hdr-row'); n = n.nextElementSibling){ if(n.classList.contains('nav-item')) blockRows.push(n); }
-    /* сворачиваем все блоки, кроме безымянного первого (песни до первого подзаголовка);
-       высоту списка на время переноса сохраняем, иначе страница «проваливается» к началу и теряется то место, где держали блок */
+    /* сворачиваем все блоки; высоту списка на время переноса сохраняем, иначе страница «проваливается» к началу;
+       встроенную подстройку прокрутки браузера (scroll anchoring) отключаем, чтобы она не сдвигала список после сворачивания */
     scr = getScroller(row); origScroll = scr.scrollTop;
+    scr.style.overflowAnchor = 'none'; list.style.overflowAnchor = 'none';
     list.style.minHeight = list.offsetHeight + 'px';
     list.classList.add('blk-folding');
-    var cur = null, cnt = 0, kids = Array.prototype.slice.call(list.children);
+    var cur = null, cnt = 0, kids = Array.prototype.slice.call(list.children), loose = [];
     function badge(){ if(!cur) return; var b = document.createElement('span'); b.className = 'blk-count'; b.textContent = cnt ? songsWord(cnt) : 'пусто'; cur.insertBefore(b, cur.querySelector('.nav-drag-handle')); }
     kids.forEach(function(el){
       if(!el.classList.contains('nav-item')) return;
       if(el.classList.contains('hdr-row')){ badge(); cur = el; cnt = 0; }
       else if(cur){ el.classList.add('blk-hidden'); cnt++; }
+      else { loose.push(el); }                                // песни до первого подзаголовка
     });
     badge();
-    placeholder = document.createElement('div'); placeholder.className = 'nav-item-placeholder'; placeholder.style.height = rect.height + 'px';
+    /* песни без раздела на время переноса тоже сворачиваются в строку «Без раздела»; если блок положить выше неё, эти песни станут разделом */
+    pseudo = null;
+    if(loose.length){
+      loose.forEach(function(el){ el.classList.add('blk-hidden'); });
+      pseudo = document.createElement('div'); pseudo.className = 'nav-item hdr-row blk-pseudo';
+      var pt = document.createElement('span'); pt.className = 'blk-pseudo-title'; pt.textContent = 'Без раздела';
+      var pc = document.createElement('span'); pc.className = 'blk-count'; pc.textContent = songsWord(loose.length);
+      pseudo.appendChild(pt); pseudo.appendChild(pc);
+      list.insertBefore(pseudo, loose[0]);
+    }
+    placeholder = document.createElement('div'); placeholder.className = 'nav-item-placeholder'; placeholder.style.height = row.getBoundingClientRect().height + 'px';
     list.insertBefore(placeholder, row);
     startY = curY = e.clientY;
-    /* после сворачивания строка остаётся там, где была (под пальцем); дальше двигается за пальцем от этой точки */
+    /* плашка остаётся ровно там, где её взяли (под пальцем); дальше двигается за пальцем от этой точки.
+       Свёрнутый список подгоняем так, чтобы пунктирная ячейка легла под плашку: прокруткой, а если ячейка выше -- сдвигом списка вниз.
+       Если выровнять не вышло, плашка всё равно под пальцем, а ячейка перескочит при первом движении. */
     var slotTop = placeholder.getBoundingClientRect().top;
-    /* список стал короче, и ячейка блока поднялась выше пальца; подсдвигаем свёрнутый список вниз ровно настолько,
-       чтобы ячейка оказалась там, где был блок (плашка остаётся под пальцем, никуда не «улетает») */
     var diff = slotTop - rect.top;                               // > 0: ячейка ниже плашки -- прокручиваем вниз; < 0: выше -- подталкиваем список вниз
     if(diff > 0.5){ var s0 = scr.scrollTop; scr.scrollTop = s0 + diff; diff -= (scr.scrollTop - s0); }
     if(diff < -0.5){ list.style.paddingTop = (-diff) + 'px'; }
-    slotTop = placeholder.getBoundingClientRect().top;
     row.classList.add('dragging');
     row.style.position = 'fixed'; row.style.left = rect.left + 'px'; row.style.top = rect.top + 'px'; row.style.width = rect.width + 'px'; row.style.zIndex = '50';
     var r2 = row.getBoundingClientRect(), offY = r2.top - rect.top, offX = r2.left - rect.left;
     row.style.left = (rect.left - offX) + 'px';
-    row.style.top = (rect.top - offY) + 'px';
-    baseTop = slotTop - offY;
-    /* строка стоит на месте (подсдвинутый список подставил под неё ячейку), а за пальцем едет через transform -- он не вызывает пересчёта вёрстки,
-       поэтому на слабых телефонах идёт плавнее, чем смена top */
+    baseTop = rect.top - offY;
+    /* за пальцем едет через transform -- он не вызывает пересчёта вёрстки, на слабых телефонах идёт плавнее, чем смена top */
     row.style.top = baseTop + 'px';
     row.style.willChange = 'transform';
     row.style.transform = 'translate3d(0,0,0)';
