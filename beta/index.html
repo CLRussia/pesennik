@@ -1994,6 +1994,21 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 @keyframes wn-shine{0%{background-position:100% 0;}55%,100%{background-position:0 0;}}
 @keyframes wn-tw{0%,100%{opacity:1;}50%{opacity:.55;}}
 @keyframes wn-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+
+/* ===== переход «Слайд» для экрана песни: выезд справа (0,65 с, мягкий старт), уход обратно (0,4 с, мягкое торможение).
+   Переключатель «Без анимации» в «Оформлении» (data-anim="off") возвращает прежнее появление. ===== */
+:root:not([data-anim="off"]) #song-view{
+  display:flex; visibility:hidden; opacity:1; transform:translateX(100%);
+  transition:transform .4s cubic-bezier(.32,.72,0,1), visibility 0s linear .4s;
+}
+:root:not([data-anim="off"]) #song-view.visible{
+  visibility:visible; transform:none; box-shadow:-10px 0 24px rgba(0,0,0,.14);
+  transition:transform .65s cubic-bezier(.4,0,.2,1), visibility 0s;
+}
+@media (prefers-reduced-motion: reduce){
+  :root:not([data-anim="off"]) #song-view, :root:not([data-anim="off"]) #song-view.visible{ transition-duration:.01s !important; transition-delay:0s !important; }
+}
 </style>
 </head>
 <body>
@@ -2207,6 +2222,13 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
         <button class="theme-switch-btn" data-home-choice="recent" type="button"><span>Открытые</span></button>
         <button class="theme-switch-btn" data-home-choice="lists" type="button"><span>Списки</span></button>
         <button class="theme-switch-btn" data-home-choice="none" type="button"><span>Ничего</span></button>
+      </div>
+    </div>
+    <div class="appearance-row" id="appearance-anim-row">
+      <div class="appearance-label">Анимация</div>
+      <div class="theme-switch">
+        <button class="theme-switch-btn" data-anim-choice="slide" type="button"><span>Слайд</span></button>
+        <button class="theme-switch-btn" data-anim-choice="off" type="button"><span>Без&nbsp;анимации</span></button>
       </div>
     </div>
     <div class="appearance-row" id="appearance-font-row">
@@ -4467,6 +4489,18 @@ document.querySelectorAll('.theme-switch-btn[data-home-choice]').forEach(functio
 });
 renderHomeSwitch(); renderRecent(); renderHomeLists();
 
+/* ---------- переходы между экранами: «Слайд» (по умолчанию) или «Без анимации» (как раньше) ---------- */
+function animChoice(){ return store.get('sb_anim', 'slide') === 'off' ? 'off' : 'slide'; }
+function applyAnim(){
+  var c = animChoice();
+  document.documentElement.setAttribute('data-anim', c);
+  document.querySelectorAll('.theme-switch-btn[data-anim-choice]').forEach(function(btn){ btn.classList.toggle('is-active', btn.dataset.animChoice === c); });
+}
+document.querySelectorAll('.theme-switch-btn[data-anim-choice]').forEach(function(btn){
+  btn.addEventListener('click', function(){ store.set('sb_anim', btn.dataset.animChoice); applyAnim(); });
+});
+applyAnim();
+
 /* светлое сообщение на главной (вместо тёмных всплывающих плашек) */
 function homeNotice(text){
   var old = document.getElementById('home-notice'); if(old) old.remove();
@@ -4573,11 +4607,11 @@ function showWhatsNew(){
     var el = c.v.el, w = window.innerWidth || 400, fast = c.dx / Math.max(1, Date.now() - c.t0) > 0.5;
     var systemDidIt = lastPop !== c.pop0;
     if(!systemDidIt && (c.dx > w * 0.35 || (fast && c.dx > 40))){
-      el.style.transition = 'transform .2s ease'; el.style.transform = 'translateX(100%)';
-      setTimeout(function(){ if(lastPop === c.pop0){ c.v.back(); } setTimeout(function(){ reset(el); }, 300); }, 200);
+      el.style.transition = 'transform .3s cubic-bezier(.32,.72,0,1)'; el.style.transform = 'translateX(100%)';
+      setTimeout(function(){ if(lastPop === c.pop0){ c.v.back(); } setTimeout(function(){ reset(el); }, 400); }, 300);
     } else {
-      el.style.transition = 'transform .18s ease'; el.style.transform = 'translateX(0)';
-      setTimeout(function(){ reset(el); }, 200);
+      el.style.transition = 'transform .25s cubic-bezier(.32,.72,0,1)'; el.style.transform = 'translateX(0)';
+      setTimeout(function(){ reset(el); }, 270);
     }
   }
   document.addEventListener('touchend', finish, {passive: true});
@@ -5343,7 +5377,7 @@ function pushNav(state, hash){
 /* Тур при первом входе -- после initFromHash, чтобы он лёг поверх
    уже открытого экрана (в т.ч. если открыли по присланной ссылке на
    конкретную песню), а не блокировал переход по ней. */
-if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ store.set('sb_wn_seen', '1'); showTour(); } else if(store.get('sb_tour_seen', null) && !store.get('sb_wn_seen', null) && !isListHash(location.hash)){ showWhatsNew(); }
+if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ store.set('sb_wn_seen', '1'); showTour(); }
 
 /* ------------------------------------------------------------
    SERVICE WORKER
