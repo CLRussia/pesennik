@@ -144,11 +144,13 @@ input{font-family:inherit;color:inherit;}
 #giussani{display:block;width:100%;margin:auto 0 4px;padding:14px 12px;border-radius:var(--radius-m);text-align:center;
   background:transparent;-webkit-tap-highlight-color:transparent;cursor:pointer;}
 #giussani:active{background:var(--accent-soft);}
-#giussani .q{font-family:var(--font-lyrics);font-style:italic;font-size:calc(23px * var(--scale-menu));line-height:1.35;color:var(--text);}
+/* цитата не зависит от настройки размера шрифта: всегда в одну строку, 23px, а на узких экранах сжимается так, чтобы по бокам оставались поля
+   (13.7 -- ширина фразы в em, 72px -- поля главной + внутренние отступы + запас) */
+#giussani .q{font-family:var(--font-lyrics);font-style:italic;font-size:min(23px, calc((100vw - 72px) / 13.7));line-height:1.35;color:var(--text);white-space:nowrap;}
 /* минимальный зазор над цитатой, даже когда она прижата вниз вплотную к списку */
 #giussani{border-top:30px solid transparent;background-clip:padding-box;}
 #giussani .who{margin-top:10px;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-weight:600;
-  font-size:calc(12px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);}
 #giussani-view .g-text p{font-family:var(--font-lyrics);font-size:calc(18px * var(--scale-menu));line-height:1.62;color:var(--text);margin:0 0 1.62em;text-align:left;}
 #giussani-view .g-sign{text-align:right;font-family:var(--font-ui);font-size:calc(14px * var(--scale-menu));letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin:4px 0 18px;}
 
@@ -1916,6 +1918,82 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 
 /* значок «⋮⋮»: браузерная прокрутка отключена (прокручиваем сами, пока перенос не включился удержанием) */
 .nav-drag-handle{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+
+/* ---------- «Что нового» (один раз после обновления) ---------- */
+#wn{position:fixed;inset:0;z-index:400;display:none;opacity:0;transition:opacity .45s ease;color:#F2F7F8;
+  background:radial-gradient(120% 70% at 80% 0%,#2F6470 0%,#1F3A41 55%,#142a30 100%);}
+#wn.open{display:flex;flex-direction:column;}
+#wn.visible{opacity:1;}
+.wn-skip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;z-index:2;background:none;border:0;color:#9FCAD2;font:600 13px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;padding:10px 6px;cursor:pointer;}
+.wn-track{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.wn-track::-webkit-scrollbar{display:none;}
+.wn-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:calc(env(safe-area-inset-top,0px) + 56px) 28px 12px;}
+.wn-art{height:clamp(170px,30vh,260px);display:flex;align-items:center;justify-content:center;margin-bottom:clamp(14px,3.5vh,34px);width:100%;}
+.wn-kicker{margin:0 0 10px;font:600 12.5px var(--font-ui);letter-spacing:.22em;text-transform:uppercase;color:#7CC4D0;}
+.wn-slide h2{margin:0 0 14px;width:100%;max-width:340px;font:700 clamp(20px,6.2vw,29px)/1.14 var(--font-ui);letter-spacing:.01em;text-transform:uppercase;text-wrap:balance;}
+.wn-text{margin:0;max-width:min(30ch,100%);font-size:clamp(16px,4.6vw,19px);line-height:1.45;color:#BFD8DD;text-wrap:pretty;}
+.wn-foot{display:flex;flex-direction:column;align-items:center;gap:18px;padding:10px 28px calc(env(safe-area-inset-bottom,0px) + 26px);}
+.wn-dots{display:flex;gap:8px;}
+.wn-dots i{width:7px;height:7px;border-radius:50%;background:#4A7480;transition:all .3s;}
+.wn-dots i.on{width:22px;border-radius:4px;background:#7CC4D0;}
+.wn-next{width:100%;max-width:340px;border:0;border-radius:16px;padding:16px;background:#7CC4D0;color:#17323A;font:700 15px var(--font-ui);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.wn-next:active{transform:scale(.98);}
+/* иллюстрации */
+.wn-logo{width:120px;height:120px;border-radius:28px;box-shadow:0 22px 50px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08);}
+.wn-lists{display:flex;flex-direction:column;gap:10px;width:min(300px,100%);}
+.wn-lists i{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);font-style:normal;text-align:left;}
+.wn-lists b{font:600 15px var(--font-ui);}
+.wn-lists span{font-size:13px;color:#9FCAD2;white-space:nowrap;}
+.wn-lists i.is-hi{background:#7CC4D0;border-color:#7CC4D0;color:#17323A;}
+.wn-lists i.is-hi span{color:#2B5560;}
+.wn-msg{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(290px,100%);}
+.wn-bubble{align-self:stretch;text-align:left;padding:14px 16px;border-radius:18px 18px 18px 6px;background:rgba(255,255,255,.09);display:flex;flex-direction:column;gap:7px;}
+.wn-bubble b{font:600 14px var(--font-ui);}
+.wn-bubble u{display:block;height:7px;border-radius:4px;background:rgba(255,255,255,.22);text-decoration:none;width:90%;}
+.wn-bubble u.s{width:55%;}
+.wn-bubble em{font-style:normal;font-size:12.5px;color:#9FCAD2;margin-top:2px;}
+.wn-paste{padding:12px 22px;border-radius:14px;background:#7CC4D0;color:#17323A;font:700 13.5px var(--font-ui);letter-spacing:.04em;box-shadow:0 0 0 0 rgba(124,196,208,.5);}
+.wn-bar{display:flex;gap:10px;padding:12px;border-radius:22px;background:rgba(255,255,255,.07);}
+.wn-bar span{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);color:#DCEEF1;}
+.wn-bar svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.wn-aa{font:700 15px var(--font-ui);}
+.wn-seg{display:flex;padding:5px;border-radius:16px;background:rgba(255,255,255,.08);}
+.wn-seg span{padding:12px 16px;border-radius:12px;font:600 14px var(--font-ui);color:#BFD8DD;}
+/* появление и подсветка у активного слайда */
+.wn-slide .wn-art,.wn-slide .wn-kicker,.wn-slide h2,.wn-slide .wn-text{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease;}
+.wn-slide.on .wn-art{opacity:1;transform:none;}
+.wn-slide.on .wn-kicker{opacity:1;transform:none;transition-delay:.12s;}
+.wn-slide.on h2{opacity:1;transform:none;transition-delay:.2s;}
+.wn-slide.on .wn-text{opacity:1;transform:none;transition-delay:.3s;}
+.wn-slide.on .wn-lists i.is-hi{animation:wn-pop 3.6s ease-in-out .6s infinite;}
+.wn-slide.on .wn-paste{animation:wn-pulse 2.4s ease-out .6s infinite;}
+.wn-slide.on .wn-bar span:nth-child(1){animation:wn-hl 5s ease-in-out 0s infinite;}
+.wn-slide.on .wn-bar span:nth-child(2){animation:wn-hl 5s ease-in-out 1s infinite;}
+.wn-slide.on .wn-bar span:nth-child(3){animation:wn-hl 5s ease-in-out 2s infinite;}
+.wn-slide.on .wn-bar span:nth-child(4){animation:wn-hl 5s ease-in-out 3s infinite;}
+.wn-slide.on .wn-bar span:nth-child(5){animation:wn-hl 5s ease-in-out 4s infinite;}
+.wn-slide.on .wn-seg span:nth-child(1){animation:wn-seg 6s ease-in-out 0s infinite;}
+.wn-slide.on .wn-seg span:nth-child(2){animation:wn-seg 6s ease-in-out 2s infinite;}
+.wn-slide.on .wn-seg span:nth-child(3){animation:wn-seg 6s ease-in-out 4s infinite;}
+@keyframes wn-pop{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+@keyframes wn-pulse{0%{box-shadow:0 0 0 0 rgba(124,196,208,.5);}70%,100%{box-shadow:0 0 0 16px rgba(124,196,208,0);}}
+@keyframes wn-hl{0%,18%,100%{background:rgba(255,255,255,.08);color:#DCEEF1;}6%,14%{background:#7CC4D0;color:#17323A;}}
+@keyframes wn-seg{0%,30%,100%{background:transparent;color:#BFD8DD;}6%,26%{background:#7CC4D0;color:#17323A;}}
+@media (prefers-reduced-motion:reduce){#wn,.wn-slide *{transition:none !important;animation:none !important;}.wn-slide .wn-art,.wn-slide .wn-kicker,.wn-slide h2,.wn-slide .wn-text{opacity:1;transform:none;}}
+@media (max-height:640px){.wn-art{height:auto;min-height:0;margin-bottom:16px;}.wn-lists,.wn-msg,.wn-bar,.wn-seg{zoom:.72;}.wn-slide{padding-top:64px;}.wn-logo{width:92px;height:92px;border-radius:22px;}}
+/* мерцание фона и заголовков */
+#wn::before,#wn::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(40% 30% at 20% 75%,rgba(124,196,208,.16),transparent 70%);animation:wn-glow 7s ease-in-out infinite;}
+#wn::after{background:radial-gradient(35% 28% at 85% 30%,rgba(124,196,208,.14),transparent 70%);animation-duration:9s;animation-delay:-3s;}
+.wn-track,.wn-foot,.wn-skip{position:relative;z-index:1;}
+.wn-skip{position:absolute;}
+.wn-slide.on h2{background:linear-gradient(100deg,#F2F7F8 0%,#F2F7F8 38%,#9ADBE6 50%,#F2F7F8 62%,#F2F7F8 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:wn-shine 5s ease-in-out .9s infinite;}
+.wn-slide.on .wn-kicker{animation:wn-tw 3.2s ease-in-out 1s infinite;}
+.wn-slide.on .wn-logo{animation:wn-float 5s ease-in-out infinite;}
+@keyframes wn-glow{0%,100%{opacity:.35;transform:scale(1);}50%{opacity:1;transform:scale(1.15);}}
+@keyframes wn-shine{0%{background-position:100% 0;}55%,100%{background-position:0 0;}}
+@keyframes wn-tw{0%,100%{opacity:1;}50%{opacity:.55;}}
+@keyframes wn-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
 </style>
 </head>
 <body>
@@ -2044,9 +2122,11 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 <div id="song-view">
   <div class="song-topbar">
     <div class="song-topbar-row">
-      <button class="back-btn" id="btn-back" aria-label="На главную">
+      <button class="icon-btn-sm" id="btn-song-back" type="button" aria-label="Назад" title="Назад" style="display:none">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На&nbsp;главную</span>
+      </button>
+      <button class="icon-btn-sm" id="btn-back" type="button" aria-label="На главную" title="На главную">
+        <svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg>
       </button>
       <button class="icon-btn-sm" id="btn-favorites-song" title="Списки" aria-label="Списки"><svg class="ic ic1" viewBox="0 0 24 24"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><svg class="ic ic2" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="15" y2="6.5"/><line x1="4" y1="11.5" x2="10" y2="11.5"/><line x1="4" y1="16.5" x2="10" y2="16.5"/><circle cx="16.5" cy="17.2" r="2.3"/><path d="M18.8 17.2V8l3-1"/></svg><svg class="ic ic3" viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></button>
       <button class="translation-pill ui-caps" id="btn-translation-pill" type="button" hidden>Перевод</button>
@@ -2330,6 +2410,61 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
       <button class="modal-btn danger ui-caps" id="confirm-modal-ok" type="button">Удалить</button>
     </div>
   </div></div>
+</div>
+
+<div id="wn" role="dialog" aria-modal="true" aria-label="Что нового">
+  <button class="wn-skip" id="wn-skip" type="button">Пропустить</button>
+  <div class="wn-track" id="wn-track">
+
+    <section class="wn-slide">
+      <div class="wn-art"><img class="wn-logo" src="icon-192.png" alt="" width="120" height="120"></div>
+      <p class="wn-kicker">Обновление</p>
+      <h2>Что нового в&nbsp;«Песеннике»</h2>
+      <p class="wn-text">Списки песен и&nbsp;более удобная&nbsp;навигация.</p>
+    </section>
+
+    <section class="wn-slide">
+      <div class="wn-art"><div class="wn-lists">
+        <i><b>Каникулы, день&nbsp;1</b><span>5&nbsp;песен</span></i>
+        <i class="is-hi"><b>Встреча в&nbsp;пятницу</b><span>8&nbsp;песен</span></i>
+        <i><b>Для&nbsp;детей</b><span>4&nbsp;песни</span></i>
+      </div></div>
+      <p class="wn-kicker">Списки</p>
+      <h2>Песни для&nbsp;встречи&nbsp;— в&nbsp;одном&nbsp;списке</h2>
+      <p class="wn-text">Соберите песни для&nbsp;встречи или&nbsp;даже каникул в&nbsp;одном месте и&nbsp;отправьте их&nbsp;всем участникам.</p>
+    </section>
+
+    <section class="wn-slide">
+      <div class="wn-art"><div class="wn-msg">
+        <div class="wn-bubble"><b>Встреча в&nbsp;пятницу</b><u></u><u></u><u class="s"></u><em>Как добавить список в&nbsp;«Песенник»…</em></div>
+        <div class="wn-paste">Вставить из&nbsp;сообщения</div>
+      </div></div>
+      <p class="wn-kicker">Поделиться</p>
+      <h2>Список&nbsp;— одним&nbsp;сообщением</h2>
+      <p class="wn-text">Получатель копирует сообщение, нажимает «Вставить из&nbsp;сообщения» в&nbsp;разделе «Списки»&nbsp;— и&nbsp;список уже в&nbsp;его «Песеннике».</p>
+    </section>
+
+    <section class="wn-slide">
+      <div class="wn-art"><div class="wn-bar">
+        <span><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg></span><span class="wn-aa">Aa</span><span><svg viewBox="0 0 24 24"><circle cx="5.25" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="5.25" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9.75" y1="6" x2="20.25" y2="6"/><line x1="9.75" y1="12" x2="20.25" y2="12"/><line x1="9.75" y1="18" x2="20.25" y2="18"/></svg></span><span><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><line x1="8.3" y1="10.7" x2="15.7" y2="6.3"/><line x1="8.3" y1="13.3" x2="15.7" y2="17.7"/></svg></span><span><svg viewBox="0 0 24 24"><path d="M4 5h9a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H9l-3 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M17 10h3a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v3l-3-3h-3"/></svg></span>
+      </div></div>
+      <p class="wn-kicker">Навигация</p>
+      <h2>Все нужное&nbsp;— в&nbsp;шапке&nbsp;песни</h2>
+      <p class="wn-text">Домой, оформление, списки, поделиться и&nbsp;перевод&nbsp;— прямо на&nbsp;экране песни.</p>
+    </section>
+
+    <section class="wn-slide">
+      <div class="wn-art"><div class="wn-seg"><span>Открытые</span><span>Списки</span><span>Ничего</span></div></div>
+      <p class="wn-kicker">Главная</p>
+      <h2>Главная&nbsp;— как вам&nbsp;удобно</h2>
+      <p class="wn-text">В&nbsp;«Оформлении» выберите, что показывать на&nbsp;главной: недавно открытые песни, ваши списки или&nbsp;ничего.</p>
+    </section>
+
+  </div>
+  <div class="wn-foot">
+    <div class="wn-dots" id="wn-dots"></div>
+    <button class="wn-next" id="wn-next" type="button">Далее</button>
+  </div>
 </div>
 
 <div class="modal-overlay" id="tour-modal">
@@ -2932,20 +3067,25 @@ function renderList(key){
     });
   });
 }
-function openList(key, pushHash){
+function openList(key, pushHash, keepState){
   if(typeof closeExtraViews === 'function'){ closeExtraViews(); }
   if(!LISTS[key]) return;
+  /* keepState -- возврат из песни на уже открытый список: прокрутку и
+     поле поиска не сбрасываем */
+  var keepTop = keepState ? listView.scrollTop : 0;
   currentListKey = key;
   renderList(key);
   var listSearch = document.getElementById('list-search');
-  listSearch.value = '';
   var listSearchResults = document.getElementById('list-search-results');
-  listSearchResults.innerHTML = '';
-  listSearchResults.classList.remove('show');
+  if(!keepState){
+    listSearch.value = '';
+    listSearchResults.innerHTML = '';
+    listSearchResults.classList.remove('show');
+  }
   listView.classList.add('open');
   requestAnimationFrame(function(){ listView.classList.add('visible'); });
-  listView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({list:key}, '', '#list'+key); }
+  listView.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({list:key}, '#list'+key); }
 }
 function instantHideList(){ listView.classList.remove('open','visible'); currentListKey = null; }
 
@@ -3036,7 +3176,7 @@ function renderFavorites(){
   });
   document.getElementById('favorites-empty').classList.toggle('show', favorites.length===0);
 }
-function openFavorites(pushHash){
+function openFavorites(pushHash, keepState){
   /* та же зачистка, что и в goHome() -- откуда бы ни открыли избранное
      (с главной, из списка, из песни), предыдущий экран должен закрыться,
      а не остаться лежать под избранным на весь экран. */
@@ -3052,12 +3192,13 @@ function openFavorites(pushHash){
     setTimeout(function(){ listView.classList.remove('open'); }, 200);
   }
   currentListKey = null;
-  clearSearchField('favorites-search');
+  var keepTop = keepState ? favoritesView.scrollTop : 0;
+  if(!keepState) clearSearchField('favorites-search');
   renderFavorites();
   favoritesView.classList.add('open');
   requestAnimationFrame(function(){ favoritesView.classList.add('visible'); });
-  favoritesView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({favorites:true}, '', '#favorites'); }
+  favoritesView.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({favorites:true}, '#favorites'); }
 }
 function instantHideFavorites(){ favoritesView.classList.remove('open','visible'); }
 document.getElementById('btn-favorites').addEventListener('click', function(){ openFavorites(); });
@@ -3276,7 +3417,7 @@ function positionAzJump(){
   jump.style.top = (topbarBottom + available/2) + 'px';
   jump.style.maxHeight = (available - 16) + 'px';
 }
-function openAllSongs(pushHash){
+function openAllSongs(pushHash, keepState){
   if(typeof closeExtraViews === 'function'){ closeExtraViews(); }
   // та же зачистка, что и в openFavorites -- какой бы экран ни был
   // открыт до этого, он не должен остаться лежать под "Все песни".
@@ -3296,7 +3437,8 @@ function openAllSongs(pushHash){
     setTimeout(function(){ favoritesView.classList.remove('open'); }, 200);
   }
   currentListKey = null;
-  clearSearchField('allsongs-search');
+  var keepTop = keepState ? allsongsView.scrollTop : 0;
+  if(!keepState) clearSearchField('allsongs-search');
   renderAllSongs();
   allsongsView.classList.add('open');
   requestAnimationFrame(function(){
@@ -3304,8 +3446,8 @@ function openAllSongs(pushHash){
     positionAzJump();
     document.getElementById('az-jump').classList.add('open');
   });
-  allsongsView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({allsongs:true}, '', '#allsongs'); }
+  allsongsView.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({allsongs:true}, '#allsongs'); }
 }
 function instantHideAllSongs(){
   allsongsView.classList.remove('open','visible');
@@ -3602,6 +3744,8 @@ function closeExtraViews(except){
   extraViews.forEach(function(v){ if(v !== except && v.classList.contains('open')){ v.classList.remove('visible','open'); } });
 }
 function openExtra(view, hash, pushHash){
+  /* возврат из песни на уже открытый экран (pushHash === false) -- прокрутку не сбрасываем */
+  var keepTop = (pushHash === false && view.classList.contains('open')) ? view.scrollTop : 0;
   instantHideAllSongs();
   if(songView.classList.contains('open')){ songView.classList.remove('visible'); releaseWakeLock(); currentId = null; setTranslationOpen(false); setTimeout(function(){ songView.classList.remove('open'); }, 200); }
   [listView, favoritesView, allsongsView, giussaniView].forEach(function(v){ if(v.classList.contains('open')){ v.classList.remove('visible'); v.classList.remove('open'); } });
@@ -3610,8 +3754,8 @@ function openExtra(view, hash, pushHash){
   currentListKey = null;
   view.classList.add('open');
   requestAnimationFrame(function(){ view.classList.add('visible'); });
-  view.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({extra:true}, '', hash); }
+  view.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({extra:true}, hash); }
 }
 /* ---------- карточки / строки на главной ---------- */
 function sortedLists(){ return lists.slice().sort(function(a,b){ return b.u - a.u; }); }
@@ -3862,7 +4006,7 @@ function startPicker(hdr){
   document.body.classList.add('picking');
   updatePickerBar();
   closeExtraViews();
-  history.pushState({pick:true}, '', '#pick');
+  pushNav({pick:true}, '#pick');
   collapseSections(); renderHomeLists();
   window.scrollTo(0, 0);
 }
@@ -4353,6 +4497,93 @@ function placeConfirm(){
   if(r.bottom + 8 + h > window.innerHeight - 12){ sh.style.top = Math.max(12, Math.round(r.top - 8 - h)) + 'px'; }
 }
 
+
+/* ---------- «Что нового»: один раз после обновления (для тех, кто уже проходил тур) ---------- */
+function showWhatsNew(){
+  var wn = document.getElementById('wn'), tr = document.getElementById('wn-track'),
+      dots = document.getElementById('wn-dots'), nx = document.getElementById('wn-next');
+  if(!wn) return;
+  var slides = tr.children, n = slides.length, idx = 0;
+  dots.innerHTML = '';
+  for(var i = 0; i < n; i++){ dots.appendChild(document.createElement('i')); }
+  function ui(){
+    for(var i = 0; i < n; i++){ dots.children[i].classList.toggle('on', i === idx); slides[i].classList.toggle('on', i === idx); }
+    nx.textContent = (idx === n - 1) ? 'Продолжить' : 'Далее';
+  }
+  function close(){
+    store.set('sb_wn_seen', '1');
+    wn.classList.remove('visible');
+    setTimeout(function(){ wn.classList.remove('open'); }, 450);
+  }
+  var tm = null;
+  tr.addEventListener('scroll', function(){ clearTimeout(tm); tm = setTimeout(function(){ var w = tr.clientWidth || 1, k = Math.round(tr.scrollLeft / w); if(k !== idx){ idx = k; ui(); } }, 80); }, {passive: true});
+  nx.onclick = function(){ if(idx >= n - 1){ close(); return; } tr.scrollTo({left: (idx + 1) * tr.clientWidth, behavior: 'smooth'}); idx++; ui(); };
+  document.getElementById('wn-skip').onclick = close;
+  tr.scrollLeft = 0; ui();
+  wn.classList.add('open');
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ wn.classList.add('visible'); }); });
+}
+
+
+/* ---------- свайп «назад» от левого края: экран едет за пальцем ----------
+   Своя зона у кромки (32 px, шире системной), поэтому не зависит от того, попал ли палец в
+   узкую полосу iOS. Если система тоже сработала своим жестом (popstate посреди касания) -- наш
+   отменяется, чтобы не было двойного «назад». */
+(function(){
+  var ZONE = 32, lastPop = 0;
+  window.addEventListener('popstate', function(){ lastPop = Date.now(); });
+  function topView(){
+    if(songView.classList.contains('open')) return {el: songView, back: songBack};
+    var order = extraViews.concat([allsongsView, listView, favoritesView, giussaniView]);
+    for(var i = 0; i < order.length; i++){
+      if(order[i].classList.contains('open')){
+        return {el: order[i], back: function(){ var s = history.state; if(s && s.home && s.d > 0){ history.back(); } else { goHome(); } }};
+      }
+    }
+    return null;
+  }
+  function blocked(){
+    return !!document.querySelector('.modal-overlay.open, #wn.open, #songlist-modal.open');
+  }
+  var t = null;
+  function reset(v){ v.style.transition = ''; v.style.transform = ''; v.style.boxShadow = ''; }
+  document.addEventListener('touchstart', function(e){
+    t = null;
+    if(e.touches.length !== 1 || blocked()) return;
+    var x = e.touches[0].clientX; if(x > ZONE) return;
+    var v = topView(); if(!v) return;
+    if(!(history.state && history.state.d > 0)) return;   // назад из этого экрана некуда
+    t = {v: v, x0: x, y0: e.touches[0].clientY, t0: Date.now(), pop0: lastPop, dx: 0, claimed: false, dead: false};
+  }, {passive: true});
+  document.addEventListener('touchmove', function(e){
+    if(!t || t.dead) return;
+    var dx = e.touches[0].clientX - t.x0, dy = e.touches[0].clientY - t.y0;
+    if(!t.claimed){
+      if(Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ t.dead = true; return; }
+      if(dx > 10 && dx > Math.abs(dy) * 1.5){ t.claimed = true; t.v.el.style.transition = 'none'; t.v.el.style.boxShadow = '-8px 0 24px rgba(0,0,0,.18)'; }
+      else return;
+    }
+    if(e.cancelable) e.preventDefault();
+    t.dx = Math.max(0, dx);
+    t.v.el.style.transform = 'translateX(' + t.dx + 'px)';
+  }, {passive: false});
+  function finish(){
+    var c = t; t = null;
+    if(!c || !c.claimed) return;
+    var el = c.v.el, w = window.innerWidth || 400, fast = c.dx / Math.max(1, Date.now() - c.t0) > 0.5;
+    var systemDidIt = lastPop !== c.pop0;
+    if(!systemDidIt && (c.dx > w * 0.35 || (fast && c.dx > 40))){
+      el.style.transition = 'transform .2s ease'; el.style.transform = 'translateX(100%)';
+      setTimeout(function(){ if(lastPop === c.pop0){ c.v.back(); } setTimeout(function(){ reset(el); }, 300); }, 200);
+    } else {
+      el.style.transition = 'transform .18s ease'; el.style.transform = 'translateX(0)';
+      setTimeout(function(){ reset(el); }, 200);
+    }
+  }
+  document.addEventListener('touchend', finish, {passive: true});
+  document.addEventListener('touchcancel', function(){ var c = t; t = null; if(c && c.claimed){ reset(c.v.el); } }, {passive: true});
+})();
+
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
    ------------------------------------------------------------ */
@@ -4484,9 +4715,35 @@ function renderRecent(){
   var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
   ids.forEach(function(id){ var it = makeNavItem(byId[id], numberById[id]); it.style.setProperty('--indent','0px'); box.appendChild(it); });
 }
+/* Откуда открыта песня и на какую глубину (песни, открытые поиском
+   внутри песни, копятся) -- кнопка в шапке песни ведёт обратно в тот же
+   экран ("Назад"), а не на главную. Хранится в history.state, поэтому
+   переживает системный жест "назад", "вперёд" и перезагрузку. */
+var songFrom = null, songDepth = 0;
+function updateSongBackButton(){
+  var sb = document.getElementById('btn-song-back');
+  if(sb){ sb.style.display = songFrom ? '' : 'none'; }
+}
+function songBack(){
+  if(songFrom && songDepth > 0){ history.go(-songDepth); } else { goHome(); }
+}
 function openSong(id, pushHash){
   var song = byId[id];
   if(!song) return;
+  if(pushHash === false){
+    var hs = history.state;
+    songFrom = (hs && hs.from) || null;
+    songDepth = (hs && hs.depth) || 0;
+  } else if(songView.classList.contains('open') && songFrom){
+    songDepth++;
+  } else {
+    songFrom = allsongsView.classList.contains('open') ? 'allsongs'
+             : listView.classList.contains('open') ? 'list'
+             : favoritesView.classList.contains('open') ? 'favorites'
+             : extraViews.some(function(v){ return v.classList.contains('open'); }) ? 'extra' : null;
+    songDepth = songFrom ? 1 : 0;
+  }
+  updateSongBackButton();
   recent = [id].concat(recent.filter(function(x){ return x!==id; })).slice(0, 20);
   store.setJSON('sb_recent', recent); renderRecent();
   currentId = id;
@@ -4517,7 +4774,7 @@ function openSong(id, pushHash){
   maybeShowChromeHint();
   window.scrollTo(0,0);
   document.querySelector('.song-scroll').scrollTop = 0;
-  if(pushHash !== false){ history.pushState({song:id}, '', '#song'+numberById[id]); }
+  if(pushHash !== false){ pushNav({song:id, from:songFrom, depth:songDepth}, '#song'+numberById[id]); }
   requestWakeLock();
 }
 function instantHideSong(){ songView.classList.remove('open','visible'); currentId = null; releaseWakeLock(); setTranslationOpen(false); }
@@ -4563,10 +4820,17 @@ function goHome(){
   currentListKey = null;
   clearSearchField('search');
   collapseSections();
-  if(location.hash){ history.pushState({}, '', location.pathname); }
+  /* Откатываем историю до главной на столько шагов, сколько их набралось
+     (иначе системное "назад" после "домой" возвращало бы в только что
+     закрытый экран). Если страницу открыли сразу по ссылке на песню, под
+     ней главной нет -- тогда просто ставим новую запись "главная". */
+  var cur = history.state;
+  if(cur && cur.home && cur.d > 0){ history.go(-cur.d); }
+  else if(location.hash){ history.pushState({home:true, d:0}, '', location.pathname); }
   restartGiussaniShine();
 }
 document.getElementById('btn-back').addEventListener('click', goHome);
+document.getElementById('btn-song-back').addEventListener('click', songBack);
 document.getElementById('btn-list-back').addEventListener('click', goHome);
 window.addEventListener('popstate', function(){
   var h = location.hash;
@@ -4574,7 +4838,7 @@ window.addEventListener('popstate', function(){
   if(sm && idByNumber[+sm[1]]){ openSong(idByNumber[+sm[1]], false); return; }
   if(songView.classList.contains('open')){ instantHideSong(); }
   var lm = h.match(/^#list(.+)$/);
-  if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
+  if(lm && LISTS[lm[1]]){ openList(lm[1], false, listView.classList.contains('open') && currentListKey === lm[1]); return; }
   if(listView.classList.contains('open')){ instantHideList(); }
   var em = h.match(/^#edit=(\w+)$/);
   if(isListHash(h)){ endPicker(); openProgramFromHash(h, false); return; }
@@ -4582,7 +4846,7 @@ window.addEventListener('popstate', function(){
   if(em){ endPicker(); openEdit(em[1], false); return; }
   closeExtraViews();
   if(h !== '#allsongs' && h !== '#pick' && !/^#list./.test(h)){ endPicker(); }
-  if(h === '#allsongs'){ openAllSongs(false); return; }
+  if(h === '#allsongs'){ openAllSongs(false, allsongsView.classList.contains('open')); return; }
   if(allsongsView.classList.contains('open')){ instantHideAllSongs(); }
   if(h === '#giussani'){ openGiussani(false); return; }
   if(giussaniView.classList.contains('open')){ instantHideGiussani(); }
@@ -4849,7 +5113,7 @@ function openGiussani(pushHash){
   giussaniView.classList.add('open');
   requestAnimationFrame(function(){ giussaniView.classList.add('visible'); });
   giussaniView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({giussani:true}, '', '#giussani'); }
+  if(pushHash !== false){ pushNav({giussani:true}, '#giussani'); }
 }
 function instantHideGiussani(){ giussaniView.classList.remove('open','visible'); }
 document.getElementById('giussani').addEventListener('click', function(){ openGiussani(); });
@@ -4980,17 +5244,86 @@ document.getElementById('tour-replay').addEventListener('click', function(){
 /* ------------------------------------------------------------
    WAKE LOCK
    ------------------------------------------------------------ */
+/* Экран не гасим только на телефоне/планшете (основной указатель -- палец) и только пока человек
+   что-то делает с приложением: через WAKE_IDLE_MS без касаний и прокрутки блокировка снимается
+   (иначе окно, забытое на экране, вечно не даёт уснуть; на компьютере блокировки нет вообще). */
+var WAKE_IDLE_MS = 15 * 60 * 1000;
+var wakeIdleTimer = null, wakePending = false;
+function wakeAllowed(){ return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }
 function requestWakeLock(){
-  if('wakeLock' in navigator){
-    navigator.wakeLock.request('screen').then(function(wl){ wakeLock = wl; }).catch(function(){});
-  }
+  if(!wakeAllowed() || !('wakeLock' in navigator) || wakeLock || wakePending) return;
+  wakePending = true;
+  navigator.wakeLock.request('screen').then(function(wl){
+    wakePending = false;
+    if(currentId === null){ wl.release().catch(function(){}); return; }
+    wakeLock = wl;
+    wl.addEventListener('release', function(){ if(wakeLock === wl){ wakeLock = null; } });
+  }).catch(function(){ wakePending = false; });
+  armWakeIdle();
 }
 function releaseWakeLock(){
+  clearTimeout(wakeIdleTimer); wakeIdleTimer = null;
   if(wakeLock){ wakeLock.release().catch(function(){}); wakeLock=null; }
 }
+function armWakeIdle(){
+  clearTimeout(wakeIdleTimer);
+  wakeIdleTimer = setTimeout(function(){
+    if(wakeLock){ wakeLock.release().catch(function(){}); wakeLock = null; }
+  }, WAKE_IDLE_MS);
+}
+/* любое касание/прокрутка/клавиша: продлеваем; если блокировка уже снята, а песня открыта -- берём снова */
+['touchstart','pointerdown','scroll','keydown'].forEach(function(ev){
+  document.addEventListener(ev, function(){
+    if(currentId === null) return;
+    if(wakeLock){ armWakeIdle(); } else { requestWakeLock(); }
+  }, {passive:true, capture:true});
+});
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState==='visible' && currentId!==null){ requestWakeLock(); }
 });
+
+/* ------------------------------------------------------------
+   ГЛУБИНА ИСТОРИИ
+   Каждый шаг вглубь приложения (pushNav) помнит свою глубину d от
+   главной и то, что под ним действительно лежит главная (home). Так
+   "НА ГЛАВНУЮ" может откатить историю назад ровно на d шагов.
+   ------------------------------------------------------------ */
+function pushNav(state, hash){
+  var cur = history.state || {};
+  state.d = (cur.d || 0) + 1;
+  state.home = !!cur.home;
+  history.pushState(state, '', hash);
+}
+(function markHistoryRoot(){
+  if(history.state && typeof history.state.d === 'number') return;
+  history.replaceState({home: !location.hash, d: 0}, '', location.href);
+})();
+
+/* ------------------------------------------------------------
+   ПОДПИСИ КНОПОК-ЗНАЧКОВ
+   У любой кнопки без видимого текста подпись для озвучки (aria-label)
+   и всплывающая подсказка на компьютере (title) должны совпадать;
+   если задана только одна из двух -- достраиваем вторую. Следим и за
+   кнопками, которые страница создаёт позже (строки списков и т. п.).
+   ------------------------------------------------------------ */
+(function(){
+  function fixOne(b){
+    if(b.textContent.trim()) return;
+    var a = b.getAttribute('aria-label'), t = b.getAttribute('title');
+    if(a && !t){ b.setAttribute('title', a); }
+    else if(t && !a){ b.setAttribute('aria-label', t); }
+  }
+  function fixIn(root){
+    if(root.nodeType !== 1) return;
+    if(root.tagName === 'BUTTON') fixOne(root);
+    var list = root.querySelectorAll('button');
+    for(var i = 0; i < list.length; i++) fixOne(list[i]);
+  }
+  fixIn(document.body);
+  new MutationObserver(function(muts){
+    muts.forEach(function(m){ for(var i = 0; i < m.addedNodes.length; i++) fixIn(m.addedNodes[i]); });
+  }).observe(document.body, {childList:true, subtree:true});
+})();
 
 /* ------------------------------------------------------------
    ЗАПУСК: открыть песню по хэшу, если он есть
@@ -5010,7 +5343,7 @@ document.addEventListener('visibilitychange', function(){
 /* Тур при первом входе -- после initFromHash, чтобы он лёг поверх
    уже открытого экрана (в т.ч. если открыли по присланной ссылке на
    конкретную песню), а не блокировал переход по ней. */
-if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ showTour(); }
+if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ store.set('sb_wn_seen', '1'); showTour(); } else if(store.get('sb_tour_seen', null) && !store.get('sb_wn_seen', null) && !isListHash(location.hash)){ showWhatsNew(); }
 
 /* ------------------------------------------------------------
    SERVICE WORKER
