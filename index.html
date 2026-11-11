@@ -1626,9 +1626,11 @@ input[type="search"]::-webkit-search-decoration{
 <div id="song-view">
   <div class="song-topbar">
     <div class="song-topbar-row">
-      <button class="back-btn" id="btn-back" aria-label="На главную">
+      <button class="icon-btn-sm" id="btn-song-back" type="button" aria-label="Назад" title="Назад" style="display:none">
         <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
-        <span>На&nbsp;главную</span>
+      </button>
+      <button class="icon-btn-sm" id="btn-back" type="button" aria-label="На главную" title="На главную">
+        <svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.8 9.8V19a1 1 0 0 0 1 1h3.6v-5.4h3.2V20h3.6a1 1 0 0 0 1-1V9.8"/></svg>
       </button>
       <button class="icon-btn-sm" id="btn-favorites-song" title="Избранное" aria-label="Избранное">
         <svg viewBox="0 0 24 24"><path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/></svg>
@@ -2483,19 +2485,24 @@ function renderList(key){
     });
   });
 }
-function openList(key, pushHash){
+function openList(key, pushHash, keepState){
   if(!LISTS[key]) return;
+  /* keepState -- возврат из песни на уже открытый список: прокрутку и
+     поле поиска не сбрасываем */
+  var keepTop = keepState ? listView.scrollTop : 0;
   currentListKey = key;
   renderList(key);
   var listSearch = document.getElementById('list-search');
-  listSearch.value = '';
   var listSearchResults = document.getElementById('list-search-results');
-  listSearchResults.innerHTML = '';
-  listSearchResults.classList.remove('show');
+  if(!keepState){
+    listSearch.value = '';
+    listSearchResults.innerHTML = '';
+    listSearchResults.classList.remove('show');
+  }
   listView.classList.add('open');
   requestAnimationFrame(function(){ listView.classList.add('visible'); });
-  listView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({list:key}, '', '#list'+key); }
+  listView.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({list:key}, '#list'+key); }
 }
 function instantHideList(){ listView.classList.remove('open','visible'); currentListKey = null; }
 
@@ -2585,7 +2592,7 @@ function renderFavorites(){
   });
   document.getElementById('favorites-empty').classList.toggle('show', favorites.length===0);
 }
-function openFavorites(pushHash){
+function openFavorites(pushHash, keepState){
   /* та же зачистка, что и в goHome() -- откуда бы ни открыли избранное
      (с главной, из списка, из песни), предыдущий экран должен закрыться,
      а не остаться лежать под избранным на весь экран. */
@@ -2601,12 +2608,13 @@ function openFavorites(pushHash){
     setTimeout(function(){ listView.classList.remove('open'); }, 200);
   }
   currentListKey = null;
-  clearSearchField('favorites-search');
+  var keepTop = keepState ? favoritesView.scrollTop : 0;
+  if(!keepState) clearSearchField('favorites-search');
   renderFavorites();
   favoritesView.classList.add('open');
   requestAnimationFrame(function(){ favoritesView.classList.add('visible'); });
-  favoritesView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({favorites:true}, '', '#favorites'); }
+  favoritesView.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({favorites:true}, '#favorites'); }
 }
 function instantHideFavorites(){ favoritesView.classList.remove('open','visible'); }
 document.getElementById('btn-favorites').addEventListener('click', function(){ openFavorites(); });
@@ -2825,7 +2833,7 @@ function positionAzJump(){
   jump.style.top = (topbarBottom + available/2) + 'px';
   jump.style.maxHeight = (available - 16) + 'px';
 }
-function openAllSongs(pushHash){
+function openAllSongs(pushHash, keepState){
   // та же зачистка, что и в openFavorites -- какой бы экран ни был
   // открыт до этого, он не должен остаться лежать под "Все песни".
   if(songView.classList.contains('open')){
@@ -2844,7 +2852,8 @@ function openAllSongs(pushHash){
     setTimeout(function(){ favoritesView.classList.remove('open'); }, 200);
   }
   currentListKey = null;
-  clearSearchField('allsongs-search');
+  var keepTop = keepState ? allsongsView.scrollTop : 0;
+  if(!keepState) clearSearchField('allsongs-search');
   renderAllSongs();
   allsongsView.classList.add('open');
   requestAnimationFrame(function(){
@@ -2852,8 +2861,8 @@ function openAllSongs(pushHash){
     positionAzJump();
     document.getElementById('az-jump').classList.add('open');
   });
-  allsongsView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({allsongs:true}, '', '#allsongs'); }
+  allsongsView.scrollTop = keepTop;
+  if(pushHash !== false){ pushNav({allsongs:true}, '#allsongs'); }
 }
 function instantHideAllSongs(){
   allsongsView.classList.remove('open','visible');
@@ -3089,9 +3098,34 @@ function renderRecent(){
   var t = document.createElement('div'); t.className = 'recent-title'; t.textContent = 'Недавно открытые'; box.appendChild(t);
   ids.forEach(function(id){ var it = makeNavItem(byId[id], numberById[id]); it.style.setProperty('--indent','0px'); box.appendChild(it); });
 }
+/* Откуда открыта песня и на какую глубину (песни, открытые поиском
+   внутри песни, копятся) -- кнопка в шапке песни ведёт обратно в тот же
+   экран ("Назад"), а не на главную. Хранится в history.state, поэтому
+   переживает системный жест "назад", "вперёд" и перезагрузку. */
+var songFrom = null, songDepth = 0;
+function updateSongBackButton(){
+  var sb = document.getElementById('btn-song-back');
+  if(sb){ sb.style.display = songFrom ? '' : 'none'; }
+}
+function songBack(){
+  if(songFrom && songDepth > 0){ history.go(-songDepth); } else { goHome(); }
+}
 function openSong(id, pushHash){
   var song = byId[id];
   if(!song) return;
+  if(pushHash === false){
+    var hs = history.state;
+    songFrom = (hs && hs.from) || null;
+    songDepth = (hs && hs.depth) || 0;
+  } else if(songView.classList.contains('open') && songFrom){
+    songDepth++;
+  } else {
+    songFrom = allsongsView.classList.contains('open') ? 'allsongs'
+             : listView.classList.contains('open') ? 'list'
+             : favoritesView.classList.contains('open') ? 'favorites' : null;
+    songDepth = songFrom ? 1 : 0;
+  }
+  updateSongBackButton();
   recent = [id].concat(recent.filter(function(x){ return x!==id; })).slice(0, 20);
   store.setJSON('sb_recent', recent); renderRecent();
   currentId = id;
@@ -3122,7 +3156,7 @@ function openSong(id, pushHash){
   maybeShowChromeHint();
   window.scrollTo(0,0);
   document.querySelector('.song-scroll').scrollTop = 0;
-  if(pushHash !== false){ history.pushState({song:id}, '', '#song'+numberById[id]); }
+  if(pushHash !== false){ pushNav({song:id, from:songFrom, depth:songDepth}, '#song'+numberById[id]); }
   requestWakeLock();
 }
 function instantHideSong(){ songView.classList.remove('open','visible'); currentId = null; releaseWakeLock(); setTranslationOpen(false); }
@@ -3167,10 +3201,17 @@ function goHome(){
   currentListKey = null;
   clearSearchField('search');
   collapseSections();
-  if(location.hash){ history.pushState({}, '', location.pathname); }
+  /* Откатываем историю до главной на столько шагов, сколько их набралось
+     (иначе системное "назад" после "домой" возвращало бы в только что
+     закрытый экран). Если страницу открыли сразу по ссылке на песню, под
+     ней главной нет -- тогда просто ставим новую запись "главная". */
+  var cur = history.state;
+  if(cur && cur.home && cur.d > 0){ history.go(-cur.d); }
+  else if(location.hash){ history.pushState({home:true, d:0}, '', location.pathname); }
   restartGiussaniShine();
 }
 document.getElementById('btn-back').addEventListener('click', goHome);
+document.getElementById('btn-song-back').addEventListener('click', songBack);
 document.getElementById('btn-list-back').addEventListener('click', goHome);
 window.addEventListener('popstate', function(){
   var h = location.hash;
@@ -3178,11 +3219,11 @@ window.addEventListener('popstate', function(){
   if(sm && idByNumber[+sm[1]]){ openSong(idByNumber[+sm[1]], false); return; }
   if(songView.classList.contains('open')){ instantHideSong(); }
   var lm = h.match(/^#list(.+)$/);
-  if(lm && LISTS[lm[1]]){ openList(lm[1], false); return; }
+  if(lm && LISTS[lm[1]]){ openList(lm[1], false, listView.classList.contains('open') && currentListKey === lm[1]); return; }
   if(listView.classList.contains('open')){ instantHideList(); }
-  if(h === '#favorites'){ openFavorites(false); return; }
+  if(h === '#favorites'){ openFavorites(false, favoritesView.classList.contains('open')); return; }
   if(favoritesView.classList.contains('open')){ instantHideFavorites(); }
-  if(h === '#allsongs'){ openAllSongs(false); return; }
+  if(h === '#allsongs'){ openAllSongs(false, allsongsView.classList.contains('open')); return; }
   if(allsongsView.classList.contains('open')){ instantHideAllSongs(); }
   if(h === '#giussani'){ openGiussani(false); return; }
   if(giussaniView.classList.contains('open')){ instantHideGiussani(); }
@@ -3437,7 +3478,7 @@ function openGiussani(pushHash){
   giussaniView.classList.add('open');
   requestAnimationFrame(function(){ giussaniView.classList.add('visible'); });
   giussaniView.scrollTop = 0;
-  if(pushHash !== false){ history.pushState({giussani:true}, '', '#giussani'); }
+  if(pushHash !== false){ pushNav({giussani:true}, '#giussani'); }
 }
 function instantHideGiussani(){ giussaniView.classList.remove('open','visible'); }
 document.getElementById('giussani').addEventListener('click', function(){ openGiussani(); });
@@ -3604,6 +3645,49 @@ function armWakeIdle(){
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState==='visible' && currentId!==null){ requestWakeLock(); }
 });
+
+/* ------------------------------------------------------------
+   ГЛУБИНА ИСТОРИИ
+   Каждый шаг вглубь приложения (pushNav) помнит свою глубину d от
+   главной и то, что под ним действительно лежит главная (home). Так
+   "НА ГЛАВНУЮ" может откатить историю назад ровно на d шагов.
+   ------------------------------------------------------------ */
+function pushNav(state, hash){
+  var cur = history.state || {};
+  state.d = (cur.d || 0) + 1;
+  state.home = !!cur.home;
+  history.pushState(state, '', hash);
+}
+(function markHistoryRoot(){
+  if(history.state && typeof history.state.d === 'number') return;
+  history.replaceState({home: !location.hash, d: 0}, '', location.href);
+})();
+
+/* ------------------------------------------------------------
+   ПОДПИСИ КНОПОК-ЗНАЧКОВ
+   У любой кнопки без видимого текста подпись для озвучки (aria-label)
+   и всплывающая подсказка на компьютере (title) должны совпадать;
+   если задана только одна из двух -- достраиваем вторую. Следим и за
+   кнопками, которые страница создаёт позже (строки списков и т. п.).
+   ------------------------------------------------------------ */
+(function(){
+  function fixOne(b){
+    if(b.textContent.trim()) return;
+    var a = b.getAttribute('aria-label'), t = b.getAttribute('title');
+    if(a && !t){ b.setAttribute('title', a); }
+    else if(t && !a){ b.setAttribute('aria-label', t); }
+  }
+  function fixIn(root){
+    if(root.nodeType !== 1) return;
+    if(root.tagName === 'BUTTON') fixOne(root);
+    var list = root.querySelectorAll('button');
+    for(var i = 0; i < list.length; i++) fixOne(list[i]);
+  }
+  fixIn(document.body);
+  new MutationObserver(function(muts){
+    muts.forEach(function(m){ for(var i = 0; i < m.addedNodes.length; i++) fixIn(m.addedNodes[i]); });
+  }).observe(document.body, {childList:true, subtree:true});
+})();
 
 /* ------------------------------------------------------------
    ЗАПУСК: открыть песню по хэшу, если он есть
