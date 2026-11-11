@@ -4718,7 +4718,9 @@ function navUnder(top){
     placeholder.remove();
     var order = [];
     Array.prototype.forEach.call(list.querySelectorAll('.nav-item'), function(el){
-      if(el === pseudo){ if(order.length){ order.push('NEW'); } return; }   // выше «Без раздела» стоит блок -- эти песни получают заголовок
+      /* выше «Без раздела» стоит блок: если он пустой (новый заголовок), песни просто оказываются под ним;
+         если у блока свои песни, песни без раздела получают отдельный заголовок «Раздел» */
+      if(el === pseudo){ if(order.length && blockRows.length){ order.push('NEW'); } return; }
       order.push(+el.getAttribute('data-fav-id'));
     });
     if(pseudo){ pseudo.remove(); pseudo = null; }
