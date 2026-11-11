@@ -5272,6 +5272,10 @@ function showWhatsNew(){
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ wn.classList.add('visible'); }); });
 }
 window.showWhatsNew = showWhatsNew;  /* можно открыть вручную (консоль, проверки) */
+/* ссылка  .../beta/#whatsnew  открывает «Что нового» вручную (например, на телефоне, где нет консоли) */
+if(/^#whatsnew$/i.test(location.hash)){
+  setTimeout(function(){ try{ history.replaceState(history.state, '', location.pathname + location.search); }catch(e){} showWhatsNew(); }, 500);
+}
 
 
 /* ---------- переходы между экранами: что сейчас сверху и что под ним ---------- */
