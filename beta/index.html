@@ -2049,6 +2049,10 @@ button.free-main{cursor:pointer;}
 .add-menu-item + .add-menu-item{border-top:1px solid var(--border);}
 .add-menu-item:active{background:var(--accent-soft);}
 #pv-list .free-row .free-main{padding-left:4px;}
+
+/* присланная новая версия уже имеющегося списка */
+.pv-update{margin:12px 0 0;padding:10px 12px;border:1px solid var(--accent);border-radius:12px;background:var(--accent-soft);color:var(--text);font-family:var(--font-ui);font-size:14px;line-height:1.4;}
+.pv-bar{display:flex;flex-direction:column;gap:8px;}
 </style>
 </head>
 <body>
@@ -2351,6 +2355,7 @@ button.free-main{cursor:pointer;}
       <div class="pv-label">Вам прислали&nbsp;список</div>
       <div class="pv-title" id="pv-title"></div>
       <div class="pv-meta" id="pv-meta"></div>
+      <div class="pv-update" id="pv-update" role="status" style="display:none"></div>
     </div>
     <div class="pv-browser" id="pv-browser" style="display:none">
       <p>Вы открыли список в&nbsp;браузере. Чтобы он появился в&nbsp;приложении «Песенник»: нажмите «Скопировать ссылку», откройте приложение, затем значок «Списки» → «Вставить из&nbsp;сообщения».</p>
@@ -2359,7 +2364,7 @@ button.free-main{cursor:pointer;}
     <div id="pv-list"></div>
     <p class="pv-note" id="pv-note"></p>
   </div>
-  <div class="edit-bar pv-bar"><button class="prog-btn primary" id="btn-pv-save" type="button"><span>Сделать&nbsp;своим</span></button></div>
+  <div class="edit-bar pv-bar"><button class="prog-btn primary" id="btn-pv-update" type="button" style="display:none"><span>Обновить мой&nbsp;список</span></button><button class="prog-btn primary" id="btn-pv-save" type="button"><span>Сделать&nbsp;своим</span></button></div>
 </div>
 
 <div class="modal-overlay" id="import-modal">
@@ -3773,7 +3778,9 @@ function parseAnyHash(h){ return parseProgHash(h) || parseLinkHash(h) || parseRe
 var LINK_WORD = 'список';
 function safeDecode(x){ try{ return decodeURIComponent(x); }catch(e){ return x; } }
 function cleanName(x){ return String(x).replace(/[\/=#?&%\s]+/g, '_').replace(/^_+|_+$/g, ''); }
-function readableHash(items, title){
+function oidSafe(s){ return String(s || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 24); }
+function listOid(l){ return oidSafe(l.oid || l.id); }
+function readableHash(items, title, oid){
   var groups = [{name: null, ids: []}];
   cleanFree(items).forEach(function(x){
     if(isHdr(x)) groups.push({name: cleanName(x) || 'Раздел', ids: []});
@@ -3785,6 +3792,7 @@ function readableHash(items, title){
     if(g.name === null){ if(g.ids.length) parts.push(g.ids.join('.')); }
     else parts.push(g.name + '=' + g.ids.join('.'));
   });
+  if(oidSafe(oid)){ parts.push('@' + oidSafe(oid)); }          // «род» списка: по нему приложение узнаёт новую версию того же списка
   return '#' + LINK_WORD + '/' + (cleanName(title) || 'Список') + '/' + parts.join('/');
 }
 function isReadableHash(h){ return safeDecode(h).toLowerCase().indexOf('#' + LINK_WORD + '/') === 0; }
@@ -3793,9 +3801,10 @@ function parseReadableHash(h){
   if(d.toLowerCase().indexOf('#' + LINK_WORD + '/') !== 0) return null;
   var segs = d.slice(LINK_WORD.length + 2).split('/');
   var title = (segs.shift() || '').replace(/_/g, ' ').trim().slice(0, 60);
-  var items = [];
+  var items = [], oid = '';
   segs.forEach(function(seg){
     if(!seg) return;
+    if(seg.charAt(0) === '@'){ oid = oidSafe(seg.slice(1)); return; }
     var eq = seg.indexOf('='), ids;
     if(eq >= 0){ items.push(seg.slice(0, eq).replace(/_/g, ' ')); ids = seg.slice(eq + 1); } else { ids = seg; }
     ids.split('.').filter(Boolean).forEach(function(t){
@@ -3803,7 +3812,7 @@ function parseReadableHash(h){
       var n = parseInt(t, 36); if(n > 0) items.push(n);
     });
   });
-  return items.length ? {ids: items, t: title} : null;
+  return items.length ? {ids: items, t: title, oid: oid} : null;
 }
 function isListHash(h){ return h.indexOf('#prog=') === 0 || h.indexOf('#l=') === 0 || isReadableHash(h); }
 
@@ -3972,7 +3981,7 @@ function freeRow(text, onEdit){
 function freeInputRow(l, idx){
   var item = document.createElement('div'); item.className = 'nav-item free-row free-editing';
   var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'free-input'; inp.maxLength = 60; inp.value = l.ids[idx].f;
-  inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', 'Своё название'); inp.placeholder = 'Название песни';
+  inp.setAttribute('autocomplete', 'off'); inp.setAttribute('spellcheck', 'false'); inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', 'Свое название'); inp.placeholder = 'Название песни';
   var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'free-ok'; ok.setAttribute('aria-label', 'Готово'); ok.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var done = false;
   function commit(){
@@ -3990,14 +3999,14 @@ function freeInputRow(l, idx){
   item.appendChild(inp); item.appendChild(ok);
   return item;
 }
-/* меню у «+ песни»: «Из песенника» (как раньше) или «Своё название» */
+/* меню у «+ песни»: «Из песенника» (как раньше) или «Свое название» */
 var addMenuEl = null;
 function closeAddMenu(){ if(addMenuEl){ addMenuEl.remove(); addMenuEl = null; } document.removeEventListener('pointerdown', addMenuOutside, true); window.removeEventListener('scroll', closeAddMenu, true); }
 function addMenuOutside(e){ if(addMenuEl && !addMenuEl.contains(e.target)){ closeAddMenu(); } }
 function openAddMenu(anchor, hdrIdx){
   closeAddMenu();
   var m = document.createElement('div'); m.className = 'add-menu'; m.setAttribute('role', 'menu');
-  [['Из песенника', function(){ startPicker(hdrIdx); }], ['Своё название', function(){ addFreeLine(hdrIdx); }]].forEach(function(o){
+  [['Из песенника', function(){ startPicker(hdrIdx); }], ['Свое название', function(){ addFreeLine(hdrIdx); }]].forEach(function(o){
     var b = document.createElement('button'); b.type = 'button'; b.className = 'add-menu-item'; b.setAttribute('role', 'menuitem'); b.textContent = o[0];
     b.addEventListener('click', function(){ closeAddMenu(); o[1](); });
     m.appendChild(b);
@@ -4159,7 +4168,7 @@ document.getElementById('btn-add-header').addEventListener('click', function(){
 });
 document.getElementById('pb-done').addEventListener('click', function(){ var id = curListId; endPicker(); instantHideList(); instantHideAllSongs(); openEdit(id); });
 /* ---------- отправка ---------- */
-function shareItems(items, title){
+function shareItems(items, title, oid){
   items = cleanFree(existingItems(items));
   if(!songCount(items)) return;
   var out = [], first = true;
@@ -4169,7 +4178,7 @@ function shareItems(items, title){
     else { out.push(SEARCH_ENTRY_BY_ID[x].number + '. ' + byId[x].title); }
     first = false;
   });
-  var link = location.origin + location.pathname + readableHash(items, title);
+  var link = location.origin + location.pathname + readableHash(items, title, oid);
   var text = typo(title) + '\n\n' + out.join('\n') + '\n\n' +
     'Как добавить список в «Песенник»:\n' +
     '1. Скопируйте это сообщение целиком.\n' +
@@ -4182,11 +4191,11 @@ function shareItems(items, title){
 }
 function shareProgram(){
   var l = getList(curListId); if(!l) return;
-  shareItems(l.ids, listTitle(l));
+  shareItems(l.ids, listTitle(l), listOid(l));
 }
 function shareReceived(){
   var p = parseAnyHash(currentProgHash || ''); if(!p) return;
-  shareItems(p.ids, p.t || 'Список');
+  shareItems(p.ids, p.t || 'Список', p.oid);
 }
 document.getElementById('btn-prog-share').addEventListener('click', shareProgram);
 /* ---------- присланные ---------- */
@@ -4201,7 +4210,9 @@ function openProgramFromHash(h, pushHash){
   var key = listKey(p.ids, title);
   var known = programs.filter(function(x){ return x.k === key; })[0];
   if(!known){
-    programs.unshift({k:key, t:title, ids:p.ids, at:Date.now()});
+    /* новая версия уже присланного списка (тот же «род») заменяет старую запись, а не копится рядом */
+    if(p.oid){ programs = programs.filter(function(x){ return x.oid !== p.oid; }); }
+    programs.unshift({k:key, t:title, ids:p.ids, at:Date.now(), oid:p.oid || ''});
     programs = programs.slice(0, 10);
     store.setJSON('sb_programs', programs);
     renderHomeLists();
@@ -4223,16 +4234,53 @@ function openProgramFromHash(h, pushHash){
   openExtra(programView, h, pushHash);
 }
 function pvKey(){ var p = parseAnyHash(currentProgHash || ''); return p ? listKey(p.ids, p.t || 'Список') : null; }
+/* свой список того же «рода» (если такой есть): по нему узнаём новую версию */
+function ownByOid(oid){
+  if(!oid) return null;
+  var m = lists.filter(function(l){ return listOid(l) === oid; }).sort(function(a, b){ return b.u - a.u; });
+  return m[0] || null;
+}
+function sameIds(a, b){ return listKey(cleanFree(a), '') === listKey(cleanFree(b), ''); }
+function pvState(){
+  var p = parseAnyHash(currentProgHash || ''), k = pvKey();
+  if(!p || !k) return null;
+  var copy = ownCopyOf(k), match = ownByOid(p.oid);
+  if(copy) return {kind: 'copy', p: p, k: k, own: copy};
+  if(match) return {kind: sameIds(match.ids, p.ids) ? 'same' : 'newer', p: p, k: k, own: match};
+  return {kind: 'new', p: p, k: k};
+}
 function refreshPvSave(){
-  var k = pvKey(), b = document.getElementById('btn-pv-save'); if(!b || !k) return;
-  b.querySelector('span').textContent = ownCopyOf(k) ? 'Редактировать мою копию' : 'Сделать своим';
+  var st = pvState(); if(!st) return;
+  var save = document.getElementById('btn-pv-save'), upd = document.getElementById('btn-pv-update'), note = document.getElementById('pv-update');
+  var ownTitle = st.own ? listTitle(st.own) : '';
+  note.style.display = 'none'; upd.style.display = 'none'; save.classList.add('primary');
+  if(st.kind === 'copy'){ save.querySelector('span').textContent = 'Редактировать мою копию'; }
+  else if(st.kind === 'same'){
+    note.textContent = 'Этот список у вас уже есть: «' + ownTitle + '».'; note.style.display = '';
+    save.querySelector('span').textContent = 'Редактировать мой список';
+  } else if(st.kind === 'newer'){
+    note.textContent = 'У вас уже есть этот список: «' + ownTitle + '». Здесь другая версия.'; note.style.display = '';
+    upd.style.display = ''; save.classList.remove('primary');
+    save.querySelector('span').textContent = 'Сохранить как новый';
+  } else { save.querySelector('span').textContent = 'Сделать своим'; }
 }
 document.getElementById('btn-pv-save').addEventListener('click', function(){
-  var p = parseAnyHash(currentProgHash || ''); if(!p) return;
-  var k = pvKey(), own = ownCopyOf(k);
-  if(own){ openEdit(own.id); return; }
-  slDup(p.ids, p.t || 'Список', k);
-  flashButton(this, '\u2713 Сохранено в мои списки');
+  var st = pvState(); if(!st) return;
+  if(st.kind === 'copy' || st.kind === 'same'){ openEdit(st.own.id); return; }
+  slDup(st.p.ids, st.p.t || 'Список', st.k, st.kind === 'newer' ? '' : st.p.oid);
+  flashButton(this, '\u2713 Сохранено в мои списки');
+  setTimeout(refreshPvSave, 1700);
+});
+/* «Обновить мой список»: ваша прежняя версия сохраняется отдельной копией, чтобы ничего не потерялось */
+document.getElementById('btn-pv-update').addEventListener('click', function(){
+  var st = pvState(); if(!st || st.kind !== 'newer') return;
+  var own = st.own;
+  slDup(own.ids, listTitle(own) + ' (до обновления)');
+  own.ids = st.p.ids.slice();
+  if((st.p.t || '').trim()){ own.t = st.p.t; }
+  own.src = st.k; own.oid = listOid(own); own.u = Date.now();
+  saveLists(); renderListsScreen(); renderHomeLists();
+  flashButton(this, '\u2713 Список обновлён');
   setTimeout(refreshPvSave, 1700);
 });
 document.getElementById('btn-pv-lists').addEventListener('click', function(){ openListsScreen(); });
@@ -4478,9 +4526,9 @@ function slPlaceAt(el){
   if(r.bottom + 8 + h > window.innerHeight - 12){ sh.style.top = Math.max(12, Math.round(r.top - 8 - h)) + 'px'; sh.style.setProperty('--sl-max', Math.max(200, r.top - 20) + 'px'); }
 }
 function slOpenFor(el){ slModal.classList.add('open'); slPlaceAt(el); }
-function slDup(srcIds, title, src){
+function slDup(srcIds, title, src, oid){
   var now = Date.now();
-  var nl = {id: 'l' + now.toString(36), t: title, ids: srcIds.slice(), c: now, u: now}; if(src) nl.src = src;
+  var nl = {id: 'l' + now.toString(36), t: title, ids: srcIds.slice(), c: now, u: now}; if(src) nl.src = src; if(oid) nl.oid = oid;
   lists.push(nl);
   saveLists(); renderListsScreen(); renderHomeLists(); slClose();
 }
@@ -4493,7 +4541,7 @@ var IC_TRASH = '<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l
 function cardMenuOwn(l, el){
   slHead(listTitle(l));
   slBody.querySelector('h2').classList.add('sl-name-h');
-  slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(l.ids, listTitle(l)); }, IC_SHARE);
+  slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(l.ids, listTitle(l), listOid(l)); }, IC_SHARE);
   slRow('Дублировать', '', 'sl-cap', function(){ slDup(l.ids, ((l.t || '').trim() ? l.t.trim() : listTitle(l)) + ' (копия)'); }, IC_COPY);
   slRow('Удалить', '', 'sl-cap sl-danger', function(){
     slClose();
@@ -4504,7 +4552,7 @@ function cardMenuOwn(l, el){
 function cardMenuRecv(p, el){
   slHead(p.t || 'Список');
   slBody.querySelector('h2').classList.add('sl-name-h');
-  slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список'); }, IC_SHARE);
+  slRow('Поделиться', '', 'sl-cap', function(){ slClose(); shareItems(p.ids, p.t || 'Список', p.oid); }, IC_SHARE);
   var rk = listKey(p.ids, p.t || 'Список'), own = ownCopyOf(rk);
   if(own){ slRow('Открыть мою копию', '', 'sl-cap', function(){ slClose(); openEdit(own.id); }, IC_EDIT); }
   else { slRow('Сделать своим', '', 'sl-cap', function(){ slDup(p.ids, p.t || 'Список', rk); }, IC_SAVE); }
