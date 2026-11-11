@@ -2056,6 +2056,9 @@ button.free-main{cursor:pointer;}
 
 .pv-keep{display:block;margin-top:8px;font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:none;border:1.5px solid var(--accent);border-radius:999px;padding:8px 14px;cursor:pointer;}
 .pv-keep:active{background:var(--accent-soft);}
+
+.import-hint{color:var(--text-faint);font-family:var(--font-ui);font-size:13px;line-height:1.4;margin:0 0 8px;}
+.import-hint:empty{display:none;}
 </style>
 </head>
 <body>
@@ -2373,6 +2376,7 @@ button.free-main{cursor:pointer;}
 <div class="modal-overlay" id="import-modal">
   <div class="modal-sheet"><div class="modal-sheet-scroll">
     <textarea id="import-text" rows="3" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Вставьте сообщение со списком"></textarea>
+    <p class="import-hint" id="import-hint"></p>
     <p class="import-err" id="import-err"></p>
     <button class="prog-btn" id="import-ok" type="button" style="width:100%;display:none"><span>Добавить</span></button>
   </div></div>
@@ -4096,6 +4100,12 @@ function renderEdit(){
 /* длинное название переносится на вторую строку, а не обрезается */
 function fitTitle(){ var t = document.getElementById('program-title'); if(!t || !t.offsetWidth) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
+/* «в Списки» из редактора / присланного списка: если «Списки» -- предыдущий шаг, возвращаемся по истории, а не добавляем новый
+   (иначе системное «назад» вернуло бы в экран, который только что покинули) */
+function goListsScreen(){
+  var s = history.state;
+  if(s && s.prev === '#lists' && s.d > 0){ history.back(); } else { openListsScreen(); }
+}
 function openEdit(id, pushHash){
   if(!getList(id)){ openListsScreen(false); return; }
   curListId = id; renderEdit();
@@ -4103,7 +4113,7 @@ function openEdit(id, pushHash){
 }
 function onProgramReorder(order){ var l = getList(curListId); if(l){ var old = l.ids; l.ids = order.map(function(i){ return i === 'NEW' ? 'Раздел' : old[+i]; }); l.u = Date.now(); saveLists(); renderEdit(); } }
 document.getElementById('btn-edit-home').addEventListener('click', goHome);
-document.getElementById('btn-edit-lists').addEventListener('click', function(){ openListsScreen(); });
+document.getElementById('btn-edit-lists').addEventListener('click', goListsScreen);
 document.getElementById('program-title').addEventListener('blur', function(){ var l = getList(curListId); if(l && l.t){ var v = typo(l.t.trim()); if(v !== l.t){ l.t = v; l.u = Date.now(); saveLists(); } this.value = v; fitTitle(); } });
 document.getElementById('program-title').addEventListener('input', function(){ fitTitle(); var l = getList(curListId); if(l){ l.t = this.value; l.u = Date.now(); saveLists(); } });
 document.getElementById('program-title').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); this.blur(); } });
@@ -4111,10 +4121,11 @@ document.getElementById('btn-prog-clear').addEventListener('click', function(){
   var l = getList(curListId); if(!l) return;
   showConfirm('Удалить список «' + listTitle(l) + '»?', function(){
     lists = lists.filter(function(x){ return x.id !== l.id; }); saveLists();
-    openListsScreen();
+    goListsScreen();
   });
 });
 /* ---------- подбор песен через обычное оглавление ---------- */
+var pickBaseD = 0, pickBaseHash = '';
 var pickHdr = -1; /* индекс подзаголовка, под который добавляем песни; -1 = в начало списка (до первого подзаголовка) */
 function sectionRange(items, hdr){
   var start = hdr + 1, end = items.length;
@@ -4149,6 +4160,7 @@ function startPicker(hdr){
   var l0 = getList(curListId);
   if(typeof hdr !== 'number'){ hdr = -1; if(l0){ for(var q = l0.ids.length - 1; q >= 0; q--){ if(isHdr(l0.ids[q])){ hdr = q; break; } } } }
   pickHdr = hdr;
+  pickBaseD = (history.state && history.state.d) || 0; pickBaseHash = location.hash;   // запоминаем, где был редактор
   pickerMode = true;
   document.body.classList.add('picking');
   updatePickerBar();
@@ -4169,7 +4181,12 @@ document.getElementById('btn-add-header').addEventListener('click', function(){
   l.ids.push(''); l.u = Date.now(); saveLists(); renderEdit();
   var rows = document.querySelectorAll('#program-list .hdr-input'); var last = rows[rows.length - 1]; if(last){ last.focus(); last.scrollIntoView({block:'center'}); }
 });
-document.getElementById('pb-done').addEventListener('click', function(){ var id = curListId; endPicker(); instantHideList(); instantHideAllSongs(); openEdit(id); });
+document.getElementById('pb-done').addEventListener('click', function(){
+  var id = curListId, k = ((history.state && history.state.d) || 0) - pickBaseD;
+  /* вернуться на тот шаг истории, где был редактор (путь по оглавлению «схлопывается»), а не открывать его заново поверх */
+  if(k > 0 && pickBaseHash === '#edit=' + id){ history.go(-k); return; }
+  endPicker(); instantHideList(); instantHideAllSongs(); openEdit(id);
+});
 /* ---------- отправка ---------- */
 function shareItems(items, title, oid){
   items = cleanFree(existingItems(items));
@@ -4317,7 +4334,7 @@ document.getElementById('btn-pv-update').addEventListener('click', function(){
   flashButton(this, '\u2713 Список обновлён');
   setTimeout(refreshPvSave, 1700);
 });
-document.getElementById('btn-pv-lists').addEventListener('click', function(){ openListsScreen(); });
+document.getElementById('btn-pv-lists').addEventListener('click', goListsScreen);
 document.getElementById('btn-program-back').addEventListener('click', goHome);
 document.getElementById('btn-pv-share').addEventListener('click', shareReceived);
 document.getElementById('btn-pv-copy').addEventListener('click', function(){
@@ -4332,7 +4349,7 @@ document.getElementById('btn-pv-remove').addEventListener('click', function(){
   showConfirm('Удалить список «' + typo(p.t || 'Список') + '»?', function(){
     programs = programs.filter(function(x){ return x.k !== key; });
     store.setJSON('sb_programs', programs);
-    openListsScreen();
+    goListsScreen();
   });
 });
 
@@ -4349,7 +4366,18 @@ function decodeListCode(text){
 }
 /* ---------- «Добавить из чата»: вставить текст сообщения или ссылку ---------- */
 var importModal = document.getElementById('import-modal');
-function openImport(){ document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; document.getElementById('import-ok').style.display = 'none'; importModal.classList.add('open'); placeImport(); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
+function pasteKeyWord(){
+  if(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return 'Вставьте текст в поле (долгое нажатие)';
+  return 'Нажмите ' + (/Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent) ? '\u2318V' : 'Ctrl+V');
+}
+function openImport(why){
+  var hint = document.getElementById('import-hint');
+  if(hint){
+    hint.textContent = why === 'denied' ? 'Браузер не разрешил взять ссылку из буфера обмена. ' + pasteKeyWord() + ': список добавится сразу (можно и прямо на любом экране приложения).'
+                     : why === 'nolist' ? 'В буфере обмена нет ссылки на список. Скопируйте сообщение со списком целиком. ' + pasteKeyWord() + ': список добавится сразу.'
+                     : '';
+  }
+  document.getElementById('import-text').value = ''; document.getElementById('import-err').textContent = ''; document.getElementById('import-ok').style.display = 'none'; importModal.classList.add('open'); placeImport(); setTimeout(function(){ document.getElementById('import-text').focus(); }, 250); }
 function closeImport(){ importModal.classList.remove('open'); }
 /* окно вставки -- рядом с кнопкой «Вставить из сообщения», а не внизу страницы (там ещё и клавиатура) */
 var importAnchor = null;
@@ -4409,13 +4437,20 @@ function looksLikeListLink(t){
 }
 function importFromClipboard(){
   var ib = document.getElementById('btn-import'); if(ib){ var ir = ib.getBoundingClientRect(); importAnchor = {top: ir.top, bottom: ir.bottom}; }
-  if(!navigator.clipboard || !navigator.clipboard.readText){ openImport(); return; }
+  if(!navigator.clipboard || !navigator.clipboard.readText){ openImport('denied'); return; }
   navigator.clipboard.readText().then(function(t){
     if(t && looksLikeListLink(t) && importFromText(t)) return;
-    openImport();
-  }).catch(function(){ openImport(); });
+    openImport('nolist');
+  }).catch(function(){ openImport('denied'); });
 }
 document.getElementById('btn-import').addEventListener('click', importFromClipboard);
+/* ⌘V / Ctrl+V в любом месте приложения (когда не печатают в поле): если в буфере ссылка на список -- открываем её.
+   Настоящая вставка браузеры разрешают без вопросов, в отличие от чтения буфера кнопкой (Safari требует подтверждения) */
+document.addEventListener('paste', function(e){
+  var t = e.target; if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  var txt = e.clipboardData && e.clipboardData.getData('text/plain');
+  if(txt && looksLikeListLink(txt)){ e.preventDefault(); importFromText(txt); }
+});
 function importFromText(txt){
   var h = parseImport(txt || '');
   if(!h){ document.getElementById('import-err').textContent = 'Не нашёл список. Скопируйте сообщение со списком целиком.'; return false; }
@@ -5699,6 +5734,7 @@ function pushNav(state, hash){
   var cur = history.state || {};
   state.d = (cur.d || 0) + 1;
   state.home = !!cur.home;
+  state.prev = location.hash || '';
   history.pushState(state, '', hash);
 }
 (function markHistoryRoot(){
