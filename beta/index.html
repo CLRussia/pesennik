@@ -6268,7 +6268,7 @@ function pushNav(state, hash){
 /* Тур при первом входе -- после initFromHash, чтобы он лёг поверх
    уже открытого экрана (в т.ч. если открыли по присланной ссылке на
    конкретную песню), а не блокировал переход по ней. */
-if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ store.set('sb_wn_seen', '1'); showTour(); }
+if(!store.get('sb_tour_seen', null) && !isListHash(location.hash)){ store.set('sb_wn_seen', '1'); showTour(); } else if(store.get('sb_tour_seen', null) && !store.get('sb_wn_seen', null) && !isListHash(location.hash)){ showWhatsNew(); }
 
 /* ------------------------------------------------------------
    SERVICE WORKER
