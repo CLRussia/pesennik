@@ -2053,6 +2053,9 @@ button.free-main{cursor:pointer;}
 /* присланная новая версия уже имеющегося списка */
 .pv-update{margin:12px 0 0;padding:10px 12px;border:1px solid var(--accent);border-radius:12px;background:var(--accent-soft);color:var(--text);font-family:var(--font-ui);font-size:14px;line-height:1.4;}
 .pv-bar{display:flex;flex-direction:column;gap:8px;}
+
+.pv-keep{display:block;margin-top:8px;font-family:var(--font-ui);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:none;border:1.5px solid var(--accent);border-radius:999px;padding:8px 14px;cursor:pointer;}
+.pv-keep:active{background:var(--accent-soft);}
 </style>
 </head>
 <body>
@@ -3864,7 +3867,7 @@ function ownItem(l){
   return {title: listTitle(l), meta: n ? songsWord(n) : 'пусто', onClick: function(){ openEdit(l.id); }};
 }
 function recvItem(p, withTag){
-  return {title: typo(p.t), meta: songsWord(songCount(p.ids)), tag: withTag ? 'Прислали' : '', onClick: function(){ openProgramFromHash(progHash(p.ids, p.t)); }};
+  return {title: typo(p.t), meta: songsWord(songCount(p.ids)), tag: withTag ? (p.fresh ? 'Новая версия' : 'Прислали') : '', onClick: function(){ openProgramFromHash(progHash(p.ids, p.t)); }};
 }
 function renderHomeLists(){
   var box = document.getElementById('home-lists');
@@ -3919,7 +3922,7 @@ function renderListsScreen(){
   document.getElementById('lists-own-head').style.display = own.length ? '' : 'none';
   var r = document.getElementById('lists-recv'); r.innerHTML = '';
   programs.forEach(function(p){
-    var o = recvItem(p, false), key = recvKey(p); o.meta += ' \u00b7 получен ' + dayMonth(p.at);
+    var o = recvItem(p, false), key = recvKey(p); o.meta += ' \u00b7 получен ' + dayMonth(p.at) + (p.fresh ? ' \u00b7 новая версия' : '');
     if(selectMode) o.onClick = function(){ if(selected[key]) delete selected[key]; else selected[key] = 1; renderListsScreen(); };
     var it = homeItem('cards', o);
     if(selectMode) addSelDot(it, !!selected[key]); else attachLongPress(it, function(el){ cardMenuRecv(p, el); });
@@ -4210,9 +4213,17 @@ function openProgramFromHash(h, pushHash){
   var key = listKey(p.ids, title);
   var known = programs.filter(function(x){ return x.k === key; })[0];
   if(!known){
-    /* новая версия уже присланного списка (тот же «род») заменяет старую запись, а не копится рядом */
-    if(p.oid){ programs = programs.filter(function(x){ return x.oid !== p.oid; }); }
-    programs.unshift({k:key, t:title, ids:p.ids, at:Date.now(), oid:p.oid || ''});
+    /* новая версия уже присланного списка (тот же «род») заменяет старую запись, а не копится рядом;
+       прежнюю запоминаем, чтобы можно было оставить обе */
+    var prev = null;
+    if(p.oid){
+      var olds = programs.filter(function(x){ return x.oid === p.oid; });
+      if(olds.length){ prev = {t: olds[0].t, ids: olds[0].ids, at: olds[0].at}; }
+      programs = programs.filter(function(x){ return x.oid !== p.oid; });
+    }
+    var rec = {k:key, t:title, ids:p.ids, at:Date.now(), oid:p.oid || ''};
+    if(prev){ rec.prev = prev; rec.fresh = true; }
+    programs.unshift(rec);
     programs = programs.slice(0, 10);
     store.setJSON('sb_programs', programs);
     renderHomeLists();
@@ -4231,6 +4242,7 @@ function openProgramFromHash(h, pushHash){
   document.getElementById('pv-browser').style.display = (!isStandalone && pushHash === false) ? '' : 'none';
   document.getElementById('pv-note').textContent = missing > 0 ? ('Часть песен (' + missing + ') больше не входит в песенник.') : '';
   refreshPvSave();
+  if(known && known.fresh){ known.fresh = false; store.setJSON('sb_programs', programs); renderHomeLists(); }
   openExtra(programView, h, pushHash);
 }
 function pvKey(){ var p = parseAnyHash(currentProgHash || ''); return p ? listKey(p.ids, p.t || 'Список') : null; }
@@ -4249,6 +4261,24 @@ function pvState(){
   if(match) return {kind: sameIds(match.ids, p.ids) ? 'same' : 'newer', p: p, k: k, own: match};
   return {kind: 'new', p: p, k: k};
 }
+function currentProgRec(){ var k = pvKey(); return k ? programs.filter(function(x){ return x.k === k; })[0] : null; }
+function setPvNote(text, keepBtn){
+  var note = document.getElementById('pv-update');
+  note.textContent = ''; note.appendChild(document.createTextNode(text));
+  if(keepBtn){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'pv-keep'; b.textContent = 'Оставить обе версии';
+    b.addEventListener('click', keepBothVersions); note.appendChild(b);
+  }
+  note.style.display = '';
+}
+/* «Оставить обе версии»: прежняя присланная версия возвращается в «Присланные» отдельной записью */
+function keepBothVersions(){
+  var rec = currentProgRec(); if(!rec || !rec.prev) return;
+  var old = rec.prev; delete rec.prev; rec.fresh = false;
+  programs.splice(programs.indexOf(rec) + 1, 0, {k: listKey(old.ids, old.t || 'Список'), t: old.t, ids: old.ids, at: old.at, oid: ''});
+  store.setJSON('sb_programs', programs); renderHomeLists(); renderListsScreen();
+  setPvNote('Прежняя версия от ' + dayMonth(old.at) + ' сохранена в «Присланных» отдельным списком.', false);
+}
 function refreshPvSave(){
   var st = pvState(); if(!st) return;
   var save = document.getElementById('btn-pv-save'), upd = document.getElementById('btn-pv-update'), note = document.getElementById('pv-update');
@@ -4256,13 +4286,17 @@ function refreshPvSave(){
   note.style.display = 'none'; upd.style.display = 'none'; save.classList.add('primary');
   if(st.kind === 'copy'){ save.querySelector('span').textContent = 'Редактировать мою копию'; }
   else if(st.kind === 'same'){
-    note.textContent = 'Этот список у вас уже есть: «' + ownTitle + '».'; note.style.display = '';
+    setPvNote('Этот список у вас уже есть: «' + ownTitle + '».', false);
     save.querySelector('span').textContent = 'Редактировать мой список';
   } else if(st.kind === 'newer'){
-    note.textContent = 'У вас уже есть этот список: «' + ownTitle + '». Здесь другая версия.'; note.style.display = '';
+    setPvNote('Вы получили измененную версию списка «' + typo(st.p.t || ownTitle) + '».', false);
     upd.style.display = ''; save.classList.remove('primary');
     save.querySelector('span').textContent = 'Сохранить как новый';
-  } else { save.querySelector('span').textContent = 'Сделать своим'; }
+  } else {
+    save.querySelector('span').textContent = 'Сделать своим';
+    var rec = currentProgRec();
+    if(rec && rec.prev && rec.fresh){ setPvNote('Вы получили измененную версию списка «' + typo(st.p.t || 'Список') + '». Прежняя версия от ' + dayMonth(rec.prev.at) + ' заменена.', true); }
+  }
 }
 document.getElementById('btn-pv-save').addEventListener('click', function(){
   var st = pvState(); if(!st) return;
