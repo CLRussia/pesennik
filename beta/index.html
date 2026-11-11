@@ -2059,6 +2059,13 @@ button.free-main{cursor:pointer;}
 
 .import-hint{color:var(--text-faint);font-family:var(--font-ui);font-size:13px;line-height:1.4;margin:0 0 8px;}
 .import-hint:empty{display:none;}
+
+/* порядок списков: ручка на карточке (режим «Выбрать») */
+.card-grip{flex:0 0 auto;width:34px;height:34px;margin:-6px -6px -6px 0;display:grid;place-items:center;color:var(--text-faint);touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none;}
+.card-grip svg{width:20px;height:20px;stroke:none;}
+.card-grip:active{color:var(--accent);}
+.prog-card.card-dragging{background:var(--bg-elevated);box-shadow:var(--shadow);border-color:var(--accent);}
+.prog-card-placeholder{border:1.5px dashed var(--border);border-radius:var(--radius-m);box-sizing:border-box;}
 </style>
 </head>
 <body>
@@ -3847,7 +3854,23 @@ function openExtra(view, hash, pushHash){
   if(pushHash !== false){ pushNav({extra:true}, hash); }
 }
 /* ---------- карточки / строки на главной ---------- */
-function sortedLists(){ return lists.slice().sort(function(a,b){ return b.u - a.u; }); }
+/* порядок моих списков: пока ничего не переставляли -- свежие сверху; после ручной перестановки у списков есть номер o,
+   порядок держится сам (правка списка его не двигает), а новый список без номера встаёт самым первым */
+function sortedLists(){
+  var manual = lists.some(function(l){ return typeof l.o === 'number'; });
+  return lists.slice().sort(function(a, b){
+    if(!manual) return b.u - a.u;
+    var ao = typeof a.o === 'number', bo = typeof b.o === 'number';
+    if(!ao && !bo) return b.u - a.u;
+    if(!ao) return -1;
+    if(!bo) return 1;
+    return a.o - b.o;
+  });
+}
+function saveListOrder(idsInOrder){
+  idsInOrder.forEach(function(id, i){ var l = getList(id); if(l){ l.o = i; } });
+  saveLists(); renderListsScreen(); renderHomeLists();
+}
 function homeItem(style, o){
   var b = document.createElement('button');
   b.type = 'button';
@@ -3918,9 +3941,10 @@ function renderListsScreen(){
   var own = sortedLists();
   own.forEach(function(l){
     var o = ownItem(l), key = 'o:' + l.id;
-    if(selectMode) o.onClick = function(){ if(selected[key]) delete selected[key]; else selected[key] = 1; renderListsScreen(); };
+    if(selectMode) o.onClick = function(e){ if(e && e.target && e.target.closest && e.target.closest('.card-grip')) return; if(selected[key]) delete selected[key]; else selected[key] = 1; renderListsScreen(); };
     var it = homeItem('cards', o);
-    if(selectMode) addSelDot(it, !!selected[key]); else attachLongPress(it, function(el){ cardMenuOwn(l, el); });
+    it.setAttribute('data-lid', l.id);
+    if(selectMode){ addSelDot(it, !!selected[key]); if(own.length > 1) it.appendChild(makeCardGrip()); } else attachLongPress(it, function(el){ cardMenuOwn(l, el); });
     a.appendChild(it);
   });
   document.getElementById('lists-own-head').style.display = own.length ? '' : 'none';
@@ -3932,7 +3956,9 @@ function renderListsScreen(){
     if(selectMode) addSelDot(it, !!selected[key]); else attachLongPress(it, function(el){ cardMenuRecv(p, el); });
     r.appendChild(it);
   });
-  document.getElementById('lists-hint').style.display = (!selectMode && (own.length || programs.length)) ? '' : 'none';
+  var lh = document.getElementById('lists-hint');
+  if(selectMode && own.length > 1){ lh.innerHTML = 'Выберите списки или тяните за значок справа,<br>чтобы поменять порядок'; lh.style.display = ''; }
+  else { lh.innerHTML = 'Нажмите и удерживайте список,<br>чтобы удалить или поделиться'; lh.style.display = (!selectMode && (own.length || programs.length)) ? '' : 'none'; }
   document.getElementById('lists-recv-head').style.display = programs.length ? '' : 'none';
   document.getElementById('lists-empty').classList.toggle('show', !own.length && !programs.length);
   /* кнопка «Выбрать / Готово» и нижняя панель выбора */
@@ -3945,6 +3971,86 @@ function renderListsScreen(){
   var del = document.getElementById('sel-del'); del.disabled = n === 0; del.querySelector('span').textContent = n ? 'Удалить (' + n + ')' : 'Удалить';
   document.getElementById('sel-all').querySelector('span').textContent = (n && n === selTotal()) ? 'Снять все' : 'Выбрать все';
 }
+/* ручка переноса на карточке списка (видна в режиме «Выбрать») */
+function makeCardGrip(){
+  var g = document.createElement('span'); g.className = 'card-grip'; g.setAttribute('role', 'button'); g.setAttribute('aria-label', 'Перетащить, чтобы изменить порядок'); g.setAttribute('title', 'Перетащить, чтобы изменить порядок');
+  g.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg>';
+  return g;
+}
+(function(){
+  var box = document.getElementById('lists-own');
+  var row = null, placeholder = null, grip = null, baseTop = 0, startY = 0, curY = 0, rafPending = false, justDragged = 0;
+  var holdTimer = null, holdPt = null, scrollMode = false, scroller = null;
+  function others(){ return Array.prototype.filter.call(box.querySelectorAll('.prog-card'), function(el){ return el !== row; }); }
+  function reposition(){
+    rafPending = false; if(!row) return;
+    var cy = baseTop + (curY - startY) + row.offsetHeight / 2, rows = others(), target = null;
+    for(var i = 0; i < rows.length; i++){ var r = rows[i].getBoundingClientRect(); if(cy < r.top + r.height / 2){ target = rows[i]; break; } }
+    if(target){ if(placeholder.nextSibling !== target){ box.insertBefore(placeholder, target); } }
+    else if(box.lastElementChild !== placeholder){ box.appendChild(placeholder); }
+  }
+  function onMove(e){ if(!row) return; curY = e.clientY; row.style.transform = 'translate3d(0,' + (e.clientY - startY) + 'px,0)'; if(!rafPending){ rafPending = true; requestAnimationFrame(reposition); } }
+  function onUp(){
+    if(!row) return;
+    document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); document.removeEventListener('pointercancel', onUp);
+    row.classList.remove('card-dragging');
+    row.style.position = ''; row.style.left = ''; row.style.top = ''; row.style.width = ''; row.style.zIndex = ''; row.style.transform = ''; row.style.willChange = '';
+    box.insertBefore(row, placeholder); placeholder.remove();
+    var order = Array.prototype.map.call(box.querySelectorAll('.prog-card'), function(el){ return el.getAttribute('data-lid'); });
+    var moved = Math.abs(curY - startY) > 3;
+    row = null; placeholder = null; grip = null;
+    if(!moved){ return; }                       // просто нажали на ручку и отпустили: ничего не меняем
+    justDragged = Date.now();
+    saveListOrder(order);
+  }
+  function begin(e, g, r){
+    grip = g; row = r;
+    var rect = row.getBoundingClientRect();
+    placeholder = document.createElement('div'); placeholder.className = 'prog-card-placeholder'; placeholder.style.height = rect.height + 'px';
+    box.insertBefore(placeholder, row);
+    startY = curY = e.clientY;
+    row.classList.add('card-dragging');
+    row.style.position = 'fixed'; row.style.left = rect.left + 'px'; row.style.top = rect.top + 'px'; row.style.width = rect.width + 'px'; row.style.zIndex = '60';
+    var r2 = row.getBoundingClientRect(), offY = r2.top - rect.top, offX = r2.left - rect.left;
+    row.style.left = (rect.left - offX) + 'px'; baseTop = rect.top - offY; row.style.top = baseTop + 'px';
+    row.style.willChange = 'transform'; row.style.transform = 'translate3d(0,0,0)';
+    try{ grip.setPointerCapture(e.pointerId); }catch(err){}
+    document.addEventListener('pointermove', onMove); document.addEventListener('pointerup', onUp); document.addEventListener('pointercancel', onUp);
+  }
+  function getScroller(el){
+    for(var a = el.parentElement; a && a !== document.body; a = a.parentElement){ var oy = getComputedStyle(a).overflowY; if((oy === 'auto' || oy === 'scroll') && a.scrollHeight > a.clientHeight + 1) return a; }
+    return document.scrollingElement || document.documentElement;
+  }
+  function holdMove(ev){
+    if(!holdPt) return;
+    if(!scrollMode && Math.abs(ev.clientY - holdPt.y) + Math.abs(ev.clientX - holdPt.x) > 10){ if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; } scrollMode = true; scroller = getScroller(holdPt.g); holdPt.ly = ev.clientY; }
+    if(scrollMode){ scroller.scrollTop += (holdPt.ly - ev.clientY); holdPt.ly = ev.clientY; } else { holdPt.lx = ev.clientX; holdPt.ly = ev.clientY; }
+  }
+  function cancelHold(){
+    if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
+    holdPt = null; scrollMode = false; scroller = null;
+    document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold);
+  }
+  box.addEventListener('pointerdown', function(e){
+    var g = e.target.closest && e.target.closest('.card-grip'); if(!g) return;
+    var r = g.closest('.prog-card'); if(!r || row) return;
+    if(e.pointerType === 'touch'){
+      if(holdTimer || holdPt) return;
+      holdPt = {x: e.clientX, y: e.clientY, lx: e.clientX, ly: e.clientY, g: g};
+      var pid = e.pointerId;
+      holdTimer = setTimeout(function(){
+        holdTimer = null; var pt = holdPt; if(!pt || scrollMode) return;
+        document.removeEventListener('pointermove', holdMove); document.removeEventListener('pointerup', cancelHold); document.removeEventListener('pointercancel', cancelHold);
+        holdPt = null; begin({clientX: pt.lx, clientY: pt.ly, pointerId: pid}, g, r);
+      }, 170);
+      document.addEventListener('pointermove', holdMove); document.addEventListener('pointerup', cancelHold); document.addEventListener('pointercancel', cancelHold);
+      return;
+    }
+    e.preventDefault(); begin(e, g, r);
+  });
+  /* после переноса браузер может прислать «клик» по карточке -- гасим его, чтобы список не открылся и не отметился */
+  box.addEventListener('click', function(e){ if(e.target.closest('.card-grip') || Date.now() - justDragged < 400){ e.stopPropagation(); e.preventDefault(); } }, true);
+})();
 function exitSelect(){ selectMode = false; selected = {}; renderListsScreen(); }
 document.getElementById('btn-lists-select').addEventListener('click', function(){ if(selectMode){ exitSelect(); } else { selectMode = true; selected = {}; renderListsScreen(); } });
 document.getElementById('sel-all').addEventListener('click', function(){
@@ -4303,7 +4409,7 @@ function refreshPvSave(){
   note.style.display = 'none'; upd.style.display = 'none'; save.classList.add('primary');
   if(st.kind === 'copy'){ save.querySelector('span').textContent = 'Редактировать мою копию'; }
   else if(st.kind === 'same'){
-    setPvNote('Этот список у вас уже есть: «' + ownTitle + '».', false);
+    setPvNote('Этот список у вас уже есть.', false);
     save.querySelector('span').textContent = 'Редактировать мой список';
   } else if(st.kind === 'newer'){
     setPvNote('Вы получили измененную версию списка «' + typo(st.p.t || ownTitle) + '».', false);
