@@ -1999,6 +1999,32 @@ input[type="search"]::placeholder{text-overflow:ellipsis;}
 /* окончательное состояние без transform: иначе у экрана-контейнера свой «координатный мир» и перенос блока в длинном списке сбивает место отпускания */
 #edit-view.open.visible,#program-view.open.visible,#lists-view.open.visible{transform:none;}
 
+/* ===== переходы между экранами «Слайд» (переключатель «Анимация» в «Оформлении»; «Выкл.» = data-anim="off" = прежнее появление) =====
+   Новый экран выезжает справа, предыдущий уходит на 20% влево и слегка темнеет; обратно -- наоборот.
+   Длительность и кривая приходят из переменных, которые выставляет скрипт: вглубь 0,65 с (мягкий старт), назад 0,4 с (мягкое торможение). */
+:root{--nav-dur:.65s;--nav-ease:cubic-bezier(.4,0,.2,1);}
+:root:not([data-anim="off"]) #song-view,:root:not([data-anim="off"]) #list-view,:root:not([data-anim="off"]) #favorites-view,:root:not([data-anim="off"]) #allsongs-view,:root:not([data-anim="off"]) #giussani-view,:root:not([data-anim="off"]) #lists-view,:root:not([data-anim="off"]) #edit-view,:root:not([data-anim="off"]) #program-view{
+  visibility:hidden; opacity:1; transform:translateX(100%);
+  transition:transform var(--nav-dur) var(--nav-ease), visibility 0s linear var(--nav-dur);
+}
+:root:not([data-anim="off"]) #song-view,:root:not([data-anim="off"]) #lists-view,:root:not([data-anim="off"]) #edit-view{display:flex;flex-direction:column;}
+:root:not([data-anim="off"]) #list-view,:root:not([data-anim="off"]) #favorites-view,:root:not([data-anim="off"]) #allsongs-view,:root:not([data-anim="off"]) #giussani-view,:root:not([data-anim="off"]) #program-view{display:block;}
+:root:not([data-anim="off"]) #song-view.visible,:root:not([data-anim="off"]) #list-view.visible,:root:not([data-anim="off"]) #favorites-view.visible,:root:not([data-anim="off"]) #allsongs-view.visible,:root:not([data-anim="off"]) #giussani-view.visible,:root:not([data-anim="off"]) #lists-view.visible,:root:not([data-anim="off"]) #edit-view.visible,:root:not([data-anim="off"]) #program-view.visible{
+  visibility:visible; transform:none; box-shadow:-10px 0 24px rgba(0,0,0,.14);
+  transition:transform var(--nav-dur) var(--nav-ease), visibility 0s;
+}
+:root:not([data-anim="off"]) #song-view.visible.nav-under,:root:not([data-anim="off"]) #list-view.visible.nav-under,:root:not([data-anim="off"]) #favorites-view.visible.nav-under,:root:not([data-anim="off"]) #allsongs-view.visible.nav-under,:root:not([data-anim="off"]) #giussani-view.visible.nav-under,:root:not([data-anim="off"]) #lists-view.visible.nav-under,:root:not([data-anim="off"]) #edit-view.visible.nav-under,:root:not([data-anim="off"]) #program-view.visible.nav-under{ transform:translateX(-20%); box-shadow:none; }
+:root:not([data-anim="off"]) #home{transition:transform var(--nav-dur) var(--nav-ease);}
+:root:not([data-anim="off"]) #home.nav-under{transform:translateX(-20%);}
+:root:not([data-anim="off"]) #az-jump.nav-under{transform:translate(-20vw,-50%);}
+:root:not([data-anim="off"]) #az-jump{transition:transform var(--nav-dur) var(--nav-ease), visibility 0s linear .5s;}
+:root:not([data-anim="off"]) #allsongs-view:not(.visible) + #az-jump{visibility:hidden;transition:transform var(--nav-dur) var(--nav-ease), visibility 0s;}
+#nav-dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity var(--nav-dur) var(--nav-ease);}
+:root[data-anim="off"] #nav-dim{display:none;}
+@media (prefers-reduced-motion: reduce){
+  :root{--nav-dur:.01s !important;}
+}
+
 /* перенос блока: пока тянут подзаголовок, песни блоков свёрнуты, у каждого заголовка -- «N песен» */
 .blk-hidden{display:none !important;}
 .blk-count{margin-left:auto;margin-right:6px;align-self:center;font-family:var(--font-ui);font-size:12px;font-weight:600;color:var(--text-faint);white-space:nowrap;}
@@ -2560,6 +2586,13 @@ button.free-main{cursor:pointer;}
       <div class="font-choice">
         <button class="font-card" id="font-card-literata" data-font="literata" type="button">Literata</button>
         <button class="font-card" id="font-card-nunito" data-font="nunito" type="button">Nunito</button>
+      </div>
+    </div>
+    <div class="appearance-row" id="appearance-anim-row">
+      <div class="appearance-label">Анимация</div>
+      <div class="theme-switch">
+        <button class="theme-switch-btn" data-anim-choice="slide" type="button"><span>Вкл.</span></button>
+        <button class="theme-switch-btn" data-anim-choice="off" type="button"><span>Выкл.</span></button>
       </div>
     </div>
     <button class="modal-close ui-caps" id="appearance-close">Готово</button>
@@ -5172,6 +5205,18 @@ document.querySelectorAll('.theme-switch-btn[data-home-choice]').forEach(functio
 });
 renderHomeSwitch(); renderRecent(); renderHomeLists();
 
+/* ---------- переходы между экранами: «Слайд» (по умолчанию) или «Без анимации» (как раньше) ---------- */
+function animChoice(){ return store.get('sb_anim', 'slide') === 'off' ? 'off' : 'slide'; }
+function applyAnim(){
+  var c = animChoice();
+  document.documentElement.setAttribute('data-anim', c);
+  document.querySelectorAll('.theme-switch-btn[data-anim-choice]').forEach(function(btn){ btn.classList.toggle('is-active', btn.dataset.animChoice === c); });
+}
+document.querySelectorAll('.theme-switch-btn[data-anim-choice]').forEach(function(btn){
+  btn.addEventListener('click', function(){ store.set('sb_anim', btn.dataset.animChoice); applyAnim(); });
+});
+applyAnim();
+
 /* светлое сообщение на главной (вместо тёмных всплывающих плашек) */
 function homeNotice(text){
   var old = document.getElementById('home-notice'); if(old) old.remove();
@@ -5234,6 +5279,107 @@ window.showWhatsNew = showWhatsNew;  /* можно открыть вручную
 if(/^#whatsnew$/i.test(location.hash)){
   setTimeout(function(){ try{ history.replaceState(history.state, '', location.pathname + location.search); }catch(e){} showWhatsNew(); }, 500);
 }
+
+
+/* ---------- переходы между экранами: что сейчас сверху и что под ним ---------- */
+var NAV_SONG = document.getElementById('song-view'), NAV_ALLSONGS = document.getElementById('allsongs-view');
+var NAV_L2 = ['allsongs-view', 'list-view', 'favorites-view', 'giussani-view', 'lists-view', 'edit-view', 'program-view'].map(function(id){ return document.getElementById(id); });
+var NAV_ALL = NAV_L2.concat([NAV_SONG]);
+var navHome = document.getElementById('home'), navAz = document.getElementById('az-jump');
+var navDim = document.createElement('div'); navDim.id = 'nav-dim'; document.body.appendChild(navDim);
+function navVis(v){ return v.classList.contains('visible'); }
+function navTop(){ if(navVis(NAV_SONG)) return NAV_SONG; for(var i = 0; i < NAV_L2.length; i++){ if(navVis(NAV_L2[i])) return NAV_L2[i]; } return null; }
+function navUnder(top){
+  if(!top) return null;
+  if(top === NAV_SONG){ for(var i = 0; i < NAV_L2.length; i++){ if(navVis(NAV_L2[i])) return NAV_L2[i]; } }
+  return navHome;
+}
+(function(){
+  var key = '', n = 0, root = document.documentElement;
+  function setVars(dur, ease){ root.style.setProperty('--nav-dur', dur); root.style.setProperty('--nav-ease', ease); }
+  function update(){
+    var vis = NAV_ALL.filter(navVis), k = vis.map(function(v){ return v.id; }).join(',');
+    if(k === key) return;                                   // изменился только вспомогательный класс (nav-under) -- ничего не делаем
+    var cnt = vis.length;
+    if(cnt > n) setVars('.65s', 'cubic-bezier(.4,0,.2,1)');   // вглубь
+    else if(cnt < n) setVars('.4s', 'cubic-bezier(.32,.72,0,1)'); // назад
+    else setVars('.01s', 'linear');                         // замена одного экрана другим -- без движения
+    key = k; n = cnt;
+    var top = navTop(), under = navUnder(top);
+    NAV_ALL.concat([navHome, navAz]).forEach(function(v){ v.classList.remove('nav-under'); });
+    if(under){ under.classList.add('nav-under'); if(under === NAV_ALLSONGS){ navAz.classList.add('nav-under'); } }
+    navDim.style.zIndex = top ? String((parseInt(getComputedStyle(top).zIndex, 10) || 35) - 1) : '0';
+    navDim.style.opacity = under ? '.14' : '0';
+  }
+  var mo = new MutationObserver(update);
+  NAV_ALL.forEach(function(v){ mo.observe(v, {attributes: true, attributeFilter: ['class']}); });
+  update();
+})();
+
+/* ---------- свайп «назад» от левого края: экран едет за пальцем ----------
+   Своя зона у кромки (32 px, шире системной), поэтому не зависит от того, попал ли палец в
+   узкую полосу iOS. Если система тоже сработала своим жестом (popstate посреди касания) -- наш
+   отменяется, чтобы не было двойного «назад». */
+(function(){
+  var ZONE = 32, lastPop = 0;
+  window.addEventListener('popstate', function(){ lastPop = Date.now(); });
+  function topView(){
+    if(songView.classList.contains('open')) return {el: songView, back: songBack};
+    var order = extraViews.concat([allsongsView, listView, favoritesView, giussaniView]);
+    for(var i = 0; i < order.length; i++){
+      if(order[i].classList.contains('open')){
+        return {el: order[i], back: function(){ var s = history.state; if(s && s.home && s.d > 0){ history.back(); } else { goHome(); } }};
+      }
+    }
+    return null;
+  }
+  function blocked(){
+    return !!document.querySelector('.modal-overlay.open, #wn.open, #songlist-modal.open');
+  }
+  var t = null;
+  function reset(v){ v.style.transition = ''; v.style.transform = ''; v.style.boxShadow = ''; }
+  document.addEventListener('touchstart', function(e){
+    t = null;
+    if(e.touches.length !== 1 || blocked()) return;
+    var x = e.touches[0].clientX; if(x > ZONE) return;
+    var v = topView(); if(!v) return;
+    if(!(history.state && history.state.d > 0)) return;   // назад из этого экрана некуда
+    t = {v: v, x0: x, y0: e.touches[0].clientY, t0: Date.now(), pop0: lastPop, dx: 0, claimed: false, dead: false};
+  }, {passive: true});
+  document.addEventListener('touchmove', function(e){
+    if(!t || t.dead) return;
+    var dx = e.touches[0].clientX - t.x0, dy = e.touches[0].clientY - t.y0;
+    if(!t.claimed){
+      if(Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ t.dead = true; return; }
+      if(dx > 10 && dx > Math.abs(dy) * 1.5){
+        t.claimed = true; t.v.el.style.transition = 'none'; t.v.el.style.boxShadow = '-8px 0 24px rgba(0,0,0,.18)';
+        t.under = navUnder(t.v.el); if(t.under){ t.under.style.transition = 'none'; navDim.style.transition = 'none'; }
+      }
+      else return;
+    }
+    if(e.cancelable) e.preventDefault();
+    t.dx = Math.max(0, dx);
+    t.v.el.style.transform = 'translateX(' + t.dx + 'px)';
+    if(t.under){ var k = Math.min(1, t.dx / (window.innerWidth || 400)); t.under.style.transform = 'translateX(' + (-20 * (1 - k)) + '%)'; navDim.style.opacity = String(.14 * (1 - k)); }
+  }, {passive: false});
+  function finish(){
+    var c = t; t = null;
+    if(!c || !c.claimed) return;
+    var el = c.v.el, w = window.innerWidth || 400, fast = c.dx / Math.max(1, Date.now() - c.t0) > 0.5;
+    var systemDidIt = lastPop !== c.pop0;
+    if(!systemDidIt && (c.dx > w * 0.35 || (fast && c.dx > 40))){
+      el.style.transition = 'transform .3s cubic-bezier(.32,.72,0,1)'; el.style.transform = 'translateX(100%)';
+      if(c.under){ c.under.style.transition = 'transform .3s cubic-bezier(.32,.72,0,1)'; c.under.style.transform = 'translateX(0)'; navDim.style.transition = 'opacity .3s ease'; navDim.style.opacity = '0'; }
+      setTimeout(function(){ if(lastPop === c.pop0){ c.v.back(); } setTimeout(function(){ reset(el); if(c.under){ reset(c.under); } navDim.style.transition = ''; }, 450); }, 300);
+    } else {
+      el.style.transition = 'transform .25s cubic-bezier(.32,.72,0,1)'; el.style.transform = 'translateX(0)';
+      if(c.under){ c.under.style.transition = 'transform .25s cubic-bezier(.32,.72,0,1)'; c.under.style.transform = 'translateX(-20%)'; navDim.style.transition = 'opacity .25s ease'; navDim.style.opacity = '.14'; }
+      setTimeout(function(){ reset(el); if(c.under){ reset(c.under); } navDim.style.transition = ''; }, 270);
+    }
+  }
+  document.addEventListener('touchend', finish, {passive: true});
+  document.addEventListener('touchcancel', function(){ var c = t; t = null; if(c && c.claimed){ reset(c.v.el); if(c.under){ reset(c.under); } navDim.style.transition = ''; navDim.style.opacity = c.under ? '.14' : '0'; } }, {passive: true});
+})();
 
 
 /* ---------- перенос целого блока (подзаголовок + его песни) ----------
