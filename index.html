@@ -5341,7 +5341,7 @@ function navUnder(top){
     return null;
   }
   function blocked(){
-    return !!document.querySelector('.modal-overlay.open, #wn.open, #songlist-modal.open');
+    return !!document.querySelector('.modal-overlay.open, #wn.open, #songlist-modal.open, .add-menu');
   }
   var t = null;
   function reset(v){ v.style.transition = ''; v.style.transform = ''; v.style.boxShadow = ''; }
@@ -5526,10 +5526,30 @@ function navUnder(top){
    Окна («Добавить в список», «Оформление», меню карточки, «Вставить ссылку», подтверждение, справка…) не заводят
    шаг в истории, поэтому раньше при «назад» экран под ними менялся, а окно оставалось висеть. Экскурсия и «Что нового»
    (полноэкранные, со своей кнопкой закрытия) не трогаются. */
-window.addEventListener('popstate', function(){
-  try{ if(typeof closeAddMenu === 'function') closeAddMenu(); }catch(e){}
-  document.querySelectorAll('.modal-overlay.open').forEach(function(m){ if(m.id !== 'tour-modal') m.classList.remove('open'); });
-});
+function closeTransient(){
+  var any = false;
+  try{ if(typeof closeAddMenu === 'function' && document.querySelector('.add-menu')){ closeAddMenu(); any = true; } }catch(e){}
+  document.querySelectorAll('.modal-overlay.open').forEach(function(m){ if(m.id !== 'tour-modal'){ m.classList.remove('open'); any = true; } });
+  return any;
+}
+window.addEventListener('popstate', function(){ closeTransient(); });
+/* свайп от левого края при открытом окне или меню сначала закрывает ЕГО (экран под ним не листается); следующий свайп листает */
+(function(){
+  var ZONE = 32, g = null;
+  function trOpen(){ return !!document.querySelector('.modal-overlay.open:not(#tour-modal), .add-menu'); }
+  document.addEventListener('touchstart', function(e){
+    g = null;
+    if(e.touches.length !== 1 || e.touches[0].clientX > ZONE || !trOpen()) return;
+    g = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+  }, {passive: true});
+  document.addEventListener('touchend', function(e){
+    var s = g; g = null;
+    if(!s || !e.changedTouches.length) return;
+    var dx = e.changedTouches[0].clientX - s.x, dy = e.changedTouches[0].clientY - s.y;
+    if(dx > 50 && dx > Math.abs(dy) * 1.5) closeTransient();
+  }, {passive: true});
+  document.addEventListener('touchcancel', function(){ g = null; }, {passive: true});
+})();
 
 /* ------------------------------------------------------------
    ЭКРАН ПЕСНИ
